@@ -50,9 +50,12 @@ class AnalysisSection(QWidget):
         self.avg_monthly_expense = self.user_settings.get("AVERAGE_MONTHLY_EXPENSE")
         self.currency = self.user_settings.get("CURRENCY")
         self.data_path = self.user_settings.get("USER_FOLDER")
-        self.last_operation_date = self.user_transactions.get(
-            list(self.user_transactions.keys())[-1]
-        ).get("2_date")
+
+        self.last_operation_date = datetime.today().strftime("%d.%m.%Y")
+        if not self.user_transactions is None:
+            self.last_operation_date = self.user_transactions.get(
+                list(self.user_transactions.keys())[-1]
+            ).get("2_date")
 
         self.prognosis_date_to = (
             datetime.strptime(self.last_operation_date, "%d.%m.%Y")
@@ -122,6 +125,8 @@ class AnalysisSection(QWidget):
                     ]
                 )
             )
+            if not self.user_categories is None
+            else []
         )
 
         # Date from
@@ -221,27 +226,29 @@ class AnalysisSection(QWidget):
         main_layout.addLayout(top_layout, 0)
         main_layout.addLayout(bottom_layout, 0)
 
-        # Create default analysis charts for all types
-        for analysis_type in ANALYSIS_TYPES:
+        if not self.user_transactions is None:
 
-            date_from = datetime.strptime(
-                f"01.{self.date_from_edit.text()}", "%d.%m.%Y"
-            )
+            # Create default analysis charts for all types
+            for analysis_type in ANALYSIS_TYPES:
 
-            date_to = datetime.strptime(
-                self.last_operation_date, "%d.%m.%Y"
-            ) + relativedelta(day=31)
-
-            if analysis_type == "Prognosis":
-                date_from = datetime.strptime(self.last_operation_date, "%d.%m.%Y")
+                date_from = datetime.strptime(
+                    f"01.{self.date_from_edit.text()}", "%d.%m.%Y"
+                )
 
                 date_to = datetime.strptime(
-                    self.prognosis_date_to, "%d.%m.%Y"
+                    self.last_operation_date, "%d.%m.%Y"
                 ) + relativedelta(day=31)
 
-            self.create_analysis(
-                analysis_type=analysis_type, date_from=date_from, date_to=date_to
-            )
+                if analysis_type == "Prognosis":
+                    date_from = datetime.strptime(self.last_operation_date, "%d.%m.%Y")
+
+                    date_to = datetime.strptime(
+                        self.prognosis_date_to, "%d.%m.%Y"
+                    ) + relativedelta(day=31)
+
+                self.create_analysis(
+                    analysis_type=analysis_type, date_from=date_from, date_to=date_to
+                )
         self.analysis_type_combo.setCurrentIndex(0)
 
     def init_categorical(self):

@@ -21,8 +21,8 @@ class CategoriesSection(QWidget):
 
         self.user_categories = user_categories
         self.user_categories_path = user_categories_path
-        for key, value in self.user_categories.items():
-            print(key, value, value.get("Level_1"), value.get("Level_2"))
+        # for key, value in self.user_categories.items():
+        #     print(key, value, value.get("Level_1"), value.get("Level_2"))
 
         self.row_nums = (
             12 if self.user_categories is None else len(self.user_categories.keys())
@@ -87,8 +87,6 @@ class CategoriesSection(QWidget):
         main_layout.addWidget(self.user_categories_table, 0)
 
     def update_categories(self, data):
-        print(data)
-        print(pd.DataFrame(data).T.reset_index(drop=True))
         self.user_categories_table.clear_table()
         self.user_categories_table.update_table(
             pd.DataFrame(data).T.reset_index(drop=True)
@@ -99,12 +97,10 @@ class CategoriesSection(QWidget):
         self.add_category_window = AddCategory()
         self.add_category_window.show()
 
-        self.add_category_window.send_category.connect(self.get_category)
-
-        print(self.add_category_window.category)
+        self.add_category_window.send_category.connect(self.get_new_category)
 
     @Slot(dict)
-    def get_category(self, category):
+    def get_new_category(self, category):
 
         if self.user_categories is None:
             self.user_categories = {0: category}

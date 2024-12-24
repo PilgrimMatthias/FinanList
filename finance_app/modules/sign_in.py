@@ -25,6 +25,8 @@ class SignInWindow(QWidget):
 
     """
 
+    signed_in_signal = Signal(bool)
+
     def __init__(self, user_settings, user_setings_path) -> None:
         super().__init__()
 
@@ -282,3 +284,6 @@ class SignInWindow(QWidget):
         # Save user information to settings folder
         with open(self.user_setings_path, "w") as file:
             json.dump(user_settings_dict, file)
+
+        self.signed_in_signal.emit(True)
+        self.destroy()

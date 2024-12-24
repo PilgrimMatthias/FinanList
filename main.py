@@ -285,18 +285,13 @@ class MainWindow(QMainWindow):
 
             if not reload:
                 self.load_user_profile()
-                # QMessageBox.information(
-                #     self, "User Settings", f"Settings found:\n{user_settings}"
-                # )
 
-                self.update_acc_bal()
+                if not self.user_transactions is None:
+                    self.update_acc_bal()
 
                 self.init_window()
         else:
-            self.setCentralWidget(
-                SignInWindow(self.user_settings, self.user_settings_path)
-            )
-            center_window(self, 500, 500)
+            self.sign_in()
 
     def load_user_profile(self):
         """
@@ -321,6 +316,26 @@ class MainWindow(QMainWindow):
         if os.path.exists(self.user_upcomings_path):
             with open(self.user_upcomings_path, "r") as file:
                 self.user_upcomings = json.load(file)
+
+    def sign_in(self):
+        """
+        Show sign in window
+        """
+        self.sign_in_window = SignInWindow(self.user_settings, self.user_settings_path)
+        self.sign_in_window.signed_in_signal.connect(self.signed_in_check)
+        self.setCentralWidget(self.sign_in_window)
+        center_window(self, 500, 500)
+
+    @Slot(bool)
+    def signed_in_check(self, signed):
+        """
+        Get signed in signal from SignInWindow and login user
+
+        Args:
+            signed (bool): signal from SignInWindow
+        """
+        if signed:
+            self.check_user_settings()
 
     def add_transaction(self):
         """

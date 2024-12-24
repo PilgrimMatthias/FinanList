@@ -98,7 +98,7 @@ class MainSection(QWidget):
         # Curent account balance
         self.curr_acc_label = QLabel(self)
         self.curr_acc_label.setText(
-            "Hello {0}! Your account balance as of\n{1}\nuequels:{2} {3}".format(
+            "Hello {0}! Your account balance as of\n{1}\nequels: {2} {3}".format(
                 self.user_name,
                 datetime.today().strftime("%d-%m-%Y"),
                 str(self.current_acc_balance).replace(".", ","),
@@ -115,7 +115,8 @@ class MainSection(QWidget):
         self.summary_layout.addWidget(
             self.curr_acc_label, 0  # , alignment=Qt.AlignmentFlag.AlignCenter
         )
-        self.calculate_plot_data()
+        if not self.user_transactions is None:
+            self.calculate_plot_data()
 
         # Table layout
         table_layout = QHBoxLayout()
