@@ -32,7 +32,7 @@ This is a Python-based personal finance management application designed to help 
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/FinanList.git
+   git clone https://github.com/PilgrimMatthias/FinanList.git
    cd FinanList
    ```
 2. Ensure you have Python installed (>=3.8).
@@ -54,6 +54,36 @@ This is a Python-based personal finance management application designed to help 
    * Add and manage transactions.
    * View financial summaries and charts.
    * Export your data.
+
+## Screenshots
+
+### Sign in
+
+![1735025132775](image/README/1735025132775.png)
+
+### Main
+
+![1735025083915](image/README/1735025083915.png)
+
+### Analysis
+
+![1735025095716](image/README/1735025095716.png)
+
+![1735025109621](image/README/1735025109621.png)
+
+![1735025123730](image/README/1735025123730.png)
+
+### History
+
+![1735025140714](image/README/1735025140714.png)
+
+### Upcoming
+
+![1735025147417](image/README/1735025147417.png)
+
+### Categories
+
+![1735025153018](image/README/1735025153018.png)
 
 ## Contributing
 
