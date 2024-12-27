@@ -94,6 +94,11 @@ class AddCategory(QWidget):
         self.fourth_lvl_edit = QLineEdit(self)
         self.fourth_lvl_edit.setContentsMargins(0, 0, 0, 20)
 
+        self.top_lvl__edit.editingFinished.connect(self.on_value_changed)
+        self.second_lvl_edit.editingFinished.connect(self.on_value_changed)
+        self.third_lvl_edit.editingFinished.connect(self.on_value_changed)
+        self.fourth_lvl_edit.editingFinished.connect(self.on_value_changed)
+
         # Add button
         btn_layout = QHBoxLayout()
         self.primary_btn = QPushButton("Add")
@@ -155,6 +160,24 @@ class AddCategory(QWidget):
         main_layout.addWidget(self.close_btn, 7, 0, Qt.AlignmentFlag.AlignLeft)
 
         main_layout.addItem(self.spacer)
+
+    def on_value_changed(self):
+        """
+        Set category custom name as every level widget text separated with "-"
+        """
+        cat_name = ""
+        for widget in [
+            self.top_lvl__edit,
+            self.second_lvl_edit,
+            self.third_lvl_edit,
+            self.fourth_lvl_edit,
+        ]:
+            if widget.text():
+                cat_name += widget.text() + " - "
+
+        cat_name = cat_name[:-3]
+
+        self.custom_name_edit.setText(cat_name)
 
     def create_category(self):
         """
