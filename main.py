@@ -592,30 +592,34 @@ class MainWindow(QMainWindow):
                 # Update categories names (if changed) in transaction/upcomings
                 if new_cat_name != old_cat_name:
                     # Update transactions
-                    for key, value in self.user_transactions.items():
-                        if value.get("5_category") == old_cat_name:
-                            value["5_category"] = new_cat_name
-                            self.user_transactions[key] = value
+                    if not self.user_transactions is None:
+                        for key, value in self.user_transactions.items():
+                            if value.get("5_category") == old_cat_name:
+                                value["5_category"] = new_cat_name
+                                self.user_transactions[key] = value
 
-                    with open(self.user_transactions_path, "w") as file:
-                        json.dump(self.user_transactions, file)
+                        with open(self.user_transactions_path, "w") as file:
+                            json.dump(self.user_transactions, file)
 
-                    self.main_section.update_operations(
-                        self.user_transactions, "Transaction"
-                    )
-                    self.history_section.update_operations(self.user_transactions)
+                        self.main_section.update_operations(
+                            self.user_transactions, "Transaction"
+                        )
+                        self.history_section.update_operations(self.user_transactions)
 
-                    # Update upcomings
-                    for key, value in self.user_upcomings.items():
-                        if value.get("5_category") == old_cat_name:
-                            value["5_category"] = new_cat_name
-                            self.user_upcomings[key] = value
+                    if not self.user_upcomings is None:
+                        # Update upcomings
+                        for key, value in self.user_upcomings.items():
+                            if value.get("5_category") == old_cat_name:
+                                value["5_category"] = new_cat_name
+                                self.user_upcomings[key] = value
 
-                    with open(self.user_upcomings_path, "w") as file:
-                        json.dump(self.user_upcomings, file)
+                        with open(self.user_upcomings_path, "w") as file:
+                            json.dump(self.user_upcomings, file)
 
-                    self.main_section.update_operations(self.user_upcomings, "Upcoming")
-                    self.upcoming_section.update_upcoming_oper(self.user_upcomings)
+                        self.main_section.update_operations(
+                            self.user_upcomings, "Upcoming"
+                        )
+                        self.upcoming_section.update_upcoming_oper(self.user_upcomings)
 
             case "Delete":
                 # Delete upcoming transaction
@@ -638,6 +642,21 @@ class MainWindow(QMainWindow):
                 # Update categories file
                 with open(self.user_categories_path, "w") as file:
                     json.dump(self.user_categories, file)
+            case _:  # New category
+                if self.user_categories is None:
+                    self.user_categories = {0: category}
+                else:
+                    self.user_categories.update(
+                        {len(self.user_categories.keys()): category}
+                    )
+
+                with open(self.user_categories_path, "w") as file:
+                    json.dump(self.user_categories, file)
+
+                # Update information in sections
+                self.history_section.user_categories = self.user_categories
+                self.upcoming_section.user_categories = self.user_categories
+                self.categories_section.update_categories(self.user_categories)
 
     def update_acc_bal(self):
         """

@@ -14,15 +14,15 @@ from finance_app.modules.add_windows import AddCategory
 
 class CategoriesSection(QWidget):
 
-    update_category = Signal(dict, str, str)
+    update_category = Signal(
+        dict, str, str
+    )  # signal for category operation on database
 
     def __init__(self, user_categories=None, user_categories_path=None) -> None:
         super().__init__()
 
         self.user_categories = user_categories
         self.user_categories_path = user_categories_path
-        # for key, value in self.user_categories.items():
-        #     print(key, value, value.get("Level_1"), value.get("Level_2"))
 
         self.row_nums = (
             12 if self.user_categories is None else len(self.user_categories.keys())
@@ -33,6 +33,9 @@ class CategoriesSection(QWidget):
         self.init_section()
 
     def init_section(self):
+        """
+        Section initialization
+        """
         main_layout = QVBoxLayout()
         self.setLayout(main_layout)
         main_layout.setSpacing(15)
@@ -87,6 +90,12 @@ class CategoriesSection(QWidget):
         main_layout.addWidget(self.user_categories_table, 0)
 
     def update_categories(self, data):
+        """
+        Update categories database and values in table
+
+        Args:
+            data (dict): category dict list
+        """
         self.user_categories_table.clear_table()
         self.user_categories_table.update_table(
             pd.DataFrame(data).T.reset_index(drop=True)
@@ -94,6 +103,9 @@ class CategoriesSection(QWidget):
         self.user_categories = data
 
     def add_category(self):
+        """
+        Invoke new category window
+        """
         self.add_category_window = AddCategory()
         self.add_category_window.show()
 
@@ -101,17 +113,27 @@ class CategoriesSection(QWidget):
 
     @Slot(dict)
     def get_new_category(self, category):
+        """
+        Send new category to update in database and and section
 
-        if self.user_categories is None:
-            self.user_categories = {0: category}
-        else:
-            self.user_categories.update({len(self.user_categories.keys()): category})
+        Args:
+            category (dict): new category
+        """
 
-        print(self.user_categories)
-        with open(self.user_categories_path, "w") as file:
-            json.dump(self.user_categories, file)
+        self.send_category(
+            transaction=category,
+            number=len(self.user_categories.keys()),
+            activity="New",
+        )
 
     def show_category(self, row, columns):
+        """
+        Show choosen category from list for user
+
+        Args:
+            row (int): row of category in table
+            columns (int): column of ctaegory in table
+        """
         name = self.user_categories_table.item(row, 4).text()
         level_1 = self.user_categories_table.item(row, 0).text()
         level_2 = self.user_categories_table.item(row, 1).text()
@@ -138,8 +160,16 @@ class CategoriesSection(QWidget):
         )
         self.category_edit.show()
 
-        self.category_edit.send_category.connect(self.get_category)
+        self.category_edit.send_category.connect(self.send_category)
 
     @Slot(dict, str, str)
-    def get_category(self, transaction, number, activity):
+    def send_category(self, transaction, number, activity):
+        """
+        Emit signal with category to update and it's number and activity for database.
+
+        Args:
+            transaction (dict): category dict with information
+            number (int): number of category in database (new or existing)
+            activity (str): type of acitivty (New, Delete or Update)
+        """
         self.update_category.emit(transaction, number, activity)
