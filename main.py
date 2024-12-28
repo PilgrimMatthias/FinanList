@@ -286,10 +286,10 @@ class MainWindow(QMainWindow):
             if not reload:
                 self.load_user_profile()
 
+                self.init_window()
+
                 if not self.user_transactions is None:
                     self.update_acc_bal()
-
-                self.init_window()
         else:
             self.sign_in()
 

@@ -269,6 +269,10 @@ class SignInWindow(QWidget):
         )
         self.currency = self.currency_entry.currentText()
 
+        if not os.path.exists(os.path.join(self.data_path, APP_NAME)):
+            self.data_path = os.path.join(self.data_path, APP_NAME)
+            os.mkdir(self.data_path)
+
         # Dict with info
         user_settings_dict = {
             "USER_NAME": self.user_name,
