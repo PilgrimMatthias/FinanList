@@ -324,7 +324,7 @@ class MainWindow(QMainWindow):
         self.sign_in_window = SignInWindow(self.user_settings, self.user_settings_path)
         self.sign_in_window.signed_in_signal.connect(self.signed_in_check)
         self.setCentralWidget(self.sign_in_window)
-        center_window(self, 500, 500)
+        center_window(self, 500, 475)
 
     @Slot(bool)
     def signed_in_check(self, signed):

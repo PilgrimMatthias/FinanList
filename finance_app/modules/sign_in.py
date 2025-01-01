@@ -8,6 +8,7 @@ import json
 
 from finance_app import center_window
 from finance_app.config import *
+from finance_app.modules.status_windows import ErrorBox
 
 
 class SignInWindow(QWidget):
@@ -83,8 +84,8 @@ class SignInWindow(QWidget):
         )
 
         # Credential layout
-        cred_layout = QGridLayout()
-        cred_layout.setSpacing(12)
+        self.cred_layout = QGridLayout()
+        self.cred_layout.setSpacing(12)
 
         # Name label
         self.name_label = QLabel(self)
@@ -155,14 +156,15 @@ class SignInWindow(QWidget):
         # User setting folder label
         self.data_dir_label = QLabel(self)
         self.data_dir_label.setText("Data folder")
-        self.data_dir_label.setContentsMargins(15, 0, 15, 0)
+        self.data_dir_label.setContentsMargins(15, 0, 15, 20)
         self.data_dir_label.setStyleSheet("color: black; font-size: 10pt;")
 
         # Data dir layout
         data_dir_widget = QWidget()
-        data_dir_layout = QHBoxLayout(data_dir_widget)
-        data_dir_layout.setContentsMargins(0, 0, 0, 0)
-        data_dir_layout.setSpacing(0)
+        data_dir_widget.setContentsMargins(0, 0, 0, 20)
+        self.data_dir_layout = QHBoxLayout(data_dir_widget)
+        self.data_dir_layout.setContentsMargins(0, 0, 0, 0)
+        self.data_dir_layout.setSpacing(0)
 
         # User setting folder entry
         self.data_dir_entry = QLineEdit(self)
@@ -182,8 +184,8 @@ class SignInWindow(QWidget):
         self.folder_browser_btn.setMinimumWidth(80)
         self.folder_browser_btn.clicked.connect(self.choose_save_folder)
 
-        data_dir_layout.addWidget(self.data_dir_entry)
-        data_dir_layout.addWidget(self.folder_browser_btn)
+        self.data_dir_layout.addWidget(self.data_dir_entry)
+        self.data_dir_layout.addWidget(self.folder_browser_btn)
 
         # Create account button
         self.create_acc_btn = QPushButton(self)
@@ -197,35 +199,35 @@ class SignInWindow(QWidget):
         self.create_acc_btn.clicked.connect(self.create_account)
 
         # Adding widgets to layout
-        cred_layout.addWidget(
+        self.cred_layout.addWidget(
             self.name_label, 0, 0, alignment=Qt.AlignmentFlag.AlignCenter
         )
-        cred_layout.addWidget(self.name_entry, 0, 1)
-        cred_layout.addWidget(
+        self.cred_layout.addWidget(self.name_entry, 0, 1)
+        self.cred_layout.addWidget(
             self.acc_bal_label, 1, 0, alignment=Qt.AlignmentFlag.AlignCenter
         )
-        cred_layout.addWidget(self.acc_bal_entry, 1, 1)
-        cred_layout.addWidget(
+        self.cred_layout.addWidget(self.acc_bal_entry, 1, 1)
+        self.cred_layout.addWidget(
             self.gross_salary_label, 2, 0, alignment=Qt.AlignmentFlag.AlignCenter
         )
-        cred_layout.addWidget(self.gross_salary_entry, 2, 1)
-        cred_layout.addWidget(
+        self.cred_layout.addWidget(self.gross_salary_entry, 2, 1)
+        self.cred_layout.addWidget(
             self.net_salary_label, 3, 0, alignment=Qt.AlignmentFlag.AlignCenter
         )
-        cred_layout.addWidget(self.net_salary_entry, 3, 1)
-        cred_layout.addWidget(
+        self.cred_layout.addWidget(self.net_salary_entry, 3, 1)
+        self.cred_layout.addWidget(
             self.avg_expenses_label, 4, 0, alignment=Qt.AlignmentFlag.AlignCenter
         )
-        cred_layout.addWidget(self.avg_expenses_entry, 4, 1)
-        cred_layout.addWidget(
+        self.cred_layout.addWidget(self.avg_expenses_entry, 4, 1)
+        self.cred_layout.addWidget(
             self.currency_label, 5, 0, alignment=Qt.AlignmentFlag.AlignCenter
         )
-        cred_layout.addWidget(self.currency_entry, 5, 1)
-        cred_layout.addWidget(
+        self.cred_layout.addWidget(self.currency_entry, 5, 1)
+        self.cred_layout.addWidget(
             self.data_dir_label, 6, 0, alignment=Qt.AlignmentFlag.AlignCenter
         )
-        cred_layout.addWidget(data_dir_widget, 6, 1)
-        cred_layout.addWidget(
+        self.cred_layout.addWidget(data_dir_widget, 6, 1)
+        self.cred_layout.addWidget(
             self.create_acc_btn, 7, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignCenter
         )
 
@@ -233,7 +235,7 @@ class SignInWindow(QWidget):
         self.spacer = QSpacerItem(2, 2, QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         main_layout.addLayout(title_layout, 0)
-        main_layout.addLayout(cred_layout, 0)
+        main_layout.addLayout(self.cred_layout, 0)
         main_layout.addItem(self.spacer)
 
     def choose_save_folder(self):
@@ -252,11 +254,52 @@ class SignInWindow(QWidget):
             self.data_path = data_path
             self.data_dir_entry.setText(self.data_path)
 
+    def check_completion(self):
+        """
+        Verification of entries completion
+
+        If any widget is empty then show ErrorBox.
+        """
+        blank_check = False
+
+        # Iterate through all layouts with required boxes to insert
+        for layout in [self.cred_layout, self.data_dir_layout]:
+            for index in range(layout.count()):
+                item = layout.itemAt(index)
+                if type(item.widget()) == QLineEdit:  # QLineEdit verifaction
+                    # Return ErrorBox if the first widget found has no value and is visible
+                    if (item.widget().text() == "") and (item.widget().isVisible()):
+                        blank_check = True
+                        break
+
+                if type(item.widget()) == QComboBox:  # QComboBox verification
+                    # Return ErrorBox if the first widget found has no value and is visible
+                    if (item.widget().currentText() == "") and (
+                        item.widget().isVisible()
+                    ):
+                        blank_check = True
+                        break
+            else:
+                continue
+            break
+
+        # Show Error Box
+        if blank_check:
+            msg = "Please fill all fields to create account!"
+            ErrorBox(self, title="Empty fields detected!", msg=msg)
+            return False
+
+        return True
+
     def create_account(self):
         """
         Method user for creating user account based on information provided by the user.
         User data is saved in settings path based on platformdirs library.
         """
+        # Check if any entry is empty
+        if not self.check_completion():
+            return
+
         # Get user values
         self.user_name = self.name_entry.text()
         self.current_acc_balance = float(self.acc_bal_entry.text().replace(",", "."))
@@ -269,9 +312,16 @@ class SignInWindow(QWidget):
         )
         self.currency = self.currency_entry.currentText()
 
-        if not os.path.exists(os.path.join(self.data_path, APP_NAME)):
-            self.data_path = os.path.join(self.data_path, APP_NAME)
-            os.mkdir(self.data_path)
+        try:
+            if not os.path.exists(os.path.join(self.data_path, APP_NAME)):
+                self.data_path = os.path.join(self.data_path, APP_NAME)
+                os.mkdir(self.data_path)
+        except TypeError:
+            msg = "Folder: {0} is not valid. Please enter a new path or browse for folder!".format(
+                self.data_dir_entry.text()
+            )
+            ErrorBox(self, title="Invalid path", msg=msg)
+            return
 
         # Dict with info
         user_settings_dict = {

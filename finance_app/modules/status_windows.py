@@ -64,3 +64,49 @@ class ChooseBox(QDialog):
         """
         self.selected_value = None
         super().reject()
+
+
+class ErrorBox(QMessageBox):
+    """
+    Error box window which show message with provided title and msg.
+    """
+
+    def __init__(self, parent=None, title="Error", msg="Unknown error!"):
+        super().__init__(parent)
+
+        self.title = title
+        self.msg = msg
+
+        # Fonty
+        self.font = QFont()
+        self.font.setPointSize(11)
+
+        self.init_box()
+
+    def init_box(self):
+        """
+        Initialize error window
+        """
+        # Title and msg
+        self.setWindowTitle(self.title)
+        self.setText(self.msg)
+
+        # Icon
+        self.setIcon(QMessageBox.Critical)
+
+        # Font for title and msg
+        self.setFont(self.font)
+
+        # Close button
+        error_btn = QPushButton("Ok")
+        error_btn.setStyleSheet(
+            "QPushButton {background-color: #5AC37D; border-style: solid; border-color: #5AC37D; border-width: 2px; border-radius: 10px; font-size: 11pt;} "
+            + "QPushButton::pressed {background-color: #8fd6a7; border-style: solid; border-color: #8fd6a7; border-width: 2px; border-radius: 10px; font-size: 11pt;}"
+        )
+        error_btn.setMinimumHeight(30)
+        error_btn.setMinimumWidth(70)
+
+        self.addButton(error_btn, QMessageBox.AcceptRole)
+
+        # Show button
+        self.exec()

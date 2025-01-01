@@ -1,7 +1,7 @@
 # Importing classes and modules
 from .utils import center_window, filter_func, is_date, is_number
 from .modules.sign_in import SignInWindow
-from .modules.status_windows import ChooseBox
+from .modules.status_windows import ChooseBox, ErrorBox
 from .modules.main_section import MainSection
 from .modules.categories_section import CategoriesSection
 from .modules.history_section import HistorySection
@@ -23,6 +23,7 @@ __all__ = [
     "AccountSettings",
     "AppSettings",
     "ChooseBox",
+    "ErrorBox",
     "TableWidget",
     "AddTransaction",
     "center_window",
