@@ -283,6 +283,7 @@ class SignInWindow(QWidget):
             "CURRENCY": self.currency,
             "USER_FOLDER": self.data_path,
             "DEFAULT_VIEW": "Home",
+            "DEFAULT_ANALYSIS": "Categorical",
         }
 
         # Save user information to settings folder

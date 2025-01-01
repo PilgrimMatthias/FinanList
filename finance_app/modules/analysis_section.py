@@ -50,6 +50,7 @@ class AnalysisSection(QWidget):
         self.avg_monthly_expense = self.user_settings.get("AVERAGE_MONTHLY_EXPENSE")
         self.currency = self.user_settings.get("CURRENCY")
         self.data_path = self.user_settings.get("USER_FOLDER")
+        self.user_def_analysis = self.user_settings.get("DEFAULT_ANALYSIS")
 
         self.last_operation_date = datetime.today().strftime("%d.%m.%Y")
         if not self.user_transactions is None:
@@ -249,7 +250,8 @@ class AnalysisSection(QWidget):
                 self.create_analysis(
                     analysis_type=analysis_type, date_from=date_from, date_to=date_to
                 )
-        self.analysis_type_combo.setCurrentIndex(0)
+
+        self.analysis_type_combo.setCurrentText(self.user_def_analysis)
 
     def init_categorical(self):
         """
@@ -354,7 +356,7 @@ class AnalysisSection(QWidget):
 
     def on_analysis_type_change(self):
         """
-        Set dates for each analysis type.
+        Set current analysis view and date for choosen type.
         For prognosis set date from as last operation date and date to as value + 2 years.
         For other analysis type set date to as last operation date and date from as remebered date.
         """
