@@ -411,9 +411,6 @@ class MainWindow(QMainWindow):
                         self.upcoming_section.update_upcoming_oper(self.user_upcomings)
 
                     case _:
-                        print(self.user_transactions)
-                        print(transaction)
-                        print(list(transaction.keys()))
                         # Delete transaction from expense/income
                         self.user_transactions.pop(list(transaction.keys())[0])
 

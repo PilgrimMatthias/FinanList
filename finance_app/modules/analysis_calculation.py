@@ -162,15 +162,31 @@ class Analysis:
             lambda x: x.strftime("%Y-%m")
         )
 
+        # Calculate average spendings - last month summary spendings
         last_month_spendings = (
             transactions.groupby(["Year-month"])["6_amount"].sum().values[0]
         )
         last_month_spendings = self.average_spendings - last_month_spendings
         last_month_spendings = 0 if last_month_spendings <= 0 else last_month_spendings
 
+        # Set value for first revenue value in result table (first month)
+        last_month_revenue = self.transactions.copy()
+        last_month_revenue = last_month_revenue[
+            (
+                last_month_revenue["2_date"]
+                >= last_transaction_date + relativedelta(day=1)
+            )
+            & (
+                last_month_revenue["2_date"]
+                <= last_transaction_date + relativedelta(day=31)
+            )
+            & (last_month_revenue["4_type"] == "Income")
+        ]
+        last_month_revenue = 0 if not last_month_revenue.empty else self.average_revenue
+
         planned_expenses = self.upcomings.copy()
         planned_expenses = planned_expenses[
-            (planned_expenses["2_date"] >= last_transaction_date)
+            (planned_expenses["2_date"] >= last_transaction_date + relativedelta(day=1))
             & (planned_expenses["2_date"] <= self.date_to)
         ]
 
@@ -208,23 +224,29 @@ class Analysis:
             temp_revenue = 0
             temp_spendings = 0
             temp_balance = 0
+            # First month values
             if index == 0:
-                temp_revenue = 0
+                temp_revenue = last_month_revenue
                 temp_spendings = last_month_spendings
                 temp_balance = result_table.iloc[index, 1]
 
                 result_table.at[index, "Average spendings"] = temp_spendings
+
+            # Rest month values
             else:
                 temp_revenue = self.average_revenue
                 temp_spendings = self.average_spendings
                 temp_balance = result_table.iloc[index - 1, 1]
 
+            # Get planned expenses
             temp_planned_expenses = result_table.iloc[index, -1]
 
+            # Calculate balance
             temp_balance = temp_balance + (
                 temp_revenue - temp_spendings - temp_planned_expenses
             )
 
+            # Add value to result
             result_table.at[index, "Account balance"] = temp_balance
 
         result_table = result_table[
