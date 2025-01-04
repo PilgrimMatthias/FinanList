@@ -87,6 +87,7 @@ class Analysis:
             aggfunc="sum",
             fill_value=0,
         ).reset_index(drop=False)
+        result_table["Summary"] = result_table.iloc[:, 1:].sum(axis=1)
 
         return result_table.round(2)
 
@@ -148,58 +149,52 @@ class Analysis:
         Returns:
             pandas.DataFrame: Table with results
         """
-        last_transaction_date = self.transactions["2_date"].iloc[-1]
+        last_month_spendings = self.average_spendings
+        last_month_revenue = self.average_revenue
+        transactions = self.transactions
+        last_transaction_date = datetime.today()
 
-        # Calculate current account balance
-        transactions = self.transactions.copy()
-        transactions = transactions[
-            (transactions["2_date"] >= last_transaction_date + relativedelta(day=1))
-            & (transactions["2_date"] <= last_transaction_date)
-            & (transactions["4_type"] == "Expense")
-        ]
+        if not transactions.empty:
 
-        transactions["Year-month"] = transactions["2_date"].apply(
-            lambda x: x.strftime("%Y-%m")
-        )
+            last_transaction_date = transactions["2_date"].iloc[-1]
 
-        # Calculate average spendings - last month summary spendings
-        last_month_spendings = (
-            transactions.groupby(["Year-month"])["6_amount"].sum().values[0]
-        )
-        last_month_spendings = self.average_spendings - last_month_spendings
-        last_month_spendings = 0 if last_month_spendings <= 0 else last_month_spendings
+            # Calculate current account balance
+            transactions = transactions.copy()
+            transactions = transactions[
+                (transactions["2_date"] >= last_transaction_date + relativedelta(day=1))
+                & (transactions["2_date"] <= last_transaction_date)
+                & (transactions["4_type"] == "Expense")
+            ]
 
-        # Set value for first revenue value in result table (first month)
-        last_month_revenue = self.transactions.copy()
-        last_month_revenue = last_month_revenue[
-            (
-                last_month_revenue["2_date"]
-                >= last_transaction_date + relativedelta(day=1)
+            transactions["Year-month"] = transactions["2_date"].apply(
+                lambda x: x.strftime("%Y-%m")
             )
-            & (
-                last_month_revenue["2_date"]
-                <= last_transaction_date + relativedelta(day=31)
+
+            # Calculate average spendings - last month summary spendings
+            last_month_spendings = (
+                transactions.groupby(["Year-month"])["6_amount"].sum().values[0]
             )
-            & (last_month_revenue["4_type"] == "Income")
-        ]
-        last_month_revenue = 0 if not last_month_revenue.empty else self.average_revenue
+            last_month_spendings = self.average_spendings - last_month_spendings
+            last_month_spendings = (
+                0 if last_month_spendings <= 0 else last_month_spendings
+            )
 
-        planned_expenses = self.upcomings.copy()
-        planned_expenses = planned_expenses[
-            (planned_expenses["2_date"] >= last_transaction_date + relativedelta(day=1))
-            & (planned_expenses["2_date"] <= self.date_to)
-        ]
-
-        planned_expenses["Year-month"] = planned_expenses["2_date"].apply(
-            lambda x: x.strftime("%Y-%m")
-        )
-
-        planned_expenses = (
-            planned_expenses.groupby(["Year-month"])["6_amount"]
-            .sum()
-            .reset_index(drop=False)
-        )
-        planned_expenses.columns = ["Year-month", "Planned expenses"]
+            # Set value for first revenue value in result table (first month)
+            last_month_revenue = self.transactions.copy()
+            last_month_revenue = last_month_revenue[
+                (
+                    last_month_revenue["2_date"]
+                    >= last_transaction_date + relativedelta(day=1)
+                )
+                & (
+                    last_month_revenue["2_date"]
+                    <= last_transaction_date + relativedelta(day=31)
+                )
+                & (last_month_revenue["4_type"] == "Income")
+            ]
+            last_month_revenue = (
+                0 if not last_month_revenue.empty else self.average_revenue
+            )
 
         month_list = []
         current = last_transaction_date
@@ -215,6 +210,35 @@ class Analysis:
                 "Average spendings": [self.average_spendings] * len(month_list),
             }
         )
+
+        planned_expenses = None
+        if not self.upcomings is None:
+            planned_expenses = self.upcomings.copy()
+            planned_expenses = planned_expenses[
+                (
+                    planned_expenses["2_date"]
+                    >= last_transaction_date + relativedelta(day=1)
+                )
+                & (planned_expenses["2_date"] <= self.date_to)
+            ]
+
+            planned_expenses["Year-month"] = planned_expenses["2_date"].apply(
+                lambda x: x.strftime("%Y-%m")
+            )
+
+            planned_expenses = (
+                planned_expenses.groupby(["Year-month"])["6_amount"]
+                .sum()
+                .reset_index(drop=False)
+            )
+            planned_expenses.columns = ["Year-month", "Planned expenses"]
+        else:
+            planned_expenses = pd.DataFrame(
+                {
+                    "Year-month": month_list,
+                    "Planned expenses": [np.nan] * len(month_list),
+                }
+            )
 
         result_table = pd.merge(
             left=result_table, right=planned_expenses, how="left", on="Year-month"
@@ -281,7 +305,6 @@ class Analysis:
             data_to_table[col] = data_to_table[col].apply(
                 lambda x: str(x).replace(".", ",")
             )
-
         return data_to_table
 
     def get_data_to_plot(self):
@@ -298,7 +321,7 @@ class Analysis:
 
         match self.analysis_type:
             case "Categorical":
-                data_to_plot = data_to_plot.iloc[:4]
+                data_to_plot = data_to_plot.iloc[:, :-1]
                 data_to_plot = pd.DataFrame(data_to_plot.sum(axis=1), columns=["Sum"])
             case "Aggregate":
                 data_to_plot = pd.DataFrame(data_to_plot.iloc[:, :2])

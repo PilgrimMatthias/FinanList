@@ -176,7 +176,7 @@ class TableWidget(QTableWidget):
             self.setSortingEnabled(False)
 
         # Update columns in table
-        if len(data.columns) > self.col_num:
+        if len(data.columns) >= self.col_num:
             self.update_headers(data.columns)
 
         self.setRowCount(len(data.index))  # Set row num

@@ -44,13 +44,15 @@ class AddCategory(QWidget):
 
         # Custom name - label
         self.custom_name_label = QLabel(self)
-        self.custom_name_label.setText("Custom name")
+        self.custom_name_label.setText("Name of category")
         self.custom_name_label.setStyleSheet("color: black; font-size: 12pt;")
         self.custom_name_label.setWordWrap(True)
         self.custom_name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Custom name - lineedit
         self.custom_name_edit = QLineEdit(self)
+        self.custom_name_edit.setStyleSheet("background-color: #e6e6e6")
+        self.custom_name_edit.setEnabled(False)
 
         # Top level - label
         self.top_lvl_label = QLabel(self)
@@ -360,7 +362,7 @@ class AddTransaction(QWidget):
         super().__init__()
 
         # User data
-        self.user_categories = user_categories
+        self.user_categories = sorted(user_categories)
 
         # Variables
         self.validator = QDoubleValidator(bottom=0, decimals=2)

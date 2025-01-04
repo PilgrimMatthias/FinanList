@@ -119,10 +119,13 @@ class CategoriesSection(QWidget):
         Args:
             category (dict): new category
         """
-
         self.send_category(
             transaction=category,
-            number=len(self.user_categories.keys()),
+            number=(
+                "0"
+                if self.user_categories is None
+                else str(len(self.user_categories.keys()))
+            ),
             activity="New",
         )
 

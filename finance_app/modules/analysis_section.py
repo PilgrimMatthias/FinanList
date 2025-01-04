@@ -12,6 +12,7 @@ from finance_app.widgets.table_widget import TableWidget
 from finance_app.widgets.bar_plot_widget import BarChart
 from finance_app.config import *
 from finance_app.modules.analysis_calculation import Analysis
+from finance_app.modules.status_windows import ErrorBox
 
 
 class AnalysisSection(QWidget):
@@ -53,7 +54,7 @@ class AnalysisSection(QWidget):
         self.user_def_analysis = self.user_settings.get("DEFAULT_ANALYSIS")
 
         self.last_operation_date = datetime.today().strftime("%d.%m.%Y")
-        if not self.user_transactions is None:
+        if not self.user_transactions is None and len(self.user_transactions) > 0:
             self.last_operation_date = self.user_transactions.get(
                 list(self.user_transactions.keys())[-1]
             ).get("2_date")
@@ -227,7 +228,7 @@ class AnalysisSection(QWidget):
         main_layout.addLayout(top_layout, 0)
         main_layout.addLayout(bottom_layout, 0)
 
-        if not self.user_transactions is None:
+        if not self.user_transactions is None and len(self.user_transactions) > 0:
 
             # Create default analysis charts for all types
             for analysis_type in ANALYSIS_TYPES:
@@ -403,6 +404,21 @@ class AnalysisSection(QWidget):
                     QDate().fromString(self.prognosis_date_to, "dd.MM.yyyy")
                 )
 
+    def update_operations(self, data, type):
+        """
+        Update data in table and on on the plot
+
+
+        Args:
+            data (dict): transaction
+            type (str): type of operations
+        """
+        match type:
+            case "Upcoming":
+                self.user_upcomings = data
+            case _:
+                self.user_transactions = data
+
     def create_analysis(self, analysis_type=None, date_to=None, date_from=None):
         """
         Create analysis for choosen type and dates.
@@ -415,44 +431,65 @@ class AnalysisSection(QWidget):
         if analysis_type is None:
             analysis_type = self.analysis_type_combo.currentText()
 
+        if analysis_type in ["Categorical", "Aggregate"] and (
+            self.user_transactions is None or len(self.user_transactions) == 0
+        ):
+            msg = "Please add at least one transaction to analize date!"
+            ErrorBox(self, title="No categories!", msg=msg)
+            return
+
         # Columns to get from databases
         columns_to_get = ["1_name", "2_date", "4_type", "5_category", "6_amount"]
 
-        # Prepare transactions database
-        transactions = (
-            pd.DataFrame(self.user_transactions)
-            .T.reset_index(drop=True)
-            .copy()[columns_to_get]
-        )
+        if not self.user_transactions is None and len(self.user_transactions) > 0:
+            # Prepare transactions database
+            transactions = (
+                pd.DataFrame(self.user_transactions)
+                .T.reset_index(drop=True)
+                .copy()[columns_to_get]
+            )
 
-        transactions["2_date"] = transactions["2_date"].apply(
-            lambda x: datetime.strptime(x, "%d.%m.%Y")
-        )
-        transactions["6_amount"] = transactions["6_amount"].apply(
-            lambda x: float(x.replace(",", ".").replace(" ", ""))
-        )
+            transactions["2_date"] = transactions["2_date"].apply(
+                lambda x: datetime.strptime(x, "%d.%m.%Y")
+            )
+            transactions["6_amount"] = transactions["6_amount"].apply(
+                lambda x: float(x.replace(",", ".").replace(" ", ""))
+            )
+        else:
+            transactions = pd.DataFrame(columns=columns_to_get)
 
         transaction_summary = transactions.copy().groupby(["4_type"])["6_amount"].sum()
 
+        income = (
+            0
+            if "Income" not in transaction_summary.index.values
+            else transaction_summary.loc["Income"]
+        )
+        expense = (
+            0
+            if "Expense" not in transaction_summary.index.values
+            else transaction_summary.loc["Expense"]
+        )
         curr_acc_bal = round(
-            self.current_acc_balance
-            + (transaction_summary.loc["Income"] - transaction_summary.loc["Expense"]),
+            self.current_acc_balance + (income - expense),
             2,
         )
 
         # Prepare upcomings database
-        upcomings = (
-            pd.DataFrame(self.user_upcomings)
-            .T.reset_index(drop=True)
-            .copy()[columns_to_get]
-        )
+        upcomings = None
+        if not self.user_upcomings is None and len(self.user_upcomings) > 0:
+            upcomings = (
+                pd.DataFrame(self.user_upcomings)
+                .T.reset_index(drop=True)
+                .copy()[columns_to_get]
+            )
 
-        upcomings["2_date"] = upcomings["2_date"].apply(
-            lambda x: datetime.strptime(x, "%d.%m.%Y")
-        )
-        upcomings["6_amount"] = upcomings["6_amount"].apply(
-            lambda x: float(x.replace(",", ".").replace(" ", ""))
-        )
+            upcomings["2_date"] = upcomings["2_date"].apply(
+                lambda x: datetime.strptime(x, "%d.%m.%Y")
+            )
+            upcomings["6_amount"] = upcomings["6_amount"].apply(
+                lambda x: float(x.replace(",", ".").replace(" ", ""))
+            )
 
         if date_from is None:
             date_from = datetime.strptime(

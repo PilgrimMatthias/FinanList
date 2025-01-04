@@ -242,9 +242,6 @@ CHART_TOOLTIPS = {
 CATEGORICAL_HEADERS = [
     "Year-Month",
     "Sub-Category 1",
-    "Sub-Category 2",
-    "Sub-Category 3",
-    "Sub-Category 4",
     "Summary",
 ]
 

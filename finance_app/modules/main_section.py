@@ -209,7 +209,7 @@ class MainSection(QWidget):
             data (dict): transaction
             type (str): type of operations
         """
-        data = (
+        data_frame = (
             pd.DataFrame(data)
             .T.reset_index(drop=True)
             .sort_index(ascending=False)
@@ -218,21 +218,23 @@ class MainSection(QWidget):
 
         match type:
             case "Upcoming":
-                data = data = data[
+                self.user_upcomings = data
+                data_frame = data_frame[
                     [
                         col
-                        for col in data.columns
+                        for col in data_frame.columns
                         if not "vendor" in col and not "type" in col
                     ]
                 ]
                 self.planned_oper_table.clear_table()
                 self.planned_oper_table.update_table(
-                    data.iloc[:7],
+                    data_frame.iloc[:7],
                 )
             case _:
+                self.user_transactions = data
                 self.recent_oper_table.clear_table()
                 self.recent_oper_table.update_table(
-                    data.iloc[:30],
+                    data_frame.iloc[:30],
                 )
 
         self.calculate_plot_data()
@@ -241,82 +243,95 @@ class MainSection(QWidget):
         """
         Method for calculating data for plot and then displaying it on the screen
         """
-        # Columns to get from databases
-        columns_to_get = ["1_name", "2_date", "4_type", "5_category", "6_amount"]
+        if not self.user_transactions is None and len(self.user_transactions) > 0:
+            # Columns to get from databases
+            columns_to_get = ["1_name", "2_date", "4_type", "5_category", "6_amount"]
 
-        # Prepare transactions database
-        transactions = (
-            pd.DataFrame(self.user_transactions)
-            .T.reset_index(drop=True)
-            .copy()[columns_to_get]
-        )
+            # Prepare transactions database
+            transactions = (
+                pd.DataFrame(self.user_transactions)
+                .T.reset_index(drop=True)
+                .copy()[columns_to_get]
+            )
 
-        transactions["2_date"] = transactions["2_date"].apply(
-            lambda x: datetime.strptime(x, "%d.%m.%Y")
-        )
-        transactions["6_amount"] = transactions["6_amount"].apply(
-            lambda x: float(x.replace(",", ".").replace(" ", ""))
-        )
+            transactions["2_date"] = transactions["2_date"].apply(
+                lambda x: datetime.strptime(x, "%d.%m.%Y")
+            )
+            transactions["6_amount"] = transactions["6_amount"].apply(
+                lambda x: float(x.replace(",", ".").replace(" ", ""))
+            )
 
-        transactions["Year-month"] = transactions["2_date"].apply(
-            lambda x: x.strftime("%Y-%m")
-        )
+            transactions["Year-month"] = transactions["2_date"].apply(
+                lambda x: x.strftime("%Y-%m")
+            )
 
-        transactions = (
-            transactions.groupby(["Year-month", "4_type"])["6_amount"]
-            .sum()
-            .reset_index(drop=False)
-        )
+            transactions = (
+                transactions.groupby(["Year-month", "4_type"])["6_amount"]
+                .sum()
+                .reset_index(drop=False)
+            )
 
-        # Prepare expenses
-        expense = transactions[transactions["4_type"] == "Expense"].drop(
-            "4_type", axis=1
-        )
-        expense.columns = ["Year-month", "Expense"]
+            # Prepare expenses
+            expense = transactions[transactions["4_type"] == "Expense"].drop(
+                "4_type", axis=1
+            )
+            expense.columns = ["Year-month", "Expense"]
 
-        # Prepare Income
-        income = transactions[transactions["4_type"] == "Income"].drop("4_type", axis=1)
-        income.columns = ["Year-month", "Income"]
+            # Prepare Income
+            income = transactions[transactions["4_type"] == "Income"].drop(
+                "4_type", axis=1
+            )
+            income.columns = ["Year-month", "Income"]
 
-        # Prepare result table
-        result_table = transactions["Year-month"].drop_duplicates()
-        result_table = pd.merge(
-            left=result_table, right=income, how="left", on="Year-month"
-        )
-        result_table = pd.merge(
-            left=result_table, right=expense, how="left", on="Year-month"
-        ).fillna(0)
+            # Prepare result table
+            result_table = transactions["Year-month"].drop_duplicates()
+            result_table = pd.merge(
+                left=result_table, right=income, how="left", on="Year-month"
+            )
+            result_table = pd.merge(
+                left=result_table, right=expense, how="left", on="Year-month"
+            ).fillna(0)
 
-        result_table.index = result_table["Year-month"]
-        result_table = result_table.iloc[-3:].drop("Year-month", axis=1)
+            result_table.index = result_table["Year-month"]
+            result_table = result_table.iloc[-3:].drop("Year-month", axis=1)
 
-        # Deleting plot widget
-        if self.plot_check:
-            self.plot_frame.deleteLater()
-            self.plot_frame_layout.deleteLater()
-            self.aggregate_plot.deleteLater()
+            # Deleting plot widget
+            if self.plot_check:
+                self.plot_frame.deleteLater()
+                self.plot_frame_layout.deleteLater()
+                self.aggregate_plot.deleteLater()
 
-        # Creating new chart
-        self.aggregate_plot = BarChart(
-            parent=self,
-            data=result_table,
-            title="Monthly cashflow - last 3 months",
-            legend=False,
-            x_label=None,
-            y_label="[{0}]".format(self.currency),
-            y_axis_visible=False,
-            gridlines=False,
-        )
+            # Creating new chart
+            self.aggregate_plot = BarChart(
+                parent=self,
+                data=result_table,
+                title="Monthly cashflow - last 3 months",
+                legend=False,
+                x_label=None,
+                y_label="[{0}]".format(self.currency),
+                y_axis_visible=False,
+                gridlines=False,
+            )
 
-        # Frame for chart
-        self.plot_frame = QFrame()
-        self.plot_frame.setStyleSheet("border: 1px solid #b5c0c9; border-radius:10px;")
-        self.plot_frame_layout = QVBoxLayout(self.plot_frame)
-        self.plot_frame_layout.setContentsMargins(0, 0, 0, 0)
-        self.plot_frame_layout.setSpacing(5)
-        self.plot_frame_layout.addWidget(self.aggregate_plot, 0)
+            # Frame for chart
+            self.plot_frame = QFrame()
+            self.plot_frame.setStyleSheet(
+                "border: 1px solid #b5c0c9; border-radius:10px;"
+            )
+            self.plot_frame_layout = QVBoxLayout(self.plot_frame)
+            self.plot_frame_layout.setContentsMargins(0, 0, 0, 0)
+            self.plot_frame_layout.setSpacing(5)
+            self.plot_frame_layout.addWidget(self.aggregate_plot, 0)
 
-        # Adding chart in frame to main layout
-        self.summary_layout.addWidget(self.plot_frame, 1)
+            # Adding chart in frame to main layout
+            self.summary_layout.addWidget(self.plot_frame, 1)
 
-        self.plot_check = True  # Plot present on screen
+            self.plot_check = True  # Plot present on screen
+        else:
+
+            # Deleting plot widget
+            if self.plot_check:
+                self.plot_frame.deleteLater()
+                self.plot_frame_layout.deleteLater()
+                self.aggregate_plot.deleteLater()
+            self.plot_check = False

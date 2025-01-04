@@ -71,8 +71,8 @@ class BarChart(QWidget):
         max_val = self.data[self.data > 0].sum(axis=1).max()
         if len(self.data.columns) > 2:
             max_val = self.data.unstack().max()
-        elif len(self.data.index) == 2:
-            min_val *= min_val * 0.2
+        # elif len(self.data.index) == 2:
+        #     min_val *= min_val * 0.2
         elif len(self.data.index) == 1:
             max_val = int(math.ceil(self.data.unstack().max() / 1000)) * 1000
             max_val = max_val + max_val * 0.2

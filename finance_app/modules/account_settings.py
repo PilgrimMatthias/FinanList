@@ -368,6 +368,8 @@ class AccountSettings(QWidget):
                 ),
                 "CURRENCY": self.currency_entry.currentText(),
                 "USER_FOLDER": self.data_dir_entry.text(),
+                "DEFAULT_VIEW": self.user_settings.get("DEFAULT_VIEW"),
+                "DEFAULT_ANALYSIS": self.user_settings.get("DEFAULT_ANALYSIS"),
             }
 
             with open(self.user_settings_path, "w") as file:

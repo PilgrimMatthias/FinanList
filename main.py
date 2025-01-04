@@ -19,6 +19,7 @@ from finance_app import (
     AccountSettings,
     AppSettings,
     AddTransaction,
+    ErrorBox,
     center_window,
 )
 from finance_app.config import *
@@ -343,13 +344,21 @@ class MainWindow(QMainWindow):
 
         After filling all necessary information and closing window new transaction will be passed to get_transaction method.
 
-        """
-        self.add_transaction_window = AddTransaction(
-            [category.get("Name") for category in self.user_categories.values()]
-        )
-        self.add_transaction_window.show()
+        If user has no added categories error will be shown and then new category window will be shown.
 
-        self.add_transaction_window.send_transaction.connect(self.get_transaction)
+        """
+        if self.user_categories is None or len(self.user_categories) == 0:
+            msg = "Please create at least one category before adding transaction!"
+            ErrorBox(self, title="No categories!", msg=msg)
+            self.stacked_categories.setCurrentIndex(1)
+            self.categories_section.add_category()
+        else:
+            self.add_transaction_window = AddTransaction(
+                [category.get("Name") for category in self.user_categories.values()]
+            )
+            self.add_transaction_window.show()
+
+            self.add_transaction_window.send_transaction.connect(self.get_transaction)
 
     @Slot(dict, str)
     def get_transaction(self, transaction, type):
@@ -371,7 +380,7 @@ class MainWindow(QMainWindow):
         match oper_type:
             case "Upcoming":
                 if self.user_upcomings is None:
-                    self.user_upcomings = {0: transaction}
+                    self.user_upcomings = {"0": transaction}
                 else:
                     self.user_upcomings.update(
                         {str(len(self.user_upcomings.keys())): transaction}
@@ -383,6 +392,7 @@ class MainWindow(QMainWindow):
 
                 # Update information in sections
                 self.main_section.update_operations(self.user_upcomings, type)
+                self.analysis_section.update_operations(self.user_upcomings, type)
                 self.upcoming_section.update_upcoming_oper(self.user_upcomings)
             case "Delete":
                 match type.split("-")[1]:
@@ -405,6 +415,9 @@ class MainWindow(QMainWindow):
 
                         # Update information in sections
                         self.main_section.update_operations(
+                            self.user_upcomings, "Upcoming"
+                        )
+                        self.analysis_section.update_operations(
                             self.user_upcomings, "Upcoming"
                         )
 
@@ -430,6 +443,9 @@ class MainWindow(QMainWindow):
                         self.main_section.update_operations(
                             self.user_transactions, "Transaction"
                         )
+                        self.analysis_section.update_operations(
+                            self.user_transactions, "Transaction"
+                        )
                         self.history_section.update_operations(self.user_transactions)
                         self.update_acc_bal()
 
@@ -444,6 +460,9 @@ class MainWindow(QMainWindow):
 
                         # Update information in sections
                         self.main_section.update_operations(self.user_upcomings, type)
+                        self.analysis_section.update_operations(
+                            self.user_upcomings, type
+                        )
                         self.upcoming_section.update_upcoming_oper(self.user_upcomings)
 
                     case "Transaction":
@@ -455,6 +474,9 @@ class MainWindow(QMainWindow):
 
                         # Update information in sections
                         self.main_section.update_operations(
+                            self.user_transactions, type
+                        )
+                        self.analysis_section.update_operations(
                             self.user_transactions, type
                         )
                         self.history_section.update_operations(self.user_transactions)
@@ -493,6 +515,12 @@ class MainWindow(QMainWindow):
                             self.user_upcomings, "Upcoming"
                         )
                         self.main_section.update_operations(
+                            self.user_transactions, "Transaction"
+                        )
+                        self.analysis_section.update_operations(
+                            self.user_upcomings, "Upcoming"
+                        )
+                        self.analysis_section.update_operations(
                             self.user_transactions, "Transaction"
                         )
                         self.upcoming_section.update_upcoming_oper(self.user_upcomings)
@@ -535,13 +563,21 @@ class MainWindow(QMainWindow):
                         self.main_section.update_operations(
                             self.user_transactions, "Transaction"
                         )
+
+                        self.analysis_section.update_operations(
+                            self.user_upcomings, "Upcoming"
+                        )
+                        self.analysis_section.update_operations(
+                            self.user_transactions, "Transaction"
+                        )
+
                         self.upcoming_section.update_upcoming_oper(self.user_upcomings)
                         self.history_section.update_operations(self.user_transactions)
                         self.update_acc_bal()
 
             case _:
                 if self.user_transactions is None:
-                    self.user_transactions = {0: transaction}
+                    self.user_transactions = {"0": transaction}
                 else:
                     self.user_transactions.update(
                         {str(len(self.user_transactions.keys())): transaction}
@@ -553,6 +589,7 @@ class MainWindow(QMainWindow):
 
                 # Update information in sections
                 self.main_section.update_operations(self.user_transactions, type)
+                self.analysis_section.update_operations(self.user_transactions, type)
                 self.history_section.update_operations(self.user_transactions)
                 self.update_acc_bal()
 
@@ -601,6 +638,9 @@ class MainWindow(QMainWindow):
                         self.main_section.update_operations(
                             self.user_transactions, "Transaction"
                         )
+                        self.analysis_section.update_operations(
+                            self.user_transactions, "Transaction"
+                        )
                         self.history_section.update_operations(self.user_transactions)
 
                     if not self.user_upcomings is None:
@@ -615,6 +655,9 @@ class MainWindow(QMainWindow):
 
                         self.main_section.update_operations(
                             self.user_upcomings, "Upcoming"
+                        )
+                        self.analysis_section.update_operations(
+                            self.user_transactions, "Transaction"
                         )
                         self.upcoming_section.update_upcoming_oper(self.user_upcomings)
 
@@ -634,6 +677,7 @@ class MainWindow(QMainWindow):
                 # Update categories dict in sections
                 self.history_section.user_categories = self.user_categories
                 self.upcoming_section.user_categories = self.user_categories
+                self.analysis_section.user_categories = self.user_categories
                 self.categories_section.update_categories(self.user_categories)
 
                 # Update categories file
@@ -641,10 +685,10 @@ class MainWindow(QMainWindow):
                     json.dump(self.user_categories, file)
             case _:  # New category
                 if self.user_categories is None:
-                    self.user_categories = {0: category}
+                    self.user_categories = {"0": category}
                 else:
                     self.user_categories.update(
-                        {len(self.user_categories.keys()): category}
+                        {str(len(self.user_categories.keys())): category}
                     )
 
                 with open(self.user_categories_path, "w") as file:
@@ -653,30 +697,46 @@ class MainWindow(QMainWindow):
                 # Update information in sections
                 self.history_section.user_categories = self.user_categories
                 self.upcoming_section.user_categories = self.user_categories
+                self.analysis_section.user_categories = self.user_categories
                 self.categories_section.update_categories(self.user_categories)
 
     def update_acc_bal(self):
         """
         Current account balance update and Text widgets displaying this value in every section.
         """
-        # Data prep
-        temp_transactions = pd.DataFrame(self.user_transactions).T.reset_index(
-            drop=True
-        )
-        temp_transactions["6_amount"] = temp_transactions["6_amount"].apply(
-            lambda x: float(x.replace(" ", "").replace(",", "."))
-        )
+        last_transaction = datetime.today().strftime("%d-%m-%Y")
+        curr_acc_bal = self.user_settings.get("CURRENT_ACCOUNT_BALANCE")
 
-        # Last transaction date
-        last_transaction = temp_transactions["2_date"].iloc[-1]
+        if not self.user_transactions is None and len(self.user_transactions) > 0:
+            # Data prep
+            temp_transactions = pd.DataFrame(self.user_transactions).T.reset_index(
+                drop=True
+            )
+            temp_transactions["6_amount"] = temp_transactions["6_amount"].apply(
+                lambda x: float(x.replace(" ", "").replace(",", "."))
+            )
 
-        # Calculate current account balance
-        transaction_summary = temp_transactions.groupby(["4_type"])["6_amount"].sum()
-        curr_acc_bal = round(
-            self.user_settings.get("CURRENT_ACCOUNT_BALANCE")
-            + (transaction_summary.loc["Income"] - transaction_summary.loc["Expense"]),
-            2,
-        )
+            # Last transaction date
+            last_transaction = temp_transactions["2_date"].iloc[-1]
+
+            # Calculate current account balance
+            transaction_summary = temp_transactions.groupby(["4_type"])[
+                "6_amount"
+            ].sum()
+            income = (
+                0
+                if "Income" not in transaction_summary.index.values
+                else transaction_summary.loc["Income"]
+            )
+            expense = (
+                0
+                if "Expense" not in transaction_summary.index.values
+                else transaction_summary.loc["Expense"]
+            )
+            curr_acc_bal = round(
+                self.user_settings.get("CURRENT_ACCOUNT_BALANCE") + (income - expense),
+                2,
+            )
 
         # Update every text widget containing current account balance
         self.main_section.curr_acc_label.setText(

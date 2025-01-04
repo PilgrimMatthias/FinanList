@@ -133,6 +133,7 @@ class UpcomingSection(QWidget):
         Args:
             data (dict): data to display on table
         """
+        self.user_upcomings = data
         # Data prep
         data = pd.DataFrame(data).T.reset_index(drop=True)
         data = data[
@@ -243,7 +244,9 @@ class UpcomingSection(QWidget):
             self.tr("Comma-separated values (*.csv);;Excel (*.xlsx)"),
         )
 
-        if save_path is not None:
+        if save_path is not None and (
+            self.user_upcomings is not None and len(self.user_upcomings) > 0
+        ):
 
             # Getting choosen path and extension by user
             extension = save_path[1].split(".")[-1].replace(")", "")
