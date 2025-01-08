@@ -178,9 +178,7 @@ class HistorySection(QWidget):
             type=type,
             category=category,
             amount=amount,
-            user_categories=[
-                category.get("Name") for category in self.user_categories.values()
-            ],
+            user_categories=self.user_categories,
         )
         self.transaction_edit.show()  # show window
 

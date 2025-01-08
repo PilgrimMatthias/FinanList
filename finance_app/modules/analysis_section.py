@@ -122,7 +122,7 @@ class AnalysisSection(QWidget):
             list(
                 dict.fromkeys(
                     [
-                        category.get("Level_1")
+                        category.get("1_Main Category")
                         for category in self.user_categories.values()
                     ]
                 )
@@ -418,6 +418,23 @@ class AnalysisSection(QWidget):
                 self.user_upcomings = data
             case _:
                 self.user_transactions = data
+
+    def update_categories(self, new_categories):
+        self.user_categories = new_categories
+
+        self.category_type_combo.clear()
+        self.category_type_combo.addItems(
+            list(
+                dict.fromkeys(
+                    [
+                        category.get("1_Main Category")
+                        for category in self.user_categories.values()
+                    ]
+                )
+            )
+            if not self.user_categories is None
+            else []
+        )
 
     def create_analysis(self, analysis_type=None, date_to=None, date_from=None):
         """

@@ -226,7 +226,12 @@ PLANNED_OPERATIONS_HEADERS = [
 ]
 
 
-CATEGORIES_HEADERS = ["Level 1", "Level 2", "Level 3", "Level 4", "Name"]
+CATEGORIES_HEADERS = [
+    "Main category",
+    "Subcategory",
+    "Default operation type",
+    "Name",
+]
 
 TRANSACTION_TYPES = ["Expense", "Income", "Upcoming"]
 

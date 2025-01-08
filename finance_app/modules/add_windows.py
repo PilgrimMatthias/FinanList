@@ -30,7 +30,7 @@ class AddCategory(QWidget):
         self.setLayout(main_layout)
         self.setContentsMargins(15, 5, 15, 5)
         self.resize(QSize(500, 300))
-        self.setFixedSize(QSize(400, 375))
+        self.setFixedSize(QSize(400, 325))
         main_layout.setSpacing(10)
 
         # Title label
@@ -55,54 +55,43 @@ class AddCategory(QWidget):
         self.custom_name_edit.setEnabled(False)
 
         # Top level - label
-        self.top_lvl_label = QLabel(self)
-        self.top_lvl_label.setText("Top level")
-        self.top_lvl_label.setStyleSheet("color: black; font-size: 12pt;")
-        self.top_lvl_label.setWordWrap(True)
-        self.top_lvl_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.main_category_label = QLabel(self)
+        self.main_category_label.setText("Main Category")
+        self.main_category_label.setStyleSheet("color: black; font-size: 12pt;")
+        self.main_category_label.setWordWrap(True)
+        self.main_category_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Top level - lineedit
-        self.top_lvl__edit = QLineEdit(self)
+        self.main_category__edit = QLineEdit(self)
 
         # Second level - label
-        self.second_lvl_label = QLabel(self)
-        self.second_lvl_label.setText("Second level")
-        self.second_lvl_label.setStyleSheet("color: black; font-size: 12pt;")
-        self.second_lvl_label.setWordWrap(True)
-        self.second_lvl_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.subcategory_label = QLabel(self)
+        self.subcategory_label.setText("Subcategory")
+        self.subcategory_label.setStyleSheet("color: black; font-size: 12pt;")
+        self.subcategory_label.setWordWrap(True)
+        self.subcategory_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Second level - lineedit
-        self.second_lvl_edit = QLineEdit(self)
+        self.subcategory_edit = QLineEdit(self)
 
         # Third level - label
-        self.third_lvl_label = QLabel(self)
-        self.third_lvl_label.setText("Third level")
-        self.third_lvl_label.setStyleSheet("color: black; font-size: 12pt;")
-        self.third_lvl_label.setWordWrap(True)
-        self.third_lvl_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.def_oper_type_label = QLabel(self)
+        self.def_oper_type_label.setText("Default operation type")
+        self.def_oper_type_label.setStyleSheet("color: black; font-size: 12pt;")
+        self.def_oper_type_label.setWordWrap(True)
+        self.def_oper_type_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Third level - lineedit
-        self.third_lvl_edit = QLineEdit(self)
+        self.def_oper_type_edit = QComboBox(self)
+        self.def_oper_type_edit.addItems(TRANSACTION_TYPES)
 
-        # Fourth level - label
-        self.fourth_lvl_label = QLabel(self)
-        self.fourth_lvl_label.setText("Fourth level")
-        self.fourth_lvl_label.setStyleSheet("color: black; font-size: 12pt;")
-        self.fourth_lvl_label.setWordWrap(True)
-        self.fourth_lvl_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.fourth_lvl_label.setContentsMargins(0, 0, 0, 20)
-
-        # Fourth level - lineedit
-        self.fourth_lvl_edit = QLineEdit(self)
-        self.fourth_lvl_edit.setContentsMargins(0, 0, 0, 20)
-
-        self.top_lvl__edit.editingFinished.connect(self.on_value_changed)
-        self.second_lvl_edit.editingFinished.connect(self.on_value_changed)
-        self.third_lvl_edit.editingFinished.connect(self.on_value_changed)
-        self.fourth_lvl_edit.editingFinished.connect(self.on_value_changed)
+        self.main_category__edit.editingFinished.connect(self.on_value_changed)
+        self.subcategory_edit.editingFinished.connect(self.on_value_changed)
 
         # Add button
         btn_layout = QHBoxLayout()
+        btn_layout.setContentsMargins(0, 20, 0, 0)
+
         self.primary_btn = QPushButton("Add")
         self.primary_btn.setStyleSheet(
             "QPushButton {background-color: #0085FC; border-style: solid; border-color: #0085FC; border-width: 2px; border-radius: 10px; font-size: 10pt; color:white;} "
@@ -146,20 +135,21 @@ class AddCategory(QWidget):
         main_layout.addWidget(self.custom_name_label, 1, 0, Qt.AlignmentFlag.AlignLeft)
         main_layout.addWidget(self.custom_name_edit, 1, 1)
 
-        main_layout.addWidget(self.top_lvl_label, 2, 0, Qt.AlignmentFlag.AlignLeft)
-        main_layout.addWidget(self.top_lvl__edit, 2, 1)
+        main_layout.addWidget(
+            self.main_category_label, 2, 0, Qt.AlignmentFlag.AlignLeft
+        )
+        main_layout.addWidget(self.main_category__edit, 2, 1)
 
-        main_layout.addWidget(self.second_lvl_label, 3, 0, Qt.AlignmentFlag.AlignLeft)
-        main_layout.addWidget(self.second_lvl_edit, 3, 1)
+        main_layout.addWidget(self.subcategory_label, 3, 0, Qt.AlignmentFlag.AlignLeft)
+        main_layout.addWidget(self.subcategory_edit, 3, 1)
 
-        main_layout.addWidget(self.third_lvl_label, 4, 0, Qt.AlignmentFlag.AlignLeft)
-        main_layout.addWidget(self.third_lvl_edit, 4, 1)
+        main_layout.addWidget(
+            self.def_oper_type_label, 4, 0, Qt.AlignmentFlag.AlignLeft
+        )
+        main_layout.addWidget(self.def_oper_type_edit, 4, 1)
 
-        main_layout.addWidget(self.fourth_lvl_label, 5, 0, Qt.AlignmentFlag.AlignLeft)
-        main_layout.addWidget(self.fourth_lvl_edit, 5, 1)
-
-        main_layout.addLayout(btn_layout, 6, 0, 1, 2)
-        main_layout.addWidget(self.close_btn, 7, 0, Qt.AlignmentFlag.AlignLeft)
+        main_layout.addLayout(btn_layout, 5, 0, 1, 2)
+        main_layout.addWidget(self.close_btn, 6, 0, Qt.AlignmentFlag.AlignLeft)
 
         main_layout.addItem(self.spacer)
 
@@ -168,12 +158,7 @@ class AddCategory(QWidget):
         Set category custom name as every level widget text separated with "-"
         """
         cat_name = ""
-        for widget in [
-            self.top_lvl__edit,
-            self.second_lvl_edit,
-            self.third_lvl_edit,
-            self.fourth_lvl_edit,
-        ]:
+        for widget in [self.main_category__edit, self.subcategory_edit]:
             if widget.text():
                 cat_name += widget.text() + " - "
 
@@ -187,10 +172,9 @@ class AddCategory(QWidget):
         """
         self.category = {
             "Name": self.custom_name_edit.text(),
-            "Level_1": self.top_lvl__edit.text(),
-            "Level_2": self.second_lvl_edit.text(),
-            "Level_3": self.third_lvl_edit.text(),
-            "Level_4": self.fourth_lvl_edit.text(),
+            "1_Main Category": self.main_category__edit.text(),
+            "2_Subcategory": self.subcategory_edit.text(),
+            "3_Default Operation Type": self.def_oper_type_edit.currentText(),
         }
 
         self.send_category.emit(self.category)
@@ -211,20 +195,18 @@ class EditCategory(AddCategory):
         self,
         number,
         name,
-        level_1,
-        level_2,
-        level_3,
-        level_4,
+        main_category,
+        subcategory,
+        def_oper_type,
     ):
         super().__init__()
 
         # Category data
         self.number = number
         self.name = name
-        self.level_1 = level_1
-        self.level_2 = level_2
-        self.level_3 = level_3
-        self.level_4 = level_4
+        self.main_category = main_category
+        self.subcategory = subcategory
+        self.def_oper_type = def_oper_type
 
         self.active = False
 
@@ -234,7 +216,7 @@ class EditCategory(AddCategory):
         self.secondary_btn.clicked.connect(self.delete_category)
         self.close_btn.setVisible(True)
         self.close_btn.clicked.connect(self.close_event)
-        self.setFixedSize(QSize(400, 425))
+        self.setFixedSize(QSize(400, 375))
         self.fill_widgets()
 
     def fill_widgets(self):
@@ -244,17 +226,15 @@ class EditCategory(AddCategory):
         # Filling data
         self.title_label.setText("Category #{0}".format(int(self.number) + 1))
         self.custom_name_edit.setText(self.name)
-        self.top_lvl__edit.setText(self.level_1)
-        self.second_lvl_edit.setText(self.level_2)
-        self.third_lvl_edit.setText(self.level_3)
-        self.fourth_lvl_edit.setText(self.level_4)
+        self.main_category__edit.setText(self.main_category)
+        self.subcategory_edit.setText(self.subcategory)
+        self.def_oper_type_edit.setCurrentText(self.def_oper_type)
 
         # Setting widgets to not enabled
         self.custom_name_edit.setEnabled(False)
-        self.top_lvl__edit.setEnabled(False)
-        self.second_lvl_edit.setEnabled(False)
-        self.third_lvl_edit.setEnabled(False)
-        self.fourth_lvl_edit.setEnabled(False)
+        self.main_category__edit.setEnabled(False)
+        self.subcategory_edit.setEnabled(False)
+        self.def_oper_type_edit.setEnabled(False)
 
         # Setting button text
         self.primary_btn.setText("Edit")
@@ -268,19 +248,17 @@ class EditCategory(AddCategory):
         """
         if self.active:
             self.custom_name_edit.setEnabled(False)
-            self.top_lvl__edit.setEnabled(False)
-            self.second_lvl_edit.setEnabled(False)
-            self.third_lvl_edit.setEnabled(False)
-            self.fourth_lvl_edit.setEnabled(False)
+            self.main_category__edit.setEnabled(False)
+            self.subcategory_edit.setEnabled(False)
+            self.def_oper_type_edit.setEnabled(False)
             self.primary_btn.setText("Edit")
 
             self.active = False
         else:
             self.custom_name_edit.setEnabled(True)
-            self.top_lvl__edit.setEnabled(True)
-            self.second_lvl_edit.setEnabled(True)
-            self.third_lvl_edit.setEnabled(True)
-            self.fourth_lvl_edit.setEnabled(True)
+            self.main_category__edit.setEnabled(True)
+            self.subcategory_edit.setEnabled(True)
+            self.def_oper_type_edit.setEnabled(True)
             self.primary_btn.setText("Save")
 
             self.active = True
@@ -299,13 +277,10 @@ class EditCategory(AddCategory):
 
         if confirmation == QMessageBox.StandardButton.Yes:
             category = {
-                # str(self.number): {
-                "Level_1": self.top_lvl__edit.text(),
-                "Level_2": self.second_lvl_edit.text(),
-                "Level_3": self.third_lvl_edit.text(),
-                "Level_4": self.fourth_lvl_edit.text(),
                 "Name": self.custom_name_edit.text(),
-                # }
+                "1_Main Category": self.main_category__edit.text(),
+                "2_Subcategory": self.subcategory_edit.text(),
+                "3_Default Operation Type": self.def_oper_type_edit.currentText(),
             }
 
             self.send_category.emit(category, str(self.number), "Delete")
@@ -322,27 +297,21 @@ class EditCategory(AddCategory):
         if self.custom_name_edit.text() != self.name:
             send_signal = True
 
-        if self.top_lvl__edit.text() != self.level_1:
+        if self.main_category__edit.text() != self.main_category:
             send_signal = True
 
-        if self.second_lvl_edit.text() != self.level_2:
+        if self.subcategory_edit.text() != self.subcategory:
             send_signal = True
 
-        if self.third_lvl_edit.text() != self.level_3:
-            send_signal = True
-
-        if self.fourth_lvl_edit.text() != self.level_4:
+        if self.def_oper_type_edit.currentText() != self.def_oper_type:
             send_signal = True
 
         if send_signal and not self.active:
             category = {
-                # str(self.number): {
-                "Level_1": self.top_lvl__edit.text(),
-                "Level_2": self.second_lvl_edit.text(),
-                "Level_3": self.third_lvl_edit.text(),
-                "Level_4": self.fourth_lvl_edit.text(),
                 "Name": self.custom_name_edit.text(),
-                # }
+                "1_Main Category": self.main_category__edit.text(),
+                "2_Subcategory": self.subcategory_edit.text(),
+                "3_Default Operation Type": self.def_oper_type_edit.currentText(),
             }
 
             self.send_category.emit(category, str(self.number), "Update")
@@ -362,7 +331,9 @@ class AddTransaction(QWidget):
         super().__init__()
 
         # User data
-        self.user_categories = sorted(user_categories)
+        self.user_categories = user_categories
+        # self.user_categories = sorted(user_categories)
+        # print(self.user_categories)
 
         # Variables
         self.validator = QDoubleValidator(bottom=0, decimals=2)
@@ -440,7 +411,9 @@ class AddTransaction(QWidget):
 
         # Category - lineedit
         self.tr_category_edit = QComboBox(self)
-        self.tr_category_edit.addItems(self.user_categories)
+        self.tr_category_edit.addItems(
+            sorted([category.get("Name") for category in self.user_categories.values()])
+        )
         # Adjusting width of pop-up list to length of longest text
         font_metrics = QFontMetrics(self.tr_category_edit.font())
         max_width = (
@@ -451,6 +424,7 @@ class AddTransaction(QWidget):
             + 40
         )
         self.tr_category_edit.view().setMinimumWidth(max_width)
+        self.tr_category_edit.currentIndexChanged.connect(self.on_category_change)
 
         # Amount - label
         self.tr_amount_label = QLabel(self)
@@ -516,11 +490,11 @@ class AddTransaction(QWidget):
         main_layout.addWidget(self.tr_vendor_label, 3, 0, Qt.AlignmentFlag.AlignLeft)
         main_layout.addWidget(self.tr_vendor_edit, 3, 1)
 
-        main_layout.addWidget(self.tr_type_label, 4, 0, Qt.AlignmentFlag.AlignLeft)
-        main_layout.addWidget(self.tr_type_edit, 4, 1)
+        main_layout.addWidget(self.tr_category_label, 4, 0, Qt.AlignmentFlag.AlignLeft)
+        main_layout.addWidget(self.tr_category_edit, 4, 1)
 
-        main_layout.addWidget(self.tr_category_label, 5, 0, Qt.AlignmentFlag.AlignLeft)
-        main_layout.addWidget(self.tr_category_edit, 5, 1)
+        main_layout.addWidget(self.tr_type_label, 5, 0, Qt.AlignmentFlag.AlignLeft)
+        main_layout.addWidget(self.tr_type_edit, 5, 1)
 
         main_layout.addWidget(self.tr_amount_label, 6, 0, Qt.AlignmentFlag.AlignLeft)
         main_layout.addWidget(self.tr_amount_edit, 6, 1)
@@ -531,6 +505,15 @@ class AddTransaction(QWidget):
         main_layout.addItem(self.spacer)
 
         main_layout.setColumnMinimumWidth(0, 225)
+
+    def on_category_change(self):
+        for category in self.user_categories.values():
+            if category.get("Name") == self.tr_category_edit.currentText():
+                print(category)
+                print(category.get("3_Default Operation Type"))
+                self.tr_type_edit.setCurrentText(
+                    category.get("3_Default Operation Type")
+                )
 
     def create_transaction(self):
         """

@@ -139,6 +139,7 @@ class UpcomingSection(QWidget):
         data = data[
             [col for col in data.columns if not "vendor" in col and not "type" in col]
         ]
+        data.columns = PLANNED_OPERATIONS_HEADERS
 
         # Update table data
         self.upcoming_operations_table.clear_table()
@@ -186,9 +187,7 @@ class UpcomingSection(QWidget):
             type=selected_transaction.get(tr_number).get("4_type"),
             category=category,
             amount=amount,
-            user_categories=[
-                category.get("Name") for category in self.user_categories.values()
-            ],
+            user_categories=self.user_categories,
         )
         self.transaction_edit.show()  # show window
 

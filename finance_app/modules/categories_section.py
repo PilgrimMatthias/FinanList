@@ -96,10 +96,11 @@ class CategoriesSection(QWidget):
         Args:
             data (dict): category dict list
         """
+        updated_df = pd.DataFrame(data).T.reset_index(drop=True)
+        updated_df.columns = CATEGORIES_HEADERS
+
         self.user_categories_table.clear_table()
-        self.user_categories_table.update_table(
-            pd.DataFrame(data).T.reset_index(drop=True)
-        )
+        self.user_categories_table.update_table(updated_df)
         self.user_categories = data
 
     def add_category(self):
@@ -137,18 +138,19 @@ class CategoriesSection(QWidget):
             row (int): row of category in table
             columns (int): column of ctaegory in table
         """
-        name = self.user_categories_table.item(row, 4).text()
-        level_1 = self.user_categories_table.item(row, 0).text()
-        level_2 = self.user_categories_table.item(row, 1).text()
-        level_3 = self.user_categories_table.item(row, 2).text()
-        level_4 = self.user_categories_table.item(row, 3).text()
+        name = self.user_categories_table.item(row, 3).text()
+        main_category = self.user_categories_table.item(row, 0).text()
+        subcategory = self.user_categories_table.item(row, 1).text()
+        def_oper_type = self.user_categories_table.item(row, 2).text()
+        # level_4 = self.user_categories_table.item(row, 3).text()
 
         selected_category = {
             key: val
             for key, val in self.user_categories.items()
             if filter_func(
                 pair=val,
-                condition=[level_1, level_2, level_3, level_4, name],
+                condition=[main_category, subcategory, def_oper_type, name],
+                # condition=[main_category, subcategory, def_oper_type, level_4, name],
             )
         }
         tr_number = list(selected_category.keys())[0]
@@ -156,10 +158,10 @@ class CategoriesSection(QWidget):
         self.category_edit = EditCategory(
             number=tr_number,
             name=name,
-            level_1=level_1,
-            level_2=level_2,
-            level_3=level_3,
-            level_4=level_4,
+            main_category=main_category,
+            subcategory=subcategory,
+            def_oper_type=def_oper_type,
+            # level_4=level_4,
         )
         self.category_edit.show()
 

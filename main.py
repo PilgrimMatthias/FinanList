@@ -353,8 +353,11 @@ class MainWindow(QMainWindow):
             self.stacked_categories.setCurrentIndex(1)
             self.categories_section.add_category()
         else:
+            # self.add_transaction_window = AddTransaction(
+            #     [category.get("Name") for category in self.user_categories.values()]
+            # )
             self.add_transaction_window = AddTransaction(
-                [category.get("Name") for category in self.user_categories.values()]
+                user_categories=self.user_categories
             )
             self.add_transaction_window.show()
 
@@ -617,6 +620,7 @@ class MainWindow(QMainWindow):
                 # Update categories dict in sections
                 self.history_section.user_categories = self.user_categories
                 self.upcoming_section.user_categories = self.user_categories
+                self.analysis_section.update_categories(self.user_categories)
                 self.categories_section.update_categories(self.user_categories)
 
                 # Update categories file
@@ -678,6 +682,7 @@ class MainWindow(QMainWindow):
                 self.history_section.user_categories = self.user_categories
                 self.upcoming_section.user_categories = self.user_categories
                 self.analysis_section.user_categories = self.user_categories
+                self.analysis_section.update_categories(self.user_categories)
                 self.categories_section.update_categories(self.user_categories)
 
                 # Update categories file
@@ -698,6 +703,7 @@ class MainWindow(QMainWindow):
                 self.history_section.user_categories = self.user_categories
                 self.upcoming_section.user_categories = self.user_categories
                 self.analysis_section.user_categories = self.user_categories
+                self.analysis_section.update_categories(self.user_categories)
                 self.categories_section.update_categories(self.user_categories)
 
     def update_acc_bal(self):
