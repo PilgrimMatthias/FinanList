@@ -133,10 +133,12 @@ class HistorySection(QWidget):
         Args:
             data (dict): data to update in table
         """
+
+        updated_df = pd.DataFrame(data).T.reset_index(drop=True)
+        updated_df.columns = RECENT_OPERATIONS_HEADERS
+
         self.user_operations_table.clear_table()
-        self.user_operations_table.update_table(
-            pd.DataFrame(data).T.reset_index(drop=True)
-        )
+        self.user_operations_table.update_table(updated_df)
         self.user_transactions = data
 
     def show_transaction(self, row, columns):
