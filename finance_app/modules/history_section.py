@@ -44,6 +44,9 @@ class HistorySection(QWidget):
 
         self.row_nums = 12
 
+        # Search box visibility bool
+        self.search_box_visible = False
+
         self.init_section()
 
     def init_section(self):
@@ -104,8 +107,6 @@ class HistorySection(QWidget):
         self.report_btn.setMinimumHeight(40)
         self.report_btn.setMinimumWidth(130)
 
-        btn_layout.addWidget(self.export_btn, 0, alignment=Qt.AlignmentFlag.AlignLeft)
-
         # Table with categories
         self.user_operations_table = TableWidget(
             parent=self,
@@ -122,9 +123,49 @@ class HistorySection(QWidget):
         )
         self.user_operations_table.cellDoubleClicked.connect(self.show_transaction)
 
+        # Search button
+        self.search_btn = QPushButton()
+        self.search_btn.setIcon(QIcon(SEARCH_ICON_WHITE))
+        self.search_btn.setStyleSheet(
+            "QPushButton {background-color: #0085FC; border-style: solid; border-color: #0085FC; border-width: 2px; border-radius: 10px; font-size: 10pt; color:white;} "
+            + "QPushButton::pressed {background-color: #4dacff; border-style: solid; border-color: #4dacff; border-width: 2px; border-radius: 10px; font-size: 10pt; color:white;}"
+        )
+        self.search_btn.setMinimumHeight(40)
+        self.search_btn.setMinimumWidth(40)
+        self.search_btn.clicked.connect(self.show_search)
+
+        # Search edit box
+        self.search_box = QLineEdit()
+        self.search_box.setMinimumHeight(40)
+        self.search_box.setMinimumWidth(200)
+        self.search_box.setVisible(self.search_box_visible)
+        self.search_box.textChanged.connect(self.user_operations_table.filter)
+
+        # Spacer for button layout
+        self.spacer = QSpacerItem(2, 2, QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+        btn_layout.addWidget(self.export_btn, 0, alignment=Qt.AlignmentFlag.AlignLeft)
+        btn_layout.addItem(self.spacer)
+        btn_layout.addWidget(self.search_box, 0, alignment=Qt.AlignmentFlag.AlignLeft)
+        btn_layout.addWidget(self.search_btn, 0, alignment=Qt.AlignmentFlag.AlignLeft)
+
         main_layout.addWidget(self.curr_acc_label, 0)
         main_layout.addLayout(btn_layout, 0)
         main_layout.addWidget(self.user_operations_table, 0)
+
+    def show_search(self):
+        """
+        Method for showing search text widget on search button click.
+
+        If search button changes from visible to hidden it also clears its content.
+        """
+        if self.search_box_visible:
+            self.search_box_visible = False
+            self.search_box.setText("")
+        else:
+            self.search_box_visible = True
+
+        self.search_box.setVisible(self.search_box_visible)
 
     def update_operations(self, data):
         """

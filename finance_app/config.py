@@ -27,6 +27,8 @@ USER_UPCOMING_OPER = "upcomings.json"
 LOGO_PATH = os.path.join(IMAGES_DIR, "app_logo.jpg")
 ADD_ICON = os.path.join(IMAGES_DIR, "plus_circle.png")
 DOWN_ICON = os.path.join(IMAGES_DIR, "down_icon.png")
+SEARCH_ICON_BLACK = os.path.join(IMAGES_DIR, "search_black.png")
+SEARCH_ICON_WHITE = os.path.join(IMAGES_DIR, "search_white.png")
 
 # Export extensions
 EXPORT_EXT = ["csv", "xlsx"]

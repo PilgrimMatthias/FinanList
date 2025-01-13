@@ -257,3 +257,23 @@ class TableWidget(QTableWidget):
             item.setText(formatted_number)
         except ValueError:
             pass
+
+    def filter(self, filter_text):
+        """
+        Method for filtering table based on provided text.
+        Any cell row that contains filtered text will be shown, every other will be hidden.
+
+        Args:
+            filter_text (str): Text to search in table
+        """
+        for i in range(self.rowCount()):
+            for j in range(self.columnCount()):
+                item = self.item(i, j)
+
+                # Check if cell text matches filtered text
+                match = filter_text.lower() not in item.text().lower()
+
+                # Hide row
+                self.setRowHidden(i, match)
+                if not match:
+                    break
