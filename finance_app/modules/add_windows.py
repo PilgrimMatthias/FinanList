@@ -383,6 +383,7 @@ class AddTransaction(QWidget):
         self.tr_date_edit.setDate(
             QDate(self.today.year, self.today.month, self.today.day)
         )
+        self.tr_date_edit.dateChanged.connect(self.on_date_change)
 
         # Shop / Person - label
         self.tr_vendor_label = QLabel(self)
@@ -507,13 +508,24 @@ class AddTransaction(QWidget):
         main_layout.setColumnMinimumWidth(0, 225)
 
     def on_category_change(self):
+        """
+        Set operation type based on default operation type for choosen category
+        """
         for category in self.user_categories.values():
             if category.get("Name") == self.tr_category_edit.currentText():
-                print(category)
-                print(category.get("3_Default Operation Type"))
                 self.tr_type_edit.setCurrentText(
                     category.get("3_Default Operation Type")
                 )
+
+    def on_date_change(self):
+        """
+        Set operation type as Upcoming if choosen date is in future.
+
+        Triggered on every date change.
+        """
+        current_date = datetime.strptime(self.tr_date_edit.text(), "%d.%m.%Y")
+        if current_date > datetime.now():
+            self.tr_type_edit.setCurrentText("Upcoming")
 
     def create_transaction(self):
         """
@@ -571,6 +583,8 @@ class EditTransaction(AddTransaction):
         self.close_btn.setVisible(True)
         self.close_btn.clicked.connect(self.close_event)
         self.setFixedSize(QSize(455, 455))
+        if self.type == "Upcoming":
+            self.tr_category_edit.currentIndexChanged.disconnect()
 
         self.fill_widgets()
 
