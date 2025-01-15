@@ -334,6 +334,7 @@ class SignInWindow(QWidget):
             "USER_FOLDER": self.data_path,
             "DEFAULT_VIEW": "Home",
             "DEFAULT_ANALYSIS": "Categorical",
+            "ANALYSIS_AUTO_RUN": 0,
         }
 
         # Save user information to settings folder

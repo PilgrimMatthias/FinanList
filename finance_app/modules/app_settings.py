@@ -26,6 +26,7 @@ class AppSettings(QWidget):
 
         self.user_def_view = self.user_settings.get("DEFAULT_VIEW")
         self.user_def_analysis = self.user_settings.get("DEFAULT_ANALYSIS")
+        self.user_auto_analysis = self.user_settings.get("ANALYSIS_AUTO_RUN")
 
         # Variables
         self.validator = QDoubleValidator(bottom=0, decimals=2)
@@ -81,6 +82,20 @@ class AppSettings(QWidget):
             self.user_settings.get("DEFAULT_ANALYSIS")
         )
 
+        # Auto analysis check
+        self.auto_analysis_check = QCheckBox(self)
+        self.auto_analysis_check.setText(
+            "Automatically run analysis on any transaction change?"
+        )
+        self.auto_analysis_check.setLayoutDirection(Qt.RightToLeft)
+        self.auto_analysis_check.setStyleSheet(
+            "color: black; font-size: 10pt; spacing:25px;"
+        )
+        self.auto_analysis_check.setContentsMargins(50, 0, 50, 0)
+        self.auto_analysis_check.setChecked(False)
+        if self.user_auto_analysis == 1:
+            self.auto_analysis_check.setChecked(True)
+
         # Spacer do layoutu
         self.spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
@@ -122,9 +137,13 @@ class AppSettings(QWidget):
         )
         main_layout.addWidget(self.def_analysis_entry, 1, 1)
 
-        main_layout.addItem(self.spacer, 2, 0, 1, 2)
+        main_layout.addWidget(
+            self.auto_analysis_check, 2, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignCenter
+        )
 
-        main_layout.addLayout(btn_layout, 3, 0, 1, 2)
+        main_layout.addItem(self.spacer, 3, 0, 1, 2)
+
+        main_layout.addLayout(btn_layout, 4, 0, 1, 2)
 
     def save_event(self):
         """
@@ -138,6 +157,9 @@ class AppSettings(QWidget):
         if self.def_analysis_entry.currentText() != self.user_def_analysis:
             send_signal = True
 
+        if int(self.auto_analysis_check.isChecked()) != self.user_auto_analysis:
+            send_signal = True
+
         if send_signal and not self.active:
             user_settings_dict = self.user_settings
 
@@ -146,6 +168,10 @@ class AppSettings(QWidget):
             )
             user_settings_dict["DEFAULT_ANALYSIS"] = (
                 self.def_analysis_entry.currentText()
+            )
+
+            user_settings_dict["ANALYSIS_AUTO_RUN"] = int(
+                self.auto_analysis_check.isChecked()
             )
 
             with open(self.user_settings_path, "w") as file:

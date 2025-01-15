@@ -596,6 +596,10 @@ class MainWindow(QMainWindow):
                 self.history_section.update_operations(self.user_transactions)
                 self.update_acc_bal()
 
+        # Update analysis if auto run is set to True
+        if self.user_settings.get("ANALYSIS_AUTO_RUN") == 1:
+            self.analysis_section.update_analysis()
+
     @Slot(dict, str, str)
     def get_category(self, category, number, activity):
         """
@@ -928,6 +932,11 @@ class MainWindow(QMainWindow):
                 color: black;
                 padding: 2px;
                 font-size: 10pt;
+            }
+
+            QCheckBox::indicator{
+                width: 20px; 
+                height: 20px;
             }
             """
         )

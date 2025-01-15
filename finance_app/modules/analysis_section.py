@@ -228,29 +228,7 @@ class AnalysisSection(QWidget):
         main_layout.addLayout(top_layout, 0)
         main_layout.addLayout(bottom_layout, 0)
 
-        if not self.user_transactions is None and len(self.user_transactions) > 0:
-
-            # Create default analysis charts for all types
-            for analysis_type in ANALYSIS_TYPES:
-
-                date_from = datetime.strptime(
-                    f"01.{self.date_from_edit.text()}", "%d.%m.%Y"
-                )
-
-                date_to = datetime.strptime(
-                    self.last_operation_date, "%d.%m.%Y"
-                ) + relativedelta(day=31)
-
-                if analysis_type == "Prognosis":
-                    date_from = datetime.strptime(self.last_operation_date, "%d.%m.%Y")
-
-                    date_to = datetime.strptime(
-                        self.prognosis_date_to, "%d.%m.%Y"
-                    ) + relativedelta(day=31)
-
-                self.create_analysis(
-                    analysis_type=analysis_type, date_from=date_from, date_to=date_to
-                )
+        self.update_analysis()
 
         self.analysis_type_combo.setCurrentText(self.user_def_analysis)
 
@@ -435,6 +413,34 @@ class AnalysisSection(QWidget):
             if not self.user_categories is None
             else []
         )
+
+    def update_analysis(self):
+        """
+        Method used for updating all analysis types at once based on default dates.
+        """
+        if not self.user_transactions is None and len(self.user_transactions) > 0:
+
+            # Create default analysis charts for all types
+            for analysis_type in ANALYSIS_TYPES:
+
+                date_from = datetime.strptime(
+                    f"01.{self.date_from_edit.text()}", "%d.%m.%Y"
+                )
+
+                date_to = datetime.strptime(
+                    self.last_operation_date, "%d.%m.%Y"
+                ) + relativedelta(day=31)
+
+                if analysis_type == "Prognosis":
+                    date_from = datetime.strptime(self.last_operation_date, "%d.%m.%Y")
+
+                    date_to = datetime.strptime(
+                        self.prognosis_date_to, "%d.%m.%Y"
+                    ) + relativedelta(day=31)
+
+                self.create_analysis(
+                    analysis_type=analysis_type, date_from=date_from, date_to=date_to
+                )
 
     def create_analysis(self, analysis_type=None, date_to=None, date_from=None):
         """

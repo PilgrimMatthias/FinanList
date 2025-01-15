@@ -370,6 +370,7 @@ class AccountSettings(QWidget):
                 "USER_FOLDER": self.data_dir_entry.text(),
                 "DEFAULT_VIEW": self.user_settings.get("DEFAULT_VIEW"),
                 "DEFAULT_ANALYSIS": self.user_settings.get("DEFAULT_ANALYSIS"),
+                "ANALYSIS_AUTO_RUN": self.user_settings.get("ANALYSIS_AUTO_RUN"),
             }
 
             with open(self.user_settings_path, "w") as file:
