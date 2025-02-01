@@ -29,9 +29,15 @@ ADD_ICON = os.path.join(IMAGES_DIR, "plus_circle.png")
 DOWN_ICON = os.path.join(IMAGES_DIR, "down_icon.png")
 SEARCH_ICON_BLACK = os.path.join(IMAGES_DIR, "search_black.png")
 SEARCH_ICON_WHITE = os.path.join(IMAGES_DIR, "search_white.png")
+ASCENDING_ICON = os.path.join(IMAGES_DIR, "ascending-sort.png")
+DESCENDING_ICON = os.path.join(IMAGES_DIR, "descending-sort.png")
+FILTER_ICON = os.path.join(IMAGES_DIR, "filter.png")
 
 # Export extensions
 EXPORT_EXT = ["csv", "xlsx"]
+
+# Export file name
+EXPORT_FILE_NAME = "Transactions_Export_"
 
 # Sections in app
 SECTION_LIST = {"Home": 0, "Analysis": 2, "History": 3, "Upcoming": 4, "Categories": 1}

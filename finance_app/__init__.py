@@ -9,6 +9,7 @@ from .modules.upcoming_section import UpcomingSection
 from .modules.analysis_section import AnalysisSection
 from .modules.account_settings import AccountSettings
 from .widgets.table_widget import TableWidget
+from .widgets.checkbox_widget import CheckBoxWidget
 from .modules.add_windows import AddTransaction
 from .modules.app_settings import AppSettings
 
@@ -25,6 +26,7 @@ __all__ = [
     "ChooseBox",
     "ErrorBox",
     "TableWidget",
+    "CheckBoxWidget",
     "AddTransaction",
     "center_window",
     "filter_func",

@@ -119,7 +119,9 @@ class UpcomingSection(QWidget):
             ),
             data=pd.DataFrame(self.user_upcomings_to_table).reset_index(drop=True),
             editable=False,
-            sorting=True,
+            sorting=False,
+            filtering=True,
+            id_column=True,
         )
         self.upcoming_operations_table.cellDoubleClicked.connect(self.show_transaction)
 
@@ -195,37 +197,32 @@ class UpcomingSection(QWidget):
             columns (int): _description_
         """
         # Get transaction data from table
-        name = self.upcoming_operations_table.item(row, 0).text()
-        date = self.upcoming_operations_table.item(row, 1).text().split("-")
+        tr_number = (
+            self.upcoming_operations_table.cellWidget(row, 0)
+            .findChild(QCheckBox)
+            .get_hidden_property()
+        )
+        selected_transaction = self.user_upcomings.get(str(tr_number))
+
+        name = self.upcoming_operations_table.item(row, 1).text()
+        date = self.upcoming_operations_table.item(row, 2).text().split("-")
+
+        seller = selected_transaction.get("3_vendor")
+        type = selected_transaction.get("4_type")
 
         date = "{0}.{1}.{2}".format(date[2], date[1], date[0])
-        category = self.upcoming_operations_table.item(row, 2).text()
-        amount = self.upcoming_operations_table.item(row, 3).data(
+        category = self.upcoming_operations_table.item(row, 3).text()
+        amount = self.upcoming_operations_table.item(row, 4).data(
             Qt.ItemDataRole.UserRole + 1
         )
-
-        # Get transaction from database
-        selected_transaction = {
-            key: val
-            for key, val in self.user_upcomings.items()
-            if filter_func(
-                pair={
-                    name_val: text_val
-                    for name_val, text_val in val.items()
-                    if not "vendor" in name_val and not "type" in name_val
-                },
-                condition=[name, date, category, amount],
-            )
-        }
-        tr_number = list(selected_transaction.keys())[0]
 
         # Choosen transaction window
         self.transaction_edit = EditTransaction(
             number=tr_number,
             name=name,
             date=date,
-            seller=selected_transaction.get(tr_number).get("3_vendor"),
-            type=selected_transaction.get(tr_number).get("4_type"),
+            seller=seller,
+            type=type,
             category=category,
             amount=amount,
             user_categories=self.user_categories,
@@ -280,8 +277,10 @@ class UpcomingSection(QWidget):
         save_path = QFileDialog.getSaveFileName(
             self,
             self.tr("Save File"),
-            "",
-            self.tr("Comma-separated values (*.csv);;Excel (*.xlsx)"),
+            "{0}{1}.xlsx".format(
+                EXPORT_FILE_NAME, datetime.today().strftime("%d-%m-%Y")
+            ),
+            self.tr("Excel (*.xlsx);;Comma-separated values (*.csv)"),
         )
 
         if save_path is not None and (

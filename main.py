@@ -217,6 +217,10 @@ class MainWindow(QMainWindow):
             - App settings
         """
         self.user_menu = QMenu(self)
+        self.user_menu.setObjectName("DropDownMenu")
+        self.user_menu.setStyleSheet(
+            "#DropDownMenu {border: 2px solid #b5c0c9; border-radius:10px;}"
+        )
 
         # Widget for holding buttons
         menu_widget = QWidget(self)

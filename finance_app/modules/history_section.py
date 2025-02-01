@@ -118,8 +118,10 @@ class HistorySection(QWidget):
                 10,
             ),
             data=pd.DataFrame(self.user_transactions).T.reset_index(drop=True),
-            sorting=True,
+            sorting=False,
+            filtering=True,
             editable=False,
+            id_column=True,
         )
         self.user_operations_table.cellDoubleClicked.connect(self.show_transaction)
 
@@ -191,26 +193,20 @@ class HistorySection(QWidget):
             columns (int): _description_
         """
         # Get transaction data from table
-        name = self.user_operations_table.item(row, 0).text()
-        date = self.user_operations_table.item(row, 1).text().split("-")
+        tr_number = (
+            self.user_operations_table.cellWidget(row, 0)
+            .findChild(QCheckBox)
+            .get_hidden_property()
+        )
+        name = self.user_operations_table.item(row, 1).text()
+        date = self.user_operations_table.item(row, 2).text().split("-")
         date = "{0}.{1}.{2}".format(date[2], date[1], date[0])
-        seller = self.user_operations_table.item(row, 2).text()
-        type = self.user_operations_table.item(row, 3).text()
-        category = self.user_operations_table.item(row, 4).text()
-        amount = self.user_operations_table.item(row, 5).data(
+        seller = self.user_operations_table.item(row, 3).text()
+        type = self.user_operations_table.item(row, 4).text()
+        category = self.user_operations_table.item(row, 5).text()
+        amount = self.user_operations_table.item(row, 6).data(
             Qt.ItemDataRole.UserRole + 1
         )
-
-        # Get transaction from database
-        selected_transaction = {
-            key: val
-            for key, val in self.user_transactions.items()
-            if filter_func(
-                pair=val,
-                condition=[name, date, seller, type, category, amount],
-            )
-        }
-        tr_number = list(selected_transaction.keys())[0]
 
         # Choosen transaction window
         self.transaction_edit = EditTransaction(
@@ -272,8 +268,10 @@ class HistorySection(QWidget):
         save_path = QFileDialog.getSaveFileName(
             self,
             self.tr("Save File"),
-            "",
-            self.tr("Comma-separated values (*.csv);;Excel (*.xlsx)"),
+            "{0}{1}.xlsx".format(
+                EXPORT_FILE_NAME, datetime.today().strftime("%d-%m-%Y")
+            ),
+            self.tr("Excel (*.xlsx);;Comma-separated values (*.csv)"),
         )
 
         if save_path is not None:
