@@ -123,8 +123,9 @@ class MainSection(QWidget):
         table_layout.setSpacing(15)
 
         self.rec_oper_frame = QFrame()
+        self.rec_oper_frame.setObjectName("RecentOperations")
         self.rec_oper_frame.setStyleSheet(
-            "border: 1px solid #b5c0c9; border-radius:10px;"
+            """#RecentOperations {border: 1px solid #b5c0c9; border-radius:10px;}"""
         )
         self.rec_oper_layout = QVBoxLayout(self.rec_oper_frame)
         self.rec_oper_layout.setContentsMargins(0, 0, 0, 0)
@@ -152,6 +153,7 @@ class MainSection(QWidget):
             .reset_index(drop=True)
             .iloc[: self.recent_oper_num],
             editable=False,
+            sorting=True,
         )
 
         self.rec_oper_layout.addWidget(
@@ -160,8 +162,9 @@ class MainSection(QWidget):
         self.rec_oper_layout.addWidget(self.recent_oper_table)
 
         self.plan_oper_frame = QFrame()
+        self.plan_oper_frame.setObjectName("PlannedOperations")
         self.plan_oper_frame.setStyleSheet(
-            "border: 1px solid #b5c0c9; border-radius:10px;"
+            """#PlannedOperations {border: 1px solid #b5c0c9; border-radius:10px;}"""
         )
         self.plan_oper_layout = QVBoxLayout(self.plan_oper_frame)
         self.plan_oper_layout.setContentsMargins(0, 0, 0, 0)
@@ -186,6 +189,7 @@ class MainSection(QWidget):
             ),
             data=self.user_upcomings_df.iloc[: self.upcoming_oper_num],
             editable=False,
+            sorting=True,
         )
 
         self.plan_oper_layout.addWidget(
