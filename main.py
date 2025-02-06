@@ -405,7 +405,9 @@ class MainWindow(QMainWindow):
                 match type.split("-")[1]:
                     case "Upcoming":
                         # Delete upcoming transaction
-                        self.user_upcomings.pop(list(transaction.keys())[0])
+                        for key in transaction.keys():
+                            self.user_upcomings.pop(key)
+                        # self.user_upcomings.pop(list(transaction.keys())[0])
 
                         # Update upcomings dict keys
                         new_key = 0
@@ -432,7 +434,8 @@ class MainWindow(QMainWindow):
 
                     case _:
                         # Delete transaction from expense/income
-                        self.user_transactions.pop(list(transaction.keys())[0])
+                        for key in transaction.keys():
+                            self.user_transactions.pop(key)
 
                         # Update expense/income dict keys
                         new_key = 0

@@ -334,6 +334,22 @@ class TableWidget(QTableWidget):
         except ValueError:
             pass
 
+    def show_column(self, col_num):
+        if self.isColumnHidden(col_num):
+            self.showColumn(col_num)
+        else:
+            self.hideColumn(col_num)
+
+    def get_selected_rows(self):
+        selected_rows = []
+
+        for row in range(self.rowCount()):
+            row_widget = self.cellWidget(row, 0).findChild(QCheckBox)
+            if row_widget.isChecked():
+                selected_rows.append(row_widget.get_hidden_property())
+
+        return selected_rows
+
     def filter(self, filter_text):
         """
         Method for filtering table based on provided text.

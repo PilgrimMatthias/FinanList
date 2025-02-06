@@ -346,8 +346,10 @@ class AnalysisSection(QWidget):
         date_from = datetime.strptime(f"01.{self.date_from_edit.text()}", "%d.%m.%Y")
 
         # Set current date from
-        if date_from < datetime.strptime(self.last_operation_date, "%d.%m.%Y"):
-            self.current_date_from = self.date_from_edit.text()
+        if date_from < datetime.strptime(
+            self.last_operation_date, "%d.%m.%Y"
+        ) + relativedelta(day=1):
+            self.current_date_from = f"01.{self.date_from_edit.text()}"
 
         # Set dates
         match self.analysis_type_combo.currentText():

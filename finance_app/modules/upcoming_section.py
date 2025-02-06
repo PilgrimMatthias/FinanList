@@ -8,7 +8,7 @@ from datetime import datetime
 from finance_app.widgets.table_widget import TableWidget
 from finance_app.modules.add_windows import EditTransaction
 from finance_app.config import *
-from finance_app.utils import filter_func
+from finance_app.modules.status_windows import ErrorBox
 
 
 class UpcomingSection(QWidget):
@@ -88,14 +88,26 @@ class UpcomingSection(QWidget):
         btn_layout.setSpacing(15)
         btn_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
-        # Edit transactions btn
-        self.edit_btn = QPushButton("Edit")
-        self.edit_btn.setStyleSheet(
+        # Select transactions btn
+        self.select_btn = QPushButton("Select")
+        self.select_btn.setStyleSheet(
             "QPushButton {background-color: #0085FC; border-style: solid; border-color: #0085FC; border-width: 2px; border-radius: 10px; font-size: 10pt; color:white;} "
             + "QPushButton::pressed {background-color: #4dacff; border-style: solid; border-color: #4dacff; border-width: 2px; border-radius: 10px; font-size: 10pt; color:white;}"
         )
-        self.edit_btn.setMinimumHeight(40)
-        self.edit_btn.setMinimumWidth(130)
+        self.select_btn.setMinimumHeight(40)
+        self.select_btn.setMinimumWidth(130)
+        self.select_btn.clicked.connect(self.on_select_click)
+
+        # Delete transactions btn
+        self.delete_btn = QPushButton("Delete")
+        self.delete_btn.setStyleSheet(
+            "QPushButton {background-color: #ff3333; border-style: solid; border-color: #ff3333; border-width: 2px; border-radius: 10px; font-size: 10pt; color:white;} "
+            + "QPushButton::pressed {background-color: #ff8080; border-style: solid; border-color: #ff8080; border-width: 2px; border-radius: 10px; font-size: 10pt; color:white;}"
+        )
+        self.delete_btn.setMinimumHeight(40)
+        self.delete_btn.setMinimumWidth(130)
+        self.delete_btn.setVisible(False)
+        self.delete_btn.clicked.connect(self.delete_transactions)
 
         # Export transactions btn
         self.export_btn = QPushButton("Export")
@@ -146,6 +158,8 @@ class UpcomingSection(QWidget):
         # Spacer for button layout
         self.spacer = QSpacerItem(2, 2, QSizePolicy.Expanding, QSizePolicy.Fixed)
 
+        btn_layout.addWidget(self.select_btn, 0, alignment=Qt.AlignmentFlag.AlignLeft)
+        btn_layout.addWidget(self.delete_btn, 0, alignment=Qt.AlignmentFlag.AlignLeft)
         btn_layout.addWidget(self.export_btn, 0, alignment=Qt.AlignmentFlag.AlignLeft)
         btn_layout.addItem(self.spacer)
         btn_layout.addWidget(self.search_box, 0, alignment=Qt.AlignmentFlag.AlignLeft)
@@ -179,14 +193,20 @@ class UpcomingSection(QWidget):
         self.user_upcomings = data
         # Data prep
         data = pd.DataFrame(data).T.reset_index(drop=True)
-        data = data[
-            [col for col in data.columns if not "vendor" in col and not "type" in col]
-        ]
-        data.columns = PLANNED_OPERATIONS_HEADERS
-
-        # Update table data
         self.upcoming_operations_table.clear_table()
-        self.upcoming_operations_table.update_table(data)
+
+        if len(self.user_upcomings) > 0:
+            data = data[
+                [
+                    col
+                    for col in data.columns
+                    if not "vendor" in col and not "type" in col
+                ]
+            ]
+            data.columns = PLANNED_OPERATIONS_HEADERS
+
+            # Update table data
+            self.upcoming_operations_table.update_table(data)
 
     def show_transaction(self, row, columns):
         """
@@ -273,6 +293,29 @@ class UpcomingSection(QWidget):
         """
         Method for exporting data to csv or excel to user choosen path.
         """
+        oper_to_export = self.user_upcomings
+
+        # Check if there are any selected operations
+        if self.delete_btn.isVisible():
+            selected_rows = self.upcoming_operations_table.get_selected_rows()
+
+            if len(selected_rows) > 0:
+                # Confirmation box
+                confirmation = QMessageBox.question(
+                    self,
+                    "Export selected",
+                    "Do you want to export the selected operations?",
+                    defaultButton=QMessageBox.StandardButton.No,
+                )
+
+                # If exprot selected operations than create dict with these operations to export
+                if confirmation == QMessageBox.StandardButton.Yes:
+                    oper_to_export = {}
+
+                    for tr_num in selected_rows:
+                        temp_transaction = self.user_upcomings.get(str(tr_num))
+
+                        oper_to_export[str(tr_num)] = temp_transaction
         # Dialog to choose save path
         save_path = QFileDialog.getSaveFileName(
             self,
@@ -284,7 +327,7 @@ class UpcomingSection(QWidget):
         )
 
         if save_path is not None and (
-            self.user_upcomings is not None and len(self.user_upcomings) > 0
+            self.user_upcomings is not None and len(oper_to_export) > 0
         ):
 
             # Getting choosen path and extension by user
@@ -306,3 +349,42 @@ class UpcomingSection(QWidget):
                     data_to_save.to_csv(file_path, index=False, decimal=",", sep=";")
                 case "xlsx":
                     data_to_save.to_excel(file_path, index=False)
+
+    def on_select_click(self):
+        """
+        On select button click event.
+
+        When clicked delete button and first id column is shown/hidden.
+        """
+        # Show/hide id column in table
+        self.upcoming_operations_table.show_column(0)
+
+        # Show/hide delete button
+        if self.delete_btn.isVisible():
+            self.delete_btn.setVisible(False)
+        else:
+            self.delete_btn.setVisible(True)
+
+    def delete_transactions(self):
+        """
+        Delete transactions event
+
+        When clicked selected transactions by user will be deleted from database.
+        """
+        # Selected rows
+        selected_rows = self.upcoming_operations_table.get_selected_rows()
+
+        if len(selected_rows) == 0:
+            msg = "No transactions where selected!\nSelect at least one operation!"
+            ErrorBox(self, title="Nothing to delete!", msg=msg)
+            return
+
+        # Create transation dicts
+        selected_tr_dict = {}
+        for tr_num in selected_rows:
+            temp_transaction = self.user_upcomings.get(str(tr_num))
+
+            selected_tr_dict[str(tr_num)] = temp_transaction
+
+        # Send transactions to delete
+        self.update_transaction.emit(selected_tr_dict, "Delete-Upcoming")

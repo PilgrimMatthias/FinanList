@@ -230,19 +230,22 @@ class MainSection(QWidget):
                         if not "vendor" in col and not "type" in col
                     ]
                 ]
-                data_frame.columns = PLANNED_OPERATIONS_HEADERS
 
                 self.planned_oper_table.clear_table()
-                self.planned_oper_table.update_table(
-                    data_frame.iloc[:7],
-                )
+                if len(self.user_upcomings) > 0:
+                    data_frame.columns = PLANNED_OPERATIONS_HEADERS
+                    self.planned_oper_table.update_table(
+                        data_frame.iloc[:7],
+                    )
             case _:
-                data_frame.columns = RECENT_OPERATIONS_HEADERS
                 self.user_transactions = data
                 self.recent_oper_table.clear_table()
-                self.recent_oper_table.update_table(
-                    data_frame.iloc[:30],
-                )
+
+                if len(self.user_transactions) > 0:
+                    data_frame.columns = RECENT_OPERATIONS_HEADERS
+                    self.recent_oper_table.update_table(
+                        data_frame.iloc[:30],
+                    )
 
         self.calculate_plot_data()
 
