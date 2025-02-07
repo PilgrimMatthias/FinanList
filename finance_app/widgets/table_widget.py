@@ -229,7 +229,12 @@ class TableWidget(QTableWidget):
             self.setSortingEnabled(False)
 
         # Update columns in table
-        if len(data.columns) >= self.col_num:
+        if self.id_column:
+            columns = [""]
+            columns.extend(data.columns)
+            self.update_headers(columns)
+            columns = None
+        else:
             self.update_headers(data.columns)
 
         self.setRowCount(len(data.index))  # Set row num

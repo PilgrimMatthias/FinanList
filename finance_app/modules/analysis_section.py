@@ -428,6 +428,8 @@ class AnalysisSection(QWidget):
                 date_from = datetime.strptime(
                     f"01.{self.date_from_edit.text()}", "%d.%m.%Y"
                 )
+                if self.current_date_from is not None:
+                    date_from = datetime.strptime(self.current_date_from, "%d.%m.%Y")
 
                 date_to = datetime.strptime(
                     self.last_operation_date, "%d.%m.%Y"
