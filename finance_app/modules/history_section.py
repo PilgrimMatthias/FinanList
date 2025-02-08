@@ -6,7 +6,7 @@ import pandas as pd
 from datetime import datetime
 
 from finance_app.config import *
-from finance_app.modules import TableWidget, EditTransaction, ErrorBox
+from finance_app.modules import TableWidget, EditTransaction, ErrorBox, LineEdit
 
 
 class HistorySection(QWidget):
@@ -146,7 +146,7 @@ class HistorySection(QWidget):
         self.search_btn.clicked.connect(self.show_search)
 
         # Search edit box
-        self.search_box = QLineEdit()
+        self.search_box = LineEdit(self)
         self.search_box.setMinimumHeight(40)
         self.search_box.setMinimumWidth(200)
         self.search_box.setVisible(self.search_box_visible)

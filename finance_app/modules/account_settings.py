@@ -7,6 +7,7 @@ from datetime import datetime
 from platformdirs import user_data_dir
 
 from finance_app.config import *
+from finance_app.modules import LineEdit
 
 
 class AccountSettings(QWidget):
@@ -33,10 +34,6 @@ class AccountSettings(QWidget):
         self.currency = self.user_settings.get("CURRENCY")
         self.user_folder = self.user_settings.get("USER_FOLDER")
 
-        # Variables
-        self.validator = QDoubleValidator(bottom=0, decimals=2)
-        self.validator.setNotation(QDoubleValidator.StandardNotation)
-
         self.today = datetime.today()
         self.active = False
 
@@ -62,10 +59,7 @@ class AccountSettings(QWidget):
         self.name_label.setStyleSheet("color: black; font-size: 10pt;")
 
         # Name entry
-        self.name_entry = QLineEdit(self)
-        self.name_entry.setStyleSheet("padding: 5px;")
-        self.name_entry.setText(self.username)
-        self.name_entry.setEnabled(False)
+        self.name_entry = LineEdit(self, text=self.username, enabled=False)
 
         # Current account balance label
         self.acc_bal_label = QLabel(self)
@@ -74,11 +68,9 @@ class AccountSettings(QWidget):
         self.acc_bal_label.setStyleSheet("color: black; font-size: 10pt;")
 
         # Current account balance entry
-        self.acc_bal_entry = QLineEdit(self)
-        self.acc_bal_entry.setStyleSheet("padding: 5px;")
-        self.acc_bal_entry.setValidator(self.validator)
-        self.acc_bal_entry.setText(self.acc_balance)
-        self.acc_bal_entry.setEnabled(False)
+        self.acc_bal_entry = LineEdit(
+            self, text=self.acc_balance, enabled=False, validator=True
+        )
 
         # Monthly gross salary label
         self.gross_salary_label = QLabel(self)
@@ -87,11 +79,9 @@ class AccountSettings(QWidget):
         self.gross_salary_label.setStyleSheet("color: black; font-size: 10pt;")
 
         # Monthly gross salary  entry
-        self.gross_salary_entry = QLineEdit(self)
-        self.gross_salary_entry.setStyleSheet("padding: 5px;")
-        self.gross_salary_entry.setValidator(self.validator)
-        self.gross_salary_entry.setText(self.gross_salary)
-        self.gross_salary_entry.setEnabled(False)
+        self.gross_salary_entry = LineEdit(
+            self, text=self.gross_salary, enabled=False, validator=True
+        )
 
         # Monthly net salary label
         self.net_salary_label = QLabel(self)
@@ -100,11 +90,9 @@ class AccountSettings(QWidget):
         self.net_salary_label.setStyleSheet("color: black; font-size: 10pt;")
 
         # Monthly net salary  entry
-        self.net_salary_entry = QLineEdit(self)
-        self.net_salary_entry.setStyleSheet("padding: 5px;")
-        self.net_salary_entry.setValidator(self.validator)
-        self.net_salary_entry.setText(self.net_salary)
-        self.net_salary_entry.setEnabled(False)
+        self.net_salary_entry = LineEdit(
+            self, text=self.net_salary, enabled=False, validator=True
+        )
 
         # Average monthly expenses label
         self.avg_expenses_label = QLabel(self)
@@ -113,12 +101,9 @@ class AccountSettings(QWidget):
         self.avg_expenses_label.setStyleSheet("color: black; font-size: 10pt;")
 
         # Average monthly expenses entry
-        self.avg_expenses_entry = QLineEdit(self)
-        self.avg_expenses_entry.setStyleSheet("padding: 5px;")
-        self.avg_expenses_entry.setValidator(self.validator)
-        self.avg_expenses_entry.setText(self.avg_expenses)
-        self.avg_expenses_entry.setEnabled(False)
-
+        self.avg_expenses_entry = LineEdit(
+            self, text=self.avg_expenses, enabled=False, validator=True
+        )
         # Currency label
         self.currency_label = QLabel(self)
         self.currency_label.setText("Currency")
@@ -146,16 +131,14 @@ class AccountSettings(QWidget):
         data_dir_layout.setSpacing(0)
 
         # User setting folder entry
-        self.data_dir_entry = QLineEdit(self)
-        self.data_dir_entry.setMinimumHeight(37)
-        # self.data_dir_entry.setMinimumWidth(140)
-        self.data_dir_entry.setStyleSheet(
-            "border-top-right-radius: 0px; border-bottom-right-radius: 0px;"
+        self.data_dir_entry = LineEdit(
+            self,
+            text=self.user_folder,
+            enabled=False,
+            stylesheet="border-top-right-radius: 0px; border-bottom-right-radius: 0px;",
         )
+        self.data_dir_entry.setMinimumHeight(37)
         self.data_dir_entry.setPlaceholderText("Choose folder")
-        self.data_dir_entry.setText(self.user_folder)
-        self.data_dir_entry.setEnabled(False)
-
         self.folder_browser_btn = QPushButton()
         self.folder_browser_btn.setText("Browse")
         self.folder_browser_btn.setStyleSheet(
@@ -333,16 +316,16 @@ class AccountSettings(QWidget):
         if self.name_entry.text() != self.username:
             send_signal = True
 
-        if self.acc_bal_entry.text() != self.acc_balance:
+        if self.acc_bal_entry.get_number() != self.acc_balance:
             send_signal = True
 
-        if self.gross_salary_entry.text() != self.gross_salary:
+        if self.gross_salary_entry.get_number() != self.gross_salary:
             send_signal = True
 
-        if self.net_salary_entry.text() != self.net_salary:
+        if self.net_salary_entry.get_number() != self.net_salary:
             send_signal = True
 
-        if self.avg_expenses_entry.text() != self.avg_expenses:
+        if self.avg_expenses_entry.get_number() != self.avg_expenses:
             send_signal = True
 
         if self.currency_entry.currentText() != self.currency:
@@ -354,18 +337,10 @@ class AccountSettings(QWidget):
         if send_signal and not self.active:
             user_settings_dict = {
                 "USER_NAME": self.name_entry.text(),
-                "CURRENT_ACCOUNT_BALANCE": float(
-                    self.acc_bal_entry.text().replace(",", ".")
-                ),
-                "MONTHLY_GROSS_SALARY": float(
-                    self.gross_salary_entry.text().replace(",", ".")
-                ),
-                "MONTHLY_NET_SALARY": float(
-                    self.net_salary_entry.text().replace(",", ".")
-                ),
-                "AVERAGE_MONTHLY_EXPENSE": float(
-                    self.avg_expenses_entry.text().replace(",", ".")
-                ),
+                "CURRENT_ACCOUNT_BALANCE": float(self.acc_bal_entry.get_number()),
+                "MONTHLY_GROSS_SALARY": float(self.gross_salary_entry.get_number()),
+                "MONTHLY_NET_SALARY": float(self.net_salary_entry.get_number()),
+                "AVERAGE_MONTHLY_EXPENSE": float(self.avg_expenses_entry.get_number()),
                 "CURRENCY": self.currency_entry.currentText(),
                 "USER_FOLDER": self.data_dir_entry.text(),
                 "DEFAULT_VIEW": self.user_settings.get("DEFAULT_VIEW"),

@@ -80,7 +80,7 @@ def is_number(value):
         _type_: boolean
     """
     try:
-        float(value.replace(",", "."))
+        float(value.replace(" ", "").replace(",", "."))
     except ValueError:
         return False
 

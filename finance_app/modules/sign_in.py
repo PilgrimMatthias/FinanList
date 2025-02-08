@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QWidget
 import json
 
 from finance_app.config import *
-from finance_app.modules import ErrorBox
+from finance_app.modules import ErrorBox, LineEdit
 
 
 class SignInWindow(QWidget):
@@ -92,8 +92,7 @@ class SignInWindow(QWidget):
         self.name_label.setStyleSheet("color: black; font-size: 10pt;")
 
         # Name entry
-        self.name_entry = QLineEdit(self)
-        self.name_entry.setStyleSheet("padding: 5px;")
+        self.name_entry = LineEdit(self)
 
         # Current account balance label
         self.acc_bal_label = QLabel(self)
@@ -102,9 +101,7 @@ class SignInWindow(QWidget):
         self.acc_bal_label.setStyleSheet("color: black; font-size: 10pt;")
 
         # Current account balance entry
-        self.acc_bal_entry = QLineEdit(self)
-        self.acc_bal_entry.setStyleSheet("padding: 5px;")
-        self.acc_bal_entry.setValidator(self.double_validator)
+        self.acc_bal_entry = LineEdit(self, validator=True)
 
         # Monthly gross salary label
         self.gross_salary_label = QLabel(self)
@@ -113,9 +110,7 @@ class SignInWindow(QWidget):
         self.gross_salary_label.setStyleSheet("color: black; font-size: 10pt;")
 
         # Monthly gross salary  entry
-        self.gross_salary_entry = QLineEdit(self)
-        self.gross_salary_entry.setStyleSheet("padding: 5px;")
-        self.gross_salary_entry.setValidator(self.double_validator)
+        self.gross_salary_entry = LineEdit(self, validator=True)
 
         # Monthly net salary label
         self.net_salary_label = QLabel(self)
@@ -124,9 +119,7 @@ class SignInWindow(QWidget):
         self.net_salary_label.setStyleSheet("color: black; font-size: 10pt;")
 
         # Monthly net salary  entry
-        self.net_salary_entry = QLineEdit(self)
-        self.net_salary_entry.setStyleSheet("padding: 5px;")
-        self.net_salary_entry.setValidator(self.double_validator)
+        self.net_salary_entry = LineEdit(self, validator=True)
 
         # Average monthly expenses label
         self.avg_expenses_label = QLabel(self)
@@ -135,9 +128,7 @@ class SignInWindow(QWidget):
         self.avg_expenses_label.setStyleSheet("color: black; font-size: 10pt;")
 
         # Average monthly expenses entry
-        self.avg_expenses_entry = QLineEdit(self)
-        self.avg_expenses_entry.setStyleSheet("padding: 5px;")
-        self.avg_expenses_entry.setValidator(self.double_validator)
+        self.avg_expenses_entry = LineEdit(self, validator=True)
 
         # Currency label
         self.currency_label = QLabel(self)
@@ -165,11 +156,11 @@ class SignInWindow(QWidget):
         self.data_dir_layout.setSpacing(0)
 
         # User setting folder entry
-        self.data_dir_entry = QLineEdit(self)
-        self.data_dir_entry.setMinimumHeight(37)
-        self.data_dir_entry.setStyleSheet(
-            "border-top-right-radius: 0px; border-bottom-right-radius: 0px;"
+        self.data_dir_entry = LineEdit(
+            self,
+            stylesheet="border-top-right-radius: 0px; border-bottom-right-radius: 0px;",
         )
+        self.data_dir_entry.setMinimumHeight(37)
         self.data_dir_entry.setPlaceholderText("Choose folder")
 
         self.folder_browser_btn = QPushButton()
@@ -264,7 +255,7 @@ class SignInWindow(QWidget):
         for layout in [self.cred_layout, self.data_dir_layout]:
             for index in range(layout.count()):
                 item = layout.itemAt(index)
-                if type(item.widget()) == QLineEdit:  # QLineEdit verifaction
+                if type(item.widget()) == LineEdit:  # QLineEdit verifaction
                     # Return ErrorBox if the first widget found has no value and is visible
                     if (item.widget().text() == "") and (item.widget().isVisible()):
                         blank_check = True
@@ -300,14 +291,10 @@ class SignInWindow(QWidget):
 
         # Get user values
         self.user_name = self.name_entry.text()
-        self.current_acc_balance = float(self.acc_bal_entry.text().replace(",", "."))
-        self.monthly_gross_salary = float(
-            self.gross_salary_entry.text().replace(",", ".")
-        )
-        self.monthly_net_salary = float(self.net_salary_entry.text().replace(",", "."))
-        self.avg_monthly_expense = float(
-            self.avg_expenses_entry.text().replace(",", ".")
-        )
+        self.current_acc_balance = self.acc_bal_entry.get_number()
+        self.monthly_gross_salary = self.gross_salary_entry.get_number()
+        self.monthly_net_salary = self.net_salary_entry.get_number()
+        self.avg_monthly_expense = self.avg_expenses_entry.get_number()
         self.currency = self.currency_entry.currentText()
 
         try:

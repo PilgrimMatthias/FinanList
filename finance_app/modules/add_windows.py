@@ -4,6 +4,7 @@ from PySide6.QtWidgets import *
 from datetime import datetime
 
 from finance_app.config import *
+from finance_app.modules import LineEdit
 
 
 class AddCategory(QWidget):
@@ -49,9 +50,9 @@ class AddCategory(QWidget):
         self.custom_name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Custom name - lineedit
-        self.custom_name_edit = QLineEdit(self)
-        self.custom_name_edit.setStyleSheet("background-color: #e6e6e6")
-        self.custom_name_edit.setEnabled(False)
+        self.custom_name_edit = LineEdit(
+            self, enabled=False, stylesheet="background-color: #e6e6e6"
+        )
 
         # Top level - label
         self.main_category_label = QLabel(self)
@@ -61,7 +62,7 @@ class AddCategory(QWidget):
         self.main_category_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Top level - lineedit
-        self.main_category__edit = QLineEdit(self)
+        self.sub_category_edit = LineEdit(self)
 
         # Second level - label
         self.subcategory_label = QLabel(self)
@@ -71,7 +72,7 @@ class AddCategory(QWidget):
         self.subcategory_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Second level - lineedit
-        self.subcategory_edit = QLineEdit(self)
+        self.main_category_edit = LineEdit(self)
 
         # Third level - label
         self.def_oper_type_label = QLabel(self)
@@ -84,8 +85,8 @@ class AddCategory(QWidget):
         self.def_oper_type_edit = QComboBox(self)
         self.def_oper_type_edit.addItems(TRANSACTION_TYPES)
 
-        self.main_category__edit.editingFinished.connect(self.on_value_changed)
-        self.subcategory_edit.editingFinished.connect(self.on_value_changed)
+        self.main_category_edit.editingFinished.connect(self.on_value_changed)
+        self.sub_category_edit.editingFinished.connect(self.on_value_changed)
 
         # Add button
         btn_layout = QHBoxLayout()
@@ -137,10 +138,10 @@ class AddCategory(QWidget):
         main_layout.addWidget(
             self.main_category_label, 2, 0, Qt.AlignmentFlag.AlignLeft
         )
-        main_layout.addWidget(self.main_category__edit, 2, 1)
+        main_layout.addWidget(self.main_category_edit, 2, 1)
 
         main_layout.addWidget(self.subcategory_label, 3, 0, Qt.AlignmentFlag.AlignLeft)
-        main_layout.addWidget(self.subcategory_edit, 3, 1)
+        main_layout.addWidget(self.sub_category_edit, 3, 1)
 
         main_layout.addWidget(
             self.def_oper_type_label, 4, 0, Qt.AlignmentFlag.AlignLeft
@@ -157,7 +158,7 @@ class AddCategory(QWidget):
         Set category custom name as every level widget text separated with "-"
         """
         cat_name = ""
-        for widget in [self.main_category__edit, self.subcategory_edit]:
+        for widget in [self.main_category_edit, self.sub_category_edit]:
             if widget.text():
                 cat_name += widget.text() + " - "
 
@@ -171,8 +172,8 @@ class AddCategory(QWidget):
         """
         self.category = {
             "Name": self.custom_name_edit.text(),
-            "1_Main Category": self.main_category__edit.text(),
-            "2_Subcategory": self.subcategory_edit.text(),
+            "1_Main Category": self.main_category_edit.text(),
+            "2_Subcategory": self.sub_category_edit.text(),
             "3_Default Operation Type": self.def_oper_type_edit.currentText(),
         }
 
@@ -225,14 +226,14 @@ class EditCategory(AddCategory):
         # Filling data
         self.title_label.setText("Category #{0}".format(int(self.number) + 1))
         self.custom_name_edit.setText(self.name)
-        self.main_category__edit.setText(self.main_category)
-        self.subcategory_edit.setText(self.subcategory)
+        self.main_category_edit.setText(self.main_category)
+        self.sub_category_edit.setText(self.subcategory)
         self.def_oper_type_edit.setCurrentText(self.def_oper_type)
 
         # Setting widgets to not enabled
         self.custom_name_edit.setEnabled(False)
-        self.main_category__edit.setEnabled(False)
-        self.subcategory_edit.setEnabled(False)
+        self.main_category_edit.setEnabled(False)
+        self.sub_category_edit.setEnabled(False)
         self.def_oper_type_edit.setEnabled(False)
 
         # Setting button text
@@ -247,16 +248,16 @@ class EditCategory(AddCategory):
         """
         if self.active:
             self.custom_name_edit.setEnabled(False)
-            self.main_category__edit.setEnabled(False)
-            self.subcategory_edit.setEnabled(False)
+            self.main_category_edit.setEnabled(False)
+            self.sub_category_edit.setEnabled(False)
             self.def_oper_type_edit.setEnabled(False)
             self.primary_btn.setText("Edit")
 
             self.active = False
         else:
             self.custom_name_edit.setEnabled(True)
-            self.main_category__edit.setEnabled(True)
-            self.subcategory_edit.setEnabled(True)
+            self.main_category_edit.setEnabled(True)
+            self.sub_category_edit.setEnabled(True)
             self.def_oper_type_edit.setEnabled(True)
             self.primary_btn.setText("Save")
 
@@ -277,8 +278,8 @@ class EditCategory(AddCategory):
         if confirmation == QMessageBox.StandardButton.Yes:
             category = {
                 "Name": self.custom_name_edit.text(),
-                "1_Main Category": self.main_category__edit.text(),
-                "2_Subcategory": self.subcategory_edit.text(),
+                "1_Main Category": self.main_category_edit.text(),
+                "2_Subcategory": self.sub_category_edit.text(),
                 "3_Default Operation Type": self.def_oper_type_edit.currentText(),
             }
 
@@ -296,10 +297,10 @@ class EditCategory(AddCategory):
         if self.custom_name_edit.text() != self.name:
             send_signal = True
 
-        if self.main_category__edit.text() != self.main_category:
+        if self.main_category_edit.text() != self.main_category:
             send_signal = True
 
-        if self.subcategory_edit.text() != self.subcategory:
+        if self.sub_category_edit.text() != self.subcategory:
             send_signal = True
 
         if self.def_oper_type_edit.currentText() != self.def_oper_type:
@@ -308,8 +309,8 @@ class EditCategory(AddCategory):
         if send_signal and not self.active:
             category = {
                 "Name": self.custom_name_edit.text(),
-                "1_Main Category": self.main_category__edit.text(),
-                "2_Subcategory": self.subcategory_edit.text(),
+                "1_Main Category": self.main_category_edit.text(),
+                "2_Subcategory": self.sub_category_edit.text(),
                 "3_Default Operation Type": self.def_oper_type_edit.currentText(),
             }
 
@@ -367,7 +368,7 @@ class AddTransaction(QWidget):
         self.tr_name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Transaction name - lineedit
-        self.tr_name_edit = QLineEdit(self)
+        self.tr_name_edit = LineEdit(self)
 
         # Date of operation - label
         self.tr_date_label = QLabel(self)
@@ -391,7 +392,7 @@ class AddTransaction(QWidget):
         self.tr_vendor_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Shop / Person - lineedit
-        self.tr_vendor_edit = QLineEdit(self)
+        self.tr_vendor_edit = LineEdit(self)
 
         # Type of operation - label
         self.tr_type_label = QLabel(self)
@@ -434,8 +435,7 @@ class AddTransaction(QWidget):
         self.tr_amount_label.setContentsMargins(0, 0, 0, 20)
 
         # Shop / Person - lineedit
-        self.tr_amount_edit = QLineEdit(self)
-        self.tr_amount_edit.setValidator(self.validator)
+        self.tr_amount_edit = LineEdit(self, validator=True)
         self.tr_amount_edit.setContentsMargins(0, 0, 0, 10)
 
         btn_layout = QHBoxLayout()
@@ -536,7 +536,7 @@ class AddTransaction(QWidget):
             "3_vendor": self.tr_vendor_edit.text(),
             "4_type": self.tr_type_edit.currentText(),
             "5_category": self.tr_category_edit.currentText(),
-            "6_amount": self.tr_amount_edit.text(),
+            "6_amount": self.tr_amount_edit.text().replace(" ", ""),
         }
 
         self.send_transaction.emit(transaction, self.tr_type_edit.currentText())
@@ -660,7 +660,7 @@ class EditTransaction(AddTransaction):
                     "3_vendor": self.tr_vendor_edit.text(),
                     "4_type": self.tr_type_edit.currentText(),
                     "5_category": self.tr_category_edit.currentText(),
-                    "6_amount": self.tr_amount_edit.text(),
+                    "6_amount": self.tr_amount_edit.text().replace(" ", ""),
                 }
             }
 
@@ -690,7 +690,7 @@ class EditTransaction(AddTransaction):
         if self.tr_category_edit.currentText() != self.category:
             send_signal = True
 
-        if self.tr_amount_edit.text() != self.amount:
+        if self.tr_amount_edit.text().replace(" ", "") != self.amount:
             send_signal = True
 
         if send_signal and not self.active:
@@ -701,7 +701,7 @@ class EditTransaction(AddTransaction):
                     "3_vendor": self.tr_vendor_edit.text(),
                     "4_type": self.tr_type_edit.currentText(),
                     "5_category": self.tr_category_edit.currentText(),
-                    "6_amount": self.tr_amount_edit.text(),
+                    "6_amount": self.tr_amount_edit.text().replace(" ", ""),
                 }
             }
 

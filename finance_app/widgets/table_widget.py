@@ -159,11 +159,23 @@ class TableWidget(QTableWidget):
 
                     # Set value display role (for sorting)
                     if is_number(value):  # number
-                        item.setData(Qt.ItemDataRole.UserRole + 1, value)
+                        number = float(value.replace(",", ".").replace(" ", ""))
 
+                        # Value formatting
+                        if number.is_integer():
+                            formatted_number = f"{int(number):,}".replace(",", " ")
+                        else:
+                            formatted_number = f"{number:,.2f}".replace(
+                                ",", " "
+                            ).replace(".", ",")
+
+                        # Actual data
+                        item.setData(Qt.ItemDataRole.UserRole + 1, formatted_number)
+
+                        # Edit role data for sorting
                         item.setData(
                             Qt.ItemDataRole.EditRole,
-                            float(value.replace(",", ".").replace(" ", "")),
+                            number,
                         )
 
                     elif is_date(value, "%d.%m.%Y"):  # date
@@ -192,8 +204,6 @@ class TableWidget(QTableWidget):
                         self.setItem(row, column, item)
 
         self.setContentsMargins(0, 0, 0, 0)
-
-        self.itemChanged.connect(self.double_formatter)
 
         if self.filtering:
             self.horizontalHeader().sectionClicked.connect(self.on_header_click)
@@ -274,13 +284,23 @@ class TableWidget(QTableWidget):
 
                     # Set value display role (for sorting)
                     if is_number(value):  # number
+                        number = float(value.replace(",", ".").replace(" ", ""))
+
+                        # Value formatting
+                        if number.is_integer():
+                            formatted_number = f"{int(number):,}".replace(",", " ")
+                        else:
+                            formatted_number = f"{number:,.2f}".replace(
+                                ",", " "
+                            ).replace(".", ",")
+
                         # Actual data
-                        item.setData(Qt.ItemDataRole.UserRole + 1, value)
+                        item.setData(Qt.ItemDataRole.UserRole + 1, formatted_number)
 
                         # Edit role data for sorting
                         item.setData(
                             Qt.ItemDataRole.EditRole,
-                            float(value.replace(",", ".").replace(" ", "")),
+                            number,
                         )
 
                     elif is_date(value, "%d.%m.%Y"):  # date
@@ -318,26 +338,6 @@ class TableWidget(QTableWidget):
         self.setRowCount(self.row_num)
 
         self.data = None
-
-    def double_formatter(self, item):
-        """
-        Formatter for items in table
-
-        Args:
-            item (QTableWidgetItem): Table item
-        """
-        try:
-            number = float(item.text().replace(" ", "").replace(",", "."))
-
-            # Value formatting
-            if number.is_integer():
-                formatted_number = f"{int(number)}".replace(",", "")
-            else:
-                formatted_number = f"{number:,.2f}".replace(",", " ").replace(".", ",")
-
-            item.setText(formatted_number)
-        except ValueError:
-            pass
 
     def show_column(self, col_num):
         if self.isColumnHidden(col_num):
