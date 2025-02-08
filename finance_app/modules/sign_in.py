@@ -3,12 +3,10 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 from PySide6.QtWidgets import QWidget
-
 import json
 
-from finance_app import center_window
 from finance_app.config import *
-from finance_app.modules.status_windows import ErrorBox
+from finance_app.modules import ErrorBox
 
 
 class SignInWindow(QWidget):

@@ -1,9 +1,9 @@
 from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
-from finance_app.utils import is_date, is_number
 from finance_app.config import ASCENDING_ICON, DESCENDING_ICON, FILTER_ICON
-from finance_app.widgets.checkbox_widget import CheckBoxWidget
+
+from finance_app.widgets import CheckBoxWidget, is_date, is_number
 
 
 class TableWidget(QTableWidget):

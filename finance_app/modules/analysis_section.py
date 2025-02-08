@@ -8,11 +8,8 @@ from dateutil.relativedelta import relativedelta
 
 import json
 
-from finance_app.widgets.table_widget import TableWidget
-from finance_app.widgets.bar_plot_widget import BarChart
+from finance_app.modules import TableWidget, BarChart, Analysis, ErrorBox
 from finance_app.config import *
-from finance_app.modules.analysis_calculation import Analysis
-from finance_app.modules.status_windows import ErrorBox
 
 
 class AnalysisSection(QWidget):

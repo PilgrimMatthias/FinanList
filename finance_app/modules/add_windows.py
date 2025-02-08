@@ -4,7 +4,6 @@ from PySide6.QtWidgets import *
 from datetime import datetime
 
 from finance_app.config import *
-from finance_app import center_window, ChooseBox
 
 
 class AddCategory(QWidget):

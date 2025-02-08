@@ -1,16 +1,13 @@
 from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
-import pandas as pd
-
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
-
 import json
+import pandas as pd
+from datetime import datetime
 
-from finance_app.widgets.table_widget import TableWidget
+
 from finance_app.config import *
-from finance_app.widgets.bar_plot_widget import BarChart
+from finance_app.modules import BarChart, TableWidget
 
 
 class MainSection(QWidget):

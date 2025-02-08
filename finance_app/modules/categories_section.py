@@ -4,12 +4,8 @@ from PySide6.QtWidgets import *
 import json
 import pandas as pd
 
-from finance_app.widgets.table_widget import TableWidget
-from finance_app.modules.add_windows import EditCategory
 from finance_app.config import *
-from finance_app.utils import filter_func
-
-from finance_app.modules.add_windows import AddCategory
+from finance_app.modules import AddCategory, TableWidget, EditCategory, filter_func
 
 
 class CategoriesSection(QWidget):

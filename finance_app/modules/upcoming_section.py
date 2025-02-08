@@ -5,10 +5,8 @@ import json
 import pandas as pd
 from datetime import datetime
 
-from finance_app.widgets.table_widget import TableWidget
-from finance_app.modules.add_windows import EditTransaction
 from finance_app.config import *
-from finance_app.modules.status_windows import ErrorBox
+from finance_app.modules import TableWidget, EditTransaction, ErrorBox
 
 
 class UpcomingSection(QWidget):
