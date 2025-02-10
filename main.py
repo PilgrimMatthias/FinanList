@@ -342,6 +342,14 @@ class MainWindow(QMainWindow):
         if signed:
             self.check_user_settings()
 
+            # Information box
+            info_dialog = QMessageBox.information(
+                self,
+                "Welcome to FinanList",
+                WELCOME_MSG,
+                defaultButton=QMessageBox.StandardButton.Ok,
+            )
+
     def add_transaction(self):
         """
         Method user for displaying window to add transaction
@@ -677,8 +685,9 @@ class MainWindow(QMainWindow):
                         self.upcoming_section.update_upcoming_oper(self.user_upcomings)
 
             case "Delete":
-                # Delete upcoming transaction
-                self.user_categories.pop(number)
+                # Delete categories
+                for key in number:
+                    self.user_categories.pop(key)
 
                 # Update upcomings dict keys
                 new_key = 0

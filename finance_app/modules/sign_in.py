@@ -326,5 +326,9 @@ class SignInWindow(QWidget):
         with open(self.user_setings_path, "w") as file:
             json.dump(user_settings_dict, file)
 
+        # Create file with sample categories
+        with open(os.path.join(self.data_path, USER_CATEGORIES), "w") as file:
+            json.dump(SAMPLE_CATEGORIES, file)
+
         self.signed_in_signal.emit(True)
         self.destroy()

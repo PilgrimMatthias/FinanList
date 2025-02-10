@@ -5,13 +5,19 @@ import json
 import pandas as pd
 
 from finance_app.config import *
-from finance_app.modules import AddCategory, TableWidget, EditCategory, filter_func
+from finance_app.modules import (
+    AddCategory,
+    TableWidget,
+    EditCategory,
+    ErrorBox,
+    filter_func,
+)
 
 
 class CategoriesSection(QWidget):
 
     update_category = Signal(
-        dict, str, str
+        dict, list, str
     )  # signal for category operation on database
 
     def __init__(self, user_categories=None, user_categories_path=None) -> None:
@@ -51,17 +57,30 @@ class CategoriesSection(QWidget):
         self.add_btn.setMinimumWidth(130)
         self.add_btn.clicked.connect(self.add_category)
 
-        # Edit category btn
-        self.edit_btn = QPushButton("Edit categories")
-        self.edit_btn.setStyleSheet(
+        # Select upcomings btn
+        self.select_btn = QPushButton("Select")
+        self.select_btn.setStyleSheet(
             "QPushButton {background-color: #0085FC; border-style: solid; border-color: #0085FC; border-width: 2px; border-radius: 10px; font-size: 10pt; color:white;} "
             + "QPushButton::pressed {background-color: #4dacff; border-style: solid; border-color: #4dacff; border-width: 2px; border-radius: 10px; font-size: 10pt; color:white;}"
         )
-        self.edit_btn.setMinimumHeight(40)
-        self.edit_btn.setMinimumWidth(130)
+        self.select_btn.setMinimumHeight(40)
+        self.select_btn.setMinimumWidth(130)
+        self.select_btn.clicked.connect(self.on_select_click)
+
+        # Delete categories btn
+        self.delete_btn = QPushButton("Delete")
+        self.delete_btn.setStyleSheet(
+            "QPushButton {background-color: #ff3333; border-style: solid; border-color: #ff3333; border-width: 2px; border-radius: 10px; font-size: 10pt; color:white;} "
+            + "QPushButton::pressed {background-color: #ff8080; border-style: solid; border-color: #ff8080; border-width: 2px; border-radius: 10px; font-size: 10pt; color:white;}"
+        )
+        self.delete_btn.setMinimumHeight(40)
+        self.delete_btn.setMinimumWidth(130)
+        self.delete_btn.setVisible(False)
+        self.delete_btn.clicked.connect(self.delete_categories)
 
         btn_layout.addWidget(self.add_btn, 0, alignment=Qt.AlignmentFlag.AlignLeft)
-        # btn_layout.addWidget(self.edit_btn, 0, alignment=Qt.AlignmentFlag.AlignLeft)
+        btn_layout.addWidget(self.select_btn, 0, alignment=Qt.AlignmentFlag.AlignLeft)
+        btn_layout.addWidget(self.delete_btn, 0, alignment=Qt.AlignmentFlag.AlignLeft)
 
         # Table with categories
         self.user_categories_table = TableWidget(
@@ -79,11 +98,62 @@ class CategoriesSection(QWidget):
                 else pd.DataFrame(self.user_categories).T.reset_index(drop=True)
             ),
             sorting=True,
+            id_column=True,
         )
         self.user_categories_table.cellDoubleClicked.connect(self.show_category)
 
         main_layout.addLayout(btn_layout, 0)
         main_layout.addWidget(self.user_categories_table, 0)
+
+    def on_select_click(self):
+        """
+        On select button click event.
+
+        When clicked delete button and first id column is shown/hidden.
+        """
+        # Show/hide id column in table
+        self.user_categories_table.show_column(0)
+
+        # Show/hide delete button
+        if self.delete_btn.isVisible():
+            self.delete_btn.setVisible(False)
+        else:
+            self.delete_btn.setVisible(True)
+
+    def delete_categories(self):
+        """
+        Delete categories event
+
+        When clicked selected categories by user will be deleted from database.
+        """
+        # Selected rows
+        selected_rows = self.user_categories_table.get_selected_rows()
+
+        if len(selected_rows) == 0:
+            msg = "No categories where selected!\nSelect at least one category!"
+            ErrorBox(self, title="Nothing to delete!", msg=msg)
+            return
+
+        # Deletion confirmation box
+        confirmation = QMessageBox.question(
+            self,
+            "Confirmation",
+            "Delete selected categories?\nThis will permamently delete them!",
+            defaultButton=QMessageBox.StandardButton.No,
+        )
+
+        if confirmation == QMessageBox.StandardButton.Yes:
+            # Create transation dicts
+            selected_cat_dict = {}
+            for tr_num in selected_rows:
+                temp_category = self.user_categories.get(str(tr_num))
+
+                selected_cat_dict[str(tr_num)] = temp_category
+
+            # Send transactions to delete
+            self.update_category.emit(
+                selected_cat_dict, list(selected_cat_dict.keys()), "Delete"
+            )
 
     def update_categories(self, data):
         """
@@ -92,12 +162,13 @@ class CategoriesSection(QWidget):
         Args:
             data (dict): category dict list
         """
-        updated_df = pd.DataFrame(data).T.reset_index(drop=True)
-        updated_df.columns = CATEGORIES_HEADERS
-
-        self.user_categories_table.clear_table()
-        self.user_categories_table.update_table(updated_df)
         self.user_categories = data
+        self.user_categories_table.clear_table()
+
+        if len(self.user_categories) > 0:
+            updated_df = pd.DataFrame(data).T.reset_index(drop=True)
+            updated_df.columns = CATEGORIES_HEADERS
+            self.user_categories_table.update_table(updated_df)
 
     def add_category(self):
         """
@@ -134,22 +205,15 @@ class CategoriesSection(QWidget):
             row (int): row of category in table
             columns (int): column of ctaegory in table
         """
-        name = self.user_categories_table.item(row, 3).text()
-        main_category = self.user_categories_table.item(row, 0).text()
-        subcategory = self.user_categories_table.item(row, 1).text()
-        def_oper_type = self.user_categories_table.item(row, 2).text()
-        # level_4 = self.user_categories_table.item(row, 3).text()
-
-        selected_category = {
-            key: val
-            for key, val in self.user_categories.items()
-            if filter_func(
-                pair=val,
-                condition=[main_category, subcategory, def_oper_type, name],
-                # condition=[main_category, subcategory, def_oper_type, level_4, name],
-            )
-        }
-        tr_number = list(selected_category.keys())[0]
+        tr_number = (
+            self.user_categories_table.cellWidget(row, 0)
+            .findChild(QCheckBox)
+            .get_hidden_property()
+        )
+        name = self.user_categories_table.item(row, 4).text()
+        main_category = self.user_categories_table.item(row, 1).text()
+        subcategory = self.user_categories_table.item(row, 2).text()
+        def_oper_type = self.user_categories_table.item(row, 3).text()
 
         self.category_edit = EditCategory(
             number=tr_number,
@@ -157,7 +221,6 @@ class CategoriesSection(QWidget):
             main_category=main_category,
             subcategory=subcategory,
             def_oper_type=def_oper_type,
-            # level_4=level_4,
         )
         self.category_edit.show()
 
@@ -173,4 +236,4 @@ class CategoriesSection(QWidget):
             number (int): number of category in database (new or existing)
             activity (str): type of acitivty (New, Delete or Update)
         """
-        self.update_category.emit(transaction, number, activity)
+        self.update_category.emit(transaction, [number], activity)

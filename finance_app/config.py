@@ -275,3 +275,45 @@ PROGNOSIS_HEADERS = [
     "Average spendings",
     "Planned expenses",
 ]
+
+# Sample categories created on login
+SAMPLE_CATEGORIES = {
+    "0": {
+        "1_Main Category": "Home",
+        "2_Subcategory": "Food",
+        "3_Default Operation Type": "Expense",
+        "Name": "Home - Food",
+    },
+    "1": {
+        "1_Main Category": "Home",
+        "2_Subcategory": "Rent",
+        "3_Default Operation Type": "Expense",
+        "Name": "Home - Rent",
+    },
+    "2": {
+        "1_Main Category": "Home",
+        "2_Subcategory": "Other",
+        "3_Default Operation Type": "Expense",
+        "Name": "Home - Other",
+    },
+    "3": {
+        "1_Main Category": "Private",
+        "2_Subcategory": "Salary",
+        "3_Default Operation Type": "Income",
+        "Name": "Private - Salary",
+    },
+    "4": {
+        "1_Main Category": "Private",
+        "2_Subcategory": "Vacations",
+        "3_Default Operation Type": "Expense",
+        "Name": "Private - Vacations",
+    },
+    "5": {
+        "1_Main Category": "Private",
+        "2_Subcategory": "Other",
+        "3_Default Operation Type": "Expense",
+        "Name": "Private - Other",
+    },
+}
+
+WELCOME_MSG = '<h3>Welcome to FinanList!🎉</h3>\n<p>Take control of your finances with ease—track expenses, manage income, analyze cash flow, and plan ahead.</p><p>✨To get you started, we’ve created some sample categories, which you can find by clicking the<i>"Categories" button on the sidebar</i>. Feel free to customize them to fit your needs!.</p><p>➡️Start by adding your first transaction using "Add Transaction" button!🚀</p>'

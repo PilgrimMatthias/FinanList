@@ -361,12 +361,21 @@ class HistorySection(QWidget):
             ErrorBox(self, title="Nothing to delete!", msg=msg)
             return
 
-        # Create transation dicts
-        selected_tr_dict = {}
-        for tr_num in selected_rows:
-            temp_transaction = self.user_transactions.get(str(tr_num))
+        # Deletion confirmation box
+        confirmation = QMessageBox.question(
+            self,
+            "Confirmation",
+            "Delete selected transactions?\nThis will permamently delete them!",
+            defaultButton=QMessageBox.StandardButton.No,
+        )
 
-            selected_tr_dict[str(tr_num)] = temp_transaction
+        if confirmation == QMessageBox.StandardButton.Yes:
+            # Create transation dicts
+            selected_tr_dict = {}
+            for tr_num in selected_rows:
+                temp_transaction = self.user_transactions.get(str(tr_num))
 
-        # Send transactions to delete
-        self.update_transaction.emit(selected_tr_dict, "Delete-Transaction")
+                selected_tr_dict[str(tr_num)] = temp_transaction
+
+            # Send transactions to delete
+            self.update_transaction.emit(selected_tr_dict, "Delete-Transaction")
