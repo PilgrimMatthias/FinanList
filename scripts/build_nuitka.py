@@ -4,7 +4,7 @@ import subprocess
 # Informacje o aplikacji
 APP_NAME = "FinanList"
 APP_VERSION = "1.0.0.0"
-ICON = os.path.join("data", "images", "app_logo.jpg")
+ICON = os.path.join("data", "images", "app_logo.ico")
 DATA = os.path.join("data")
 
 BUILD_DIR = r"build"
