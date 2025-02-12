@@ -141,9 +141,9 @@ class TableWidget(QTableWidget):
                 self.setCellWidget(row, 0, check_box_widget)
 
             self.horizontalHeader().setSectionResizeMode(
-                0, QHeaderView.ResizeMode.Fixed
+                0, QHeaderView.ResizeMode.ResizeToContents
             )
-            self.setColumnWidth(0, 3)
+
             self.hideColumn(0)
 
         # Add data if provided

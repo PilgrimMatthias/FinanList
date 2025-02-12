@@ -24,7 +24,7 @@ USER_TRANSACTIONS = "transactions.json"
 USER_UPCOMING_OPER = "upcomings.json"
 
 # Paths to images
-LOGO_PATH = os.path.join(IMAGES_DIR, "app_logo.jpg")
+LOGO_PATH = os.path.join(IMAGES_DIR, "app_logo.png")
 ADD_ICON = os.path.join(IMAGES_DIR, "plus_circle.png")
 DOWN_ICON = os.path.join(IMAGES_DIR, "down_icon.png")
 SEARCH_ICON_BLACK = os.path.join(IMAGES_DIR, "search_black.png")
