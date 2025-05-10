@@ -8,6 +8,7 @@ from .modules.history_section import HistorySection
 from .modules.upcoming_section import UpcomingSection
 from .modules.analysis_section import AnalysisSection
 from .modules.account_settings import AccountSettings
+from .modules.user_wallets import UserWallets
 from .widgets.table_widget import TableWidget
 from .widgets.checkbox_widget import CheckBoxWidget
 from .modules.add_windows import AddTransaction
@@ -22,6 +23,7 @@ __all__ = [
     "UpcomingSection",
     "AnalysisSection",
     "AccountSettings",
+    "UserWallets",
     "AppSettings",
     "ChooseBox",
     "ErrorBox",

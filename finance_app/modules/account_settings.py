@@ -346,6 +346,7 @@ class AccountSettings(QWidget):
                 "DEFAULT_VIEW": self.user_settings.get("DEFAULT_VIEW"),
                 "DEFAULT_ANALYSIS": self.user_settings.get("DEFAULT_ANALYSIS"),
                 "ANALYSIS_AUTO_RUN": self.user_settings.get("ANALYSIS_AUTO_RUN"),
+                "WALLETS": self.user_settings.get("WALLETS"),
             }
 
             with open(self.user_settings_path, "w") as file:
@@ -354,3 +355,11 @@ class AccountSettings(QWidget):
             self.update_settings.emit()
 
         self.destroy()
+
+    def closeEvent(self, event):
+        """
+        Override close event.
+
+        Invoke close event for user settings update
+        """
+        self.close_event()

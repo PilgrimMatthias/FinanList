@@ -320,6 +320,7 @@ class SignInWindow(QWidget):
             "DEFAULT_VIEW": "Home",
             "DEFAULT_ANALYSIS": "Categorical",
             "ANALYSIS_AUTO_RUN": 0,
+            "WALLETS": {"PRIVATE": self.data_path},
         }
 
         # Save user information to settings folder

@@ -18,6 +18,7 @@ from finance_app import (
     AnalysisSection,
     AccountSettings,
     AppSettings,
+    UserWallets,
     AddTransaction,
     ErrorBox,
     center_window,
@@ -247,9 +248,20 @@ class MainWindow(QMainWindow):
         self.app_settings_btn.setMinimumWidth(125)
         self.app_settings_btn.clicked.connect(self.show_app_settings)
 
+        # Wallets button
+        self.wallet_btn = QPushButton("Wallet")
+        self.wallet_btn.setStyleSheet(
+            "QPushButton {background-color: white; border-style: solid; border-color: #566876; border-width: 2px; border-radius: 10px; font-size: 10pt; color:#566876;} "
+            + "QPushButton::pressed {background-color: white; border-style: solid; border-color: #899ba9; border-width: 2px; border-radius: 10px; font-size: 10pt; color:#899ba9;}"
+        )
+        self.wallet_btn.setMinimumHeight(30)
+        self.wallet_btn.setMinimumWidth(125)
+        self.wallet_btn.clicked.connect(self.show_user_wallets)
+
         # Add buttons to the layout
         layout.addWidget(self.acc_settings_btn)
         layout.addWidget(self.app_settings_btn)
+        layout.addWidget(self.wallet_btn)
 
         # Create a QWidgetAction to add custom widgets to the QMenu
         widget_action = QWidgetAction(self)
@@ -814,6 +826,30 @@ class MainWindow(QMainWindow):
         self.app_settings_window.update_settings.connect(
             lambda: self.check_user_settings(reload=True)
         )
+
+    def show_user_wallets(self):
+        """
+        Method used for showing window with user wallets.
+        """
+        self.wallets_window = UserWallets(
+            self,
+            user_settings=self.user_settings,
+            user_settings_path=self.user_settings_path,
+        )
+        self.wallets_window.show()
+
+        self.wallets_window.update_settings.connect(self.reload_app)
+
+    def reload_app(self):
+        """
+        Reload application
+
+        Currently reloading app is used for wallet change
+        """
+        self.check_user_settings(reload=True)
+
+        python = sys.executable
+        os.execl(python, python, *sys.argv)
 
     def set_dark_theme(self, app):
         """

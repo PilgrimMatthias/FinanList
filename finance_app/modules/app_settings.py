@@ -201,3 +201,11 @@ class AppSettings(QWidget):
             self.update_settings.emit()
 
         self.destroy()
+
+    def closeEvent(self, event):
+        """
+        Override close event.
+
+        Invoke close event for user settings update
+        """
+        self.close_event()
