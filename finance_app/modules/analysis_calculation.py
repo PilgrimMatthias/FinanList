@@ -151,15 +151,18 @@ class Analysis:
         """
         last_month_spendings = self.average_spendings
         last_month_revenue = self.average_revenue
-        transactions = self.transactions
+        transactions = self.transactions.copy()
         last_transaction_date = datetime.today()
 
-        if not transactions.empty:
+        if not transactions[
+            (transactions["2_date"] >= last_transaction_date + relativedelta(day=1))
+            & (transactions["2_date"] <= last_transaction_date)
+            & (transactions["4_type"] == "Expense")
+        ].empty:
 
             last_transaction_date = transactions["2_date"].iloc[-1]
 
             # Calculate current account balance
-            transactions = transactions.copy()
             transactions = transactions[
                 (transactions["2_date"] >= last_transaction_date + relativedelta(day=1))
                 & (transactions["2_date"] <= last_transaction_date)
