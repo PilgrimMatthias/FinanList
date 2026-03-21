@@ -710,3 +710,221 @@ class EditTransaction(AddTransaction):
             )
 
         self.destroy()
+
+
+class AddWallet(QWidget):
+    """
+    AddWallet creates new window with option to add new wallet.
+    """
+
+    # Signals
+    send_wallet = Signal(dict, str)
+
+    def __init__(self, user_categories=None):
+        super().__init__()
+
+        # User data
+        self.user_categories = user_categories
+
+        self.init_window()
+
+    def init_window(self):
+        """
+        Initialize AddWallet window
+        """
+        main_layout = QGridLayout()
+        self.setLayout(main_layout)
+        self.setContentsMargins(15, 5, 15, 5)
+        self.resize(QSize(550, 375))
+        self.setFixedSize(QSize(455, 425))
+        main_layout.setSpacing(10)
+
+        # Title label
+        self.title_label = QLabel(self)
+        self.title_label.setText("New Transaction")
+        self.title_label.setStyleSheet(
+            "color: black; font-size: 16pt; padding:5px; font-weight:bold;"
+        )
+        self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Transaction name - label
+        self.tr_name_label = QLabel(self)
+        self.tr_name_label.setText("Transaction name")
+        self.tr_name_label.setStyleSheet("color: black; font-size: 12pt;")
+        self.tr_name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Transaction name - lineedit
+        self.tr_name_edit = LineEdit(self)
+
+        # Date of operation - label
+        self.tr_date_label = QLabel(self)
+        self.tr_date_label.setText("Date of operation")
+        self.tr_date_label.setStyleSheet("color: black; font-size: 12pt;")
+        self.tr_date_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Date of operation - lineedit
+        self.tr_date_edit = QDateEdit(self)
+        self.tr_date_edit.setCalendarPopup(True)
+        self.tr_date_edit.setDisplayFormat("dd.MM.yyyy")
+        self.tr_date_edit.setDate(
+            QDate(self.today.year, self.today.month, self.today.day)
+        )
+        self.tr_date_edit.dateChanged.connect(self.on_date_change)
+
+        # Shop / Person - label
+        self.tr_vendor_label = QLabel(self)
+        self.tr_vendor_label.setText("Shop / Person")
+        self.tr_vendor_label.setStyleSheet("color: black; font-size: 12pt;")
+        self.tr_vendor_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Shop / Person - lineedit
+        self.tr_vendor_edit = LineEdit(self)
+
+        # Type of operation - label
+        self.tr_type_label = QLabel(self)
+        self.tr_type_label.setText("Type of operation")
+        self.tr_type_label.setStyleSheet("color: black; font-size: 12pt;")
+        self.tr_type_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Type of operation - combobox
+        self.tr_type_edit = QComboBox(self)
+        self.tr_type_edit.addItems(TRANSACTION_TYPES)
+
+        # Category - label
+        self.tr_category_label = QLabel(self)
+        self.tr_category_label.setText("Category")
+        self.tr_category_label.setStyleSheet("color: black; font-size: 12pt;")
+        self.tr_category_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Category - lineedit
+        self.tr_category_edit = QComboBox(self)
+        self.tr_category_edit.addItems(
+            sorted([category.get("Name") for category in self.user_categories.values()])
+        )
+        # Adjusting width of pop-up list to length of longest text
+        font_metrics = QFontMetrics(self.tr_category_edit.font())
+        max_width = (
+            max(
+                font_metrics.horizontalAdvance(self.tr_category_edit.itemText(i))
+                for i in range(self.tr_category_edit.count())
+            )
+            + 40
+        )
+        self.tr_category_edit.view().setMinimumWidth(max_width)
+        self.tr_category_edit.currentIndexChanged.connect(self.on_category_change)
+
+        # Amount - label
+        self.tr_amount_label = QLabel(self)
+        self.tr_amount_label.setText("Amount")
+        self.tr_amount_label.setStyleSheet("color: black; font-size: 12pt;")
+        self.tr_amount_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.tr_amount_label.setContentsMargins(0, 0, 0, 20)
+
+        # Shop / Person - lineedit
+        self.tr_amount_edit = LineEdit(self, validator=True)
+        self.tr_amount_edit.setContentsMargins(0, 0, 0, 10)
+
+        btn_layout = QHBoxLayout()
+
+        # Add button
+        self.primary_btn = QPushButton("Add")
+        self.primary_btn.setStyleSheet(
+            "QPushButton {background-color: #0085FC; border-style: solid; border-color: #0085FC; border-width: 2px; border-radius: 10px; font-size: 10pt; color:white;} "
+            + "QPushButton::pressed {background-color: #4dacff; border-style: solid; border-color: #4dacff; border-width: 2px; border-radius: 10px; font-size: 10pt; color:white;}"
+        )
+        self.primary_btn.setMinimumHeight(40)
+        self.primary_btn.setMinimumWidth(130)
+        self.primary_btn.clicked.connect(self.create_transaction)
+
+        # Cancel button
+        self.secondary_btn = QPushButton("Cancel")
+        self.secondary_btn.setStyleSheet(
+            "QPushButton {background-color: #ff0000; border-style: solid; border-color: #ff0000; border-width: 2px; border-radius: 10px; font-size: 10pt; color:white;} "
+            + "QPushButton::pressed {background-color: #ff8080; border-style: solid; border-color: #ff8080; border-width: 2px; border-radius: 10px; font-size: 10pt; color:white;}"
+        )
+        self.secondary_btn.setMinimumHeight(40)
+        self.secondary_btn.setMinimumWidth(130)
+        self.secondary_btn.clicked.connect(self.destroy)
+
+        btn_layout.addWidget(self.primary_btn, 0)
+        btn_layout.addWidget(self.secondary_btn, 0)
+
+        # Close button
+        self.close_btn = QPushButton("Close")
+        self.close_btn.setStyleSheet(
+            "QPushButton {background-color: white; border-style: solid; border-color: #ff0000; border-width: 2px; border-radius: 10px; font-size: 10pt; color:#ff0000;} "
+            + "QPushButton::pressed {background-color: white; border-style: solid; border-color: #ff8080; border-width: 2px; border-radius: 10px; font-size: 10pt; color:#ff8080;}"
+        )
+        self.close_btn.setMinimumHeight(40)
+        self.close_btn.setMinimumWidth(130)
+        self.close_btn.clicked.connect(self.destroy)
+        self.close_btn.setVisible(False)
+
+        # Spacer for bottom
+        self.spacer = QSpacerItem(2, 2, QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+        main_layout.addWidget(
+            self.title_label, 0, 0, 1, 2, Qt.AlignmentFlag.AlignCenter
+        )
+
+        main_layout.addWidget(self.tr_name_label, 1, 0, Qt.AlignmentFlag.AlignLeft)
+        main_layout.addWidget(self.tr_name_edit, 1, 1)
+
+        main_layout.addWidget(self.tr_date_label, 2, 0, Qt.AlignmentFlag.AlignLeft)
+        main_layout.addWidget(self.tr_date_edit, 2, 1)
+
+        main_layout.addWidget(self.tr_vendor_label, 3, 0, Qt.AlignmentFlag.AlignLeft)
+        main_layout.addWidget(self.tr_vendor_edit, 3, 1)
+
+        main_layout.addWidget(self.tr_category_label, 4, 0, Qt.AlignmentFlag.AlignLeft)
+        main_layout.addWidget(self.tr_category_edit, 4, 1)
+
+        main_layout.addWidget(self.tr_type_label, 5, 0, Qt.AlignmentFlag.AlignLeft)
+        main_layout.addWidget(self.tr_type_edit, 5, 1)
+
+        main_layout.addWidget(self.tr_amount_label, 6, 0, Qt.AlignmentFlag.AlignLeft)
+        main_layout.addWidget(self.tr_amount_edit, 6, 1)
+
+        main_layout.addLayout(btn_layout, 7, 0, 1, 2)
+        main_layout.addWidget(self.close_btn, 8, 0, Qt.AlignmentFlag.AlignLeft)
+
+        main_layout.addItem(self.spacer)
+
+        main_layout.setColumnMinimumWidth(0, 225)
+
+    def on_category_change(self):
+        """
+        Set operation type based on default operation type for choosen category
+        """
+        for category in self.user_categories.values():
+            if category.get("Name") == self.tr_category_edit.currentText():
+                self.tr_type_edit.setCurrentText(
+                    category.get("3_Default Operation Type")
+                )
+
+    def on_date_change(self):
+        """
+        Set operation type as Upcoming if choosen date is in future.
+
+        Triggered on every date change.
+        """
+        current_date = datetime.strptime(self.tr_date_edit.text(), "%d.%m.%Y")
+        if current_date > datetime.now():
+            self.tr_type_edit.setCurrentText("Upcoming")
+
+    def create_transaction(self):
+        """
+        Send transaction dict based on user choices to database
+        """
+        transaction = {
+            "1_name": self.tr_name_edit.text(),
+            "2_date": self.tr_date_edit.text(),
+            "3_vendor": self.tr_vendor_edit.text(),
+            "4_type": self.tr_type_edit.currentText(),
+            "5_category": self.tr_category_edit.currentText(),
+            "6_amount": self.tr_amount_edit.text().replace(" ", ""),
+        }
+
+        self.send_transaction.emit(transaction, self.tr_type_edit.currentText())
+
+        self.destroy()

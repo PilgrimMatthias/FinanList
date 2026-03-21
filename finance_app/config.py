@@ -241,7 +241,7 @@ CATEGORIES_HEADERS = [
     "Name",
 ]
 
-TRANSACTION_TYPES = ["Expense", "Income", "Upcoming"]
+TRANSACTION_TYPES = ["Expense", "Income", "Upcoming", "Investment", "Saving"]
 
 ANALYSIS_TYPES = ["Categorical", "Aggregate", "Prognosis"]
 
