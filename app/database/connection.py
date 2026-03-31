@@ -13,7 +13,7 @@ class Database:
         # Turns on foreign keys and ON DELETE CASCADE
         self.connection.execute("PRAGMA foreign_keys = ON")
 
-        self._init_schema(self)
+        self._init_schema()
 
     def _init_schema(self):
         """
