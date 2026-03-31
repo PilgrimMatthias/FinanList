@@ -156,7 +156,6 @@ class Currency(StrEnum):
     KGS = "Som"
     SOS = "Somali Shilling"
     TJS = "Somoni"
-    ZAR = "South African Rand"
     LKR = "Sri Lanka Rupee"
     XSU = "Sucre"
     SDG = "Sudanese Pound"
