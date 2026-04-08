@@ -8,6 +8,7 @@ from .upcoming.view import UpcomingView
 from .wallets.view import WalletsView
 from .categories.view import CategoriesView
 from .profile.view import ProfileView
+from .transaction import TransactionView, TransactionService
 from .auth import AuthView, AuthService
 
 __all__ = [
@@ -21,6 +22,8 @@ __all__ = [
     "CategoriesView",
     "WalletsView",
     "ProfileView",
+    "TransactionView",
+    "TransactionService",
     "AuthView",
     "AuthService",
 ]

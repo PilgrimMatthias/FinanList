@@ -16,3 +16,7 @@ DB_PATH = DATA_DIR / "finanlist_database.db"
 
 ICONS_DIR = Path(__file__).resolve().parent.parent / "assets" / "icons"
 APP_LOGO_SVG = ICONS_DIR / APP_LOGO
+
+# New transaction window
+TRANSACTION_WINDOW_WIDTH = 500
+TRANSACTION_WINDOW_HEIGHT = 715

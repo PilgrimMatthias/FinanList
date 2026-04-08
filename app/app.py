@@ -35,6 +35,8 @@ from app.features import (
     ProfileView,
     AuthView,
     AuthService,
+    TransactionView,
+    TransactionService,
 )
 
 
@@ -64,9 +66,16 @@ class MainWindow(QMainWindow):
             user_repo=self.user_repo,
             profile_repo=self.profile_repo,
             wallet_repo=self.wallet_repo,
+            category_repo=self.category_repo,
             app_state=self.app_state,
         )
-        # self.transaction_service = TransactionService(self.transaction_repo, self.app_state)
+        self.transaction_service = TransactionService(
+            wallet_repo=self.wallet_repo,
+            category_repo=self.category_repo,
+            transaction_repo=self.transaction_repo,
+            recurring_transaction_repo=self.recurring_repo,
+            app_state=self.app_state,
+        )
 
         # Connect app state
         self.app_state.user_changed.connect(self.log_in)
@@ -102,7 +111,7 @@ class MainWindow(QMainWindow):
         )
 
         self.add_transaction_btn = PushButton(
-            text="Add transaction", height=40, width=140
+            text="Add transaction", height=40, width=140, on_click=self.add_transaction
         )
         # self.add_transaction_btn.setIcon(QIcon(ADD_ICON))
 
@@ -215,7 +224,8 @@ class MainWindow(QMainWindow):
 
         self.root_widget.addWidget(self.main_widget)
 
-        self.root_widget.setCurrentIndex(0)
+        # Check for auto login
+        self.auth_service.check_auto_login()
 
     def set_current_section(self, section_number: int = 0) -> None:
         self.stacked_pages.setCurrentIndex(section_number)
@@ -297,6 +307,13 @@ class MainWindow(QMainWindow):
         self.user_menu.exec(
             self.user_box_btn.mapToGlobal(self.user_box_btn.rect().bottomLeft())
         )
+
+    def add_transaction(self):
+        self.new_transaction = TransactionView(
+            parent=self, service=self.transaction_service
+        )
+
+        self.new_transaction.show()
 
     def log_in(self):
         print("logging in")
