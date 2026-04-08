@@ -30,6 +30,7 @@ QFrame#sidebar {
 /* --- Input Fields --- */
 QComboBox,
 QLineEdit,
+QTextEdit,
 QDateEdit {
     background-color: #ffffff;
     color: #000000;
@@ -37,9 +38,24 @@ QDateEdit {
     border-radius: 10px;
     padding: 6px;
     combobox-popup: 0;
+    min-height: 20px;
+    max-height: 20px;
+}
+QTextEdit#Description{
+    background-color: #ffffff;
+    color: #000000;
+    border: 2px solid #bfbfbf;
+    border-radius: 10px;
+    padding: 6px;
+    combobox-popup: 0;
+    min-height: 58px;
+    max-height: 58px;
 }
 
+
+
 QComboBox:focus,
+QTextEdit:focus,
 QLineEdit:focus,
 QDateEdit:focus {
     border-color: #2a82da;
@@ -205,8 +221,8 @@ QMenu::item:selected {
 QPushButton#profileCircleButton {
     background-color: #ffffff;
     border: 2px solid #808080;
-    border-radius: 80px;
-    font-size: 30pt;
+    border-radius: 60px;
+    font-size: 25pt;
     font-weight: bold;
 }
 
@@ -216,3 +232,14 @@ QPushButton:pressed#profileCircleButton {
 
 
 QLabel#logoLabel { font-size: 25pt; color: #000000; }
+
+ResizableTextEdit {
+    background-color: #ffffff;
+    color: #000000;
+    border: 2px solid #bfbfbf;
+    border-radius: 10px;
+    padding: 6px;
+}
+
+
+QLabel#transactionLabel { font-size: 18pt; font-weight:bold; color: #000000;}

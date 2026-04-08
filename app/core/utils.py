@@ -4,6 +4,9 @@ from PySide6.QtCore import Qt, QPoint
 from PySide6.QtWidgets import QApplication
 
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
+from .enums import RecurrenceInterval
 
 
 def center_window(
@@ -103,3 +106,23 @@ def is_date(value, format):
         return False
 
     return True
+
+
+def set_next_due_date(start_date: datetime, interval: RecurrenceInterval) -> datetime:
+    now = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    next_due_date = now
+
+    if start_date <= now.date():
+        match interval:
+            case RecurrenceInterval.DAILY:
+                next_due_date += relativedelta(days=1)
+            case RecurrenceInterval.WEEKLY:
+                next_due_date += relativedelta(weeks=1)
+            case RecurrenceInterval.MONTHLY:
+                next_due_date += relativedelta(months=1)
+            case RecurrenceInterval.YEARLY:
+                next_due_date += relativedelta(years=1)
+
+        return next_due_date
+
+    return start_date

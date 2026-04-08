@@ -40,5 +40,5 @@ class AppState(QObject):
         self.transaction_changed.emit(self._active_wallet_id)
 
     # Recurring transaction states
-    def emit_crecurring_transaction_change(self):
+    def emit_recurring_transaction_change(self):
         self.recurring_transaction_changed.emit(self._active_wallet_id)

@@ -3,14 +3,13 @@ from app.database.repositories import (
     UserRepo,
     UserProfileRepo,
     WalletRepo,
+    CategoryRepo,
 )
-from app.database import (
-    User,
-    UserProfile,
-    Wallet,
-)
+from app.database import User, UserProfile, Wallet, Category
 
-from app.core.enums import Currency
+from app.core.enums import Currency, OperationType
+from app.core.constants import DEFAULT_MAIN_CATEGORIES, DEFAULT_SUB_CATEGORIES
+from app.core.exceptions import ValidationError
 
 
 class AuthService:
@@ -19,6 +18,7 @@ class AuthService:
         user_repo: UserRepo,
         profile_repo: UserProfileRepo,
         wallet_repo: WalletRepo,
+        category_repo: CategoryRepo,
         app_state: AppState,
     ):
         super().__init__()
@@ -26,6 +26,7 @@ class AuthService:
         self.user_repo = user_repo
         self.profile_repo = profile_repo
         self.wallet_repo = wallet_repo
+        self.category_repo = category_repo
         self.app_state = app_state
 
     def get_all_users(self) -> list[User]:
@@ -42,6 +43,18 @@ class AuthService:
         currency: Currency = Currency.PLN,
     ):
         """Create new user with it's own profile and first wallet"""
+
+        # Validation
+        if gross_salary_monthly < 0:
+            raise ValidationError("Gross salary (monthly) must equel or higher than 0")
+        if net_salary_monthly < 0:
+            raise ValidationError("Net salary (monthly) must equel or higher than 0")
+        if estimated_expenses_monthly < 0:
+            raise ValidationError(
+                "Estimated expenses (monthly) must equel or higher than 0"
+            )
+        if initial_balance < 0:
+            raise ValidationError("Inittial balance must equel or higher than 0")
 
         # Create new user
         new_user = User(name=name)
@@ -65,6 +78,32 @@ class AuthService:
         )
         new_wallet = self.wallet_repo.create(wallet=new_wallet)
 
+        for main_category in DEFAULT_MAIN_CATEGORIES:
+            temp_main_category = Category(
+                wallet_id=new_wallet.id,
+                name=main_category,
+                operation_type=OperationType.EXPENSE,
+            )
+            temp_main_category = self.category_repo.create(temp_main_category)
+
+            for sub_category in DEFAULT_SUB_CATEGORIES:
+                temp_sub_category = Category(
+                    wallet_id=new_wallet.id,
+                    name=sub_category,
+                    operation_type=OperationType.EXPENSE,
+                    parent_id=temp_main_category.id,
+                )
+                temp_sub_category = self.category_repo.create(temp_sub_category)
+
+            if main_category == "Private":
+                temp_sub_category = Category(
+                    wallet_id=new_wallet.id,
+                    name="Income",
+                    operation_type=OperationType.INCOME,
+                    parent_id=temp_main_category.id,
+                )
+                temp_sub_category = self.category_repo.create(temp_sub_category)
+
         # Update state
         self.app_state.set_active_user(user_id=new_user.id)
         self.app_state.set_active_wallet(wallet_id=new_wallet.id)
@@ -76,3 +115,10 @@ class AuthService:
         wallets = self.wallet_repo.get_by_user_id(user_id)
         if wallets:
             self.app_state.set_active_wallet(wallet_id=wallets[0].id)
+
+    def check_auto_login(self):
+        """Check if user is single and/or has auto login -> if yes user is automatically logged in"""
+        users = self.get_all_users()
+
+        if len(users) == 1:
+            self.select_user(users[0].id)

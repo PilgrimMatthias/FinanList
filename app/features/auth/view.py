@@ -16,10 +16,13 @@ from app.core import (
     PushButton,
     ComboBox,
     UserProfileWidget,
+    show_error,
 )
 from app.core.enums import Currency
 from .service import AuthService
 from app.config import APP_NAME, APP_LOGO_SVG
+
+from app.core.exceptions import ValidationError, AppError
 
 
 class AuthView(QWidget):
@@ -85,16 +88,22 @@ class AuthView(QWidget):
 
         col_counter = 0
         row_counter = 0
-        for user in self.service.get_all_users():
+        users = self.service.get_all_users()
+        for user in users:
 
             temp_user_widget = UserProfileWidget(
                 self,
                 initial=user.name[0],
                 username=user.name,
-                on_click=lambda uid=user.id: self.service.select_user(uid),
+                on_click=lambda _, uid=user.id: self.service.select_user(uid),
             )
 
-            user_list_layout.addWidget(temp_user_widget, row_counter, col_counter)
+            user_list_layout.addWidget(
+                temp_user_widget,
+                row_counter,
+                col_counter,
+                alignment=Qt.AlignmentFlag.AlignCenter,
+            )
 
             col_counter += 1
 
@@ -103,17 +112,26 @@ class AuthView(QWidget):
                 row_counter += 1
 
         user_list_layout.setColumnStretch(0, 0)
-        user_list_layout.setColumnStretch(1, 0)
-        user_list_layout.setColumnStretch(2, 0)
+
+        if len(users) >= 2:
+            user_list_layout.setColumnStretch(1, 0)
+
+        if len(users) >= 3:
+            user_list_layout.setColumnStretch(2, 0)
 
         new_user_widget = UserProfileWidget(
             self,
             initial="+",
-            username="Create New\nUser",
+            username="Create User",
             on_click=lambda: self.stack_widget.setCurrentIndex(1),
         )
 
-        user_list_layout.addWidget(new_user_widget, row_counter, col_counter + 1)
+        user_list_layout.addWidget(
+            new_user_widget,
+            row_counter,
+            col_counter + 1,
+            alignment=Qt.AlignmentFlag.AlignCenter,
+        )
 
         return user_list_frame
 
@@ -154,7 +172,7 @@ class AuthView(QWidget):
             text="Currency",
             placeholder="Choose your preffered currency",
             values=[
-                "{0} - {1}".format(currency.name, currency.value)
+                (currency.value, "{0} - {1}".format(currency.name, currency.value))
                 for currency in Currency
             ],
             default_value="{0} - {1}".format(Currency.PLN.name, Currency.PLN.value),
@@ -210,27 +228,26 @@ class AuthView(QWidget):
 
         # Display error box if sth must be filled
         if len(msg) > 0:
-            print("Error box should fire")
-            print(msg)
+            self._show_error(f"Please fill in: {', '.join(msg)}")
             return
 
-        self.service.create_user(
-            name=self.name_input.get_value(),
-            gross_salary_monthly=self.gross_salary_input.get_value(),
-            net_salary_monthly=self.net_salary_input.get_value(),
-            estimated_expenses_monthly=self.avg_expenses_input.get_value(),
-            initial_balance=self.initial_balance_input.get_value(),
-            currency=self._parse_currency(),
-        )
+        try:
+            self.service.create_user(
+                name=self.name_input.get_value(),
+                gross_salary_monthly=self.gross_salary_input.get_value(),
+                net_salary_monthly=self.net_salary_input.get_value(),
+                estimated_expenses_monthly=self.avg_expenses_input.get_value(),
+                initial_balance=self.initial_balance_input.get_value(),
+                currency=Currency(self.currency_input.get_data()),
+            )
 
-        self._clear_sign_up_form()
-        self._refresh_user_list()
-        self.stack_widget.setCurrentIndex(0)
-
-    def _parse_currency(self) -> Currency:
-        """Currency parser based on currency input"""
-        currency_value = self.currency_input.get_value().split(" - ")[1]
-        return Currency(currency_value)
+            self._clear_sign_up_form()
+            self._refresh_user_list()
+            self.stack_widget.setCurrentIndex(0)
+        except ValidationError as e:
+            self._show_error(str(e))
+        except AppError as e:
+            self._show_error(f"Something went wrong: {e}")
 
     def _refresh_user_list(self):
         """Refresh user list widget with list of all users. Updates everytime user is created"""
@@ -252,3 +269,7 @@ class AuthView(QWidget):
         """Cancel form and return to user screen"""
         self._clear_sign_up_form()
         self.stack_widget.setCurrentIndex(0)
+
+    def _show_error(self, msg: str):
+        """Show error dialog"""
+        show_error(self, message=msg)

@@ -25,14 +25,14 @@ class UserProfileWidget(QWidget):
 
         self.profile_btn = QPushButton(self)
         self.profile_btn.setText(initial)
-        self.profile_btn.setFixedSize(160, 160)
+        self.profile_btn.setFixedSize(120, 120)
         self.profile_btn.setObjectName("profileCircleButton")
 
         self.name_label = QLabel(self)
         self.name_label.setObjectName("profileNameLabel")
         self.name_label.setText(username)
-        self.name_label.setFixedWidth(160)
-        self.name_label.setStyleSheet("font-size: 18pt;")
+        self.name_label.setFixedWidth(120)
+        self.name_label.setStyleSheet("font-size: 15pt;")
         self.name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         if on_click is not None:
