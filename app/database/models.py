@@ -90,10 +90,11 @@ class Category:
     name: str = ""
     operation_type: Optional[OperationType] = None
     color: str = field(default="#0085FC")
+    is_protected: bool = field(default=0)
     id: Optional[int] = None
 
     # Column order must match from_row() index mapping
-    COLUMNS = "id, wallet_id, parent_id, name, operation_type, color"
+    COLUMNS = "id, wallet_id, parent_id, name, operation_type, color, is_protected"
 
     @classmethod
     def from_row(cls, row: tuple) -> "Category":
@@ -104,6 +105,7 @@ class Category:
             name=row[3],
             operation_type=OperationType(row[4]) if row[4] else None,
             color=row[5],
+            is_protected=row[6],
         )
 
 

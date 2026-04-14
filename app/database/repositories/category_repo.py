@@ -19,8 +19,9 @@ class CategoryRepo(BaseRepo):
                     PARENT_ID,
                     NAME,
                     OPERATION_TYPE,
-                    COLOR)
-                VALUES (?, ?, ?, ?, ?)
+                    COLOR,
+                    IS_PROTECTED)
+                VALUES (?, ?, ?, ?, ?, ?)
                 """,
                 (
                     category.wallet_id,
@@ -28,6 +29,7 @@ class CategoryRepo(BaseRepo):
                     category.name,
                     category.operation_type,
                     category.color,
+                    category.is_protected,
                 ),
             )
             category.id = cursor.lastrowid
@@ -117,6 +119,7 @@ class CategoryRepo(BaseRepo):
                     NAME = ?,
                     OPERATION_TYPE = ?,
                     COLOR = ?
+                    IS_PROTECTED = ?
                 WHERE
                     ID = ?
                 """,
@@ -125,6 +128,7 @@ class CategoryRepo(BaseRepo):
                     category.name,
                     category.operation_type,
                     category.color,
+                    category.is_protected,
                     category.id,
                 ),
             )

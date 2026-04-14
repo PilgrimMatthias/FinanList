@@ -42,7 +42,11 @@ class TransactionService:
 
     def get_all_main_categories(self, wallet_id: int) -> list[Category]:
         """Method to get all main categories for the wallet"""
-        return self.category_repo.get_main_categories(wallet_id=wallet_id)
+        return [
+            category
+            for category in self.category_repo.get_main_categories(wallet_id=wallet_id)
+            if not category.is_protected
+        ]
 
     def get_all_sub_categories(self, name: str, wallet_id=None) -> list[Category]:
         """Method to get all sub categories for the wallet"""
@@ -50,7 +54,11 @@ class TransactionService:
             name=name,
             wallet_id=wallet_id or self.app_state.active_wallet_id,
         )
-        return self.category_repo.get_subcategories(parent_id=parent.id)
+        return [
+            category
+            for category in self.category_repo.get_subcategories(parent_id=parent.id)
+            if not category.is_protected
+        ]
 
     def validate_start_date(
         self, start_date: datetime, interval: RecurrenceInterval

@@ -104,6 +104,15 @@ class AuthService:
                 )
                 temp_sub_category = self.category_repo.create(temp_sub_category)
 
+        # Uncathegorized category
+        temp_sub_category = Category(
+            wallet_id=new_wallet.id,
+            name="Uncategorized",
+            operation_type=OperationType.EXPENSE,
+            is_protected=True,
+        )
+        temp_sub_category = self.category_repo.create(temp_sub_category)
+
         # Update state
         self.app_state.set_active_user(user_id=new_user.id)
         self.app_state.set_active_wallet(wallet_id=new_wallet.id)

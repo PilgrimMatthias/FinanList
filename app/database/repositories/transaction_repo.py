@@ -128,3 +128,17 @@ class TransactionRepo(BaseRepo):
     def delete_by_id(self, id: int) -> None:
         with self.db.transaction():
             self.db.execute("DELETE FROM TRANSACTIONS WHERE ID = ?", (id,))
+
+    def reassign_category(self, from_category_id: int, to_category_id: int):
+        with self.db.transaction():
+            self.db.execute(
+                "UPDATE TRANSACTIONS SET CATEGORY_ID = ? WHERE CATEGORY_ID = ?",
+                (to_category_id, from_category_id),
+            )
+
+    def exists_by_category(self, category_id: int) -> bool:
+        row = self.db.execute(
+            "SELECT 1 FROM TRANSACTIONS WHERE CATEGORY_ID = ? LIMIT 1",
+            (category_id,),
+        ).fetchone()
+        return row is not None
