@@ -1,4 +1,3 @@
-from PySide6.QtGui import QDoubleValidator
 from PySide6.QtWidgets import QWidget, QLabel, QComboBox, QVBoxLayout
 
 
@@ -60,6 +59,9 @@ class ComboBox(QWidget):
     def get_data(self):
         """Returns the userData of the currently selected item."""
         return self.combo_box.currentData()
+
+    def set_value(self, value):
+        self.combo_box.setCurrentText(value)
 
     def update_items(self, items: list[str]):
         """Update items in combobox"""

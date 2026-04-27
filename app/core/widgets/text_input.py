@@ -15,6 +15,7 @@ class TextInput(QWidget):
         parent=None,
         text: str = None,
         placeholder: str = None,
+        default_text: str = None,
         validate_number=False,
         is_multiline=False,
     ):
@@ -45,6 +46,9 @@ class TextInput(QWidget):
             self.text_input = ResizableTextEdit(self, visible_lines=3)
         else:
             self.text_input = QLineEdit(self)
+
+        if default_text is not None:
+            self.text_input.setText(default_text)
 
         if placeholder is not None:
             self.text_input.setPlaceholderText(placeholder)
