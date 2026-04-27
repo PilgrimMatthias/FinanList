@@ -6,7 +6,7 @@ from .savings.view import SavingsView
 from .settings.view import SettingsView
 from .upcoming.view import UpcomingView
 from .wallets.view import WalletsView
-from .categories.view import CategoriesView
+from .categories import CategoriesView, CategoryService
 from .profile.view import ProfileView
 from .transaction import TransactionView, TransactionService
 from .auth import AuthView, AuthService
@@ -20,6 +20,7 @@ __all__ = [
     "SettingsView",
     "UpcomingView",
     "CategoriesView",
+    "CategoryService",
     "WalletsView",
     "ProfileView",
     "TransactionView",

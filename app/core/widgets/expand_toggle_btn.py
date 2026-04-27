@@ -58,5 +58,5 @@ class ExpandToggleButton(QPushButton):
         return self._expanded
 
     def _update_icon(self):
-        self.setIcon(self._down_icon if not self._expanded else self._right_icon)
+        self.setIcon(self._down_icon if self._expanded else self._right_icon)
         self.setIconSize(self.size())

@@ -32,6 +32,7 @@ from app.features import (
     UpcomingView,
     WalletsView,
     CategoriesView,
+    CategoryService,
     ProfileView,
     AuthView,
     AuthService,
@@ -70,6 +71,13 @@ class MainWindow(QMainWindow):
             app_state=self.app_state,
         )
         self.transaction_service = TransactionService(
+            wallet_repo=self.wallet_repo,
+            category_repo=self.category_repo,
+            transaction_repo=self.transaction_repo,
+            recurring_transaction_repo=self.recurring_repo,
+            app_state=self.app_state,
+        )
+        self.category_service = CategoryService(
             wallet_repo=self.wallet_repo,
             category_repo=self.category_repo,
             transaction_repo=self.transaction_repo,
@@ -201,7 +209,9 @@ class MainWindow(QMainWindow):
         self.upcoming_section = UpcomingView()
         self.savings_section = SavingsView()
         self.investment_section = InvestmentView()
-        self.categories_section = CategoriesView()
+        self.categories_section = CategoriesView(
+            service=self.category_service, app_state=self.app_state, parent=self
+        )
         self.wallets_window = WalletsView()
         self.settings_window = SettingsView()
         self.profile_window = ProfileView()
@@ -238,9 +248,6 @@ class MainWindow(QMainWindow):
         """
         self.user_menu = QMenu(self)
         self.user_menu.setObjectName("DropDownMenu")
-        self.user_menu.setStyleSheet(
-            "#DropDownMenu {border: 2px solid #b5c0c9; border-radius:10px;}"
-        )
 
         # Widget for holding buttons
         menu_widget = QWidget(self)
@@ -309,14 +316,11 @@ class MainWindow(QMainWindow):
         )
 
     def add_transaction(self):
-        self.new_transaction = TransactionView(
-            parent=self, service=self.transaction_service
-        )
+        dialog = TransactionView(parent=self, service=self.transaction_service)
 
-        self.new_transaction.show()
+        dialog.show()
 
     def log_in(self):
-        print("logging in")
         self.root_widget.setCurrentIndex(1)
 
     def log_out(self):
@@ -324,5 +328,6 @@ class MainWindow(QMainWindow):
         Method used for showing window with user wallets.
         """
         self.user_menu.hide()
+        self.app_state.set_active_user(None)
+        self.app_state.set_active_wallet(None)
         self.root_widget.setCurrentIndex(0)
-        # TO-DO()

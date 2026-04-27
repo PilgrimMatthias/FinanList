@@ -220,3 +220,8 @@ QLabel#logoLabel { font-size: 25pt; color: #ffffff; }
 
 
 QLabel#transactionLabel { font-size: 18pt; font-weight:bold; color: #ffffff;}
+
+QMenu#DropDownMenu {
+    border: 2px solid #b5c0c9; 
+    border-radius:10px;
+    }

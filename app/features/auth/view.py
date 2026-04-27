@@ -273,3 +273,9 @@ class AuthView(QWidget):
     def _show_error(self, msg: str):
         """Show error dialog"""
         show_error(self, message=msg)
+
+    def showEvent(self, event):
+        """Override showEvent - refreshes user list"""
+        super().showEvent(event)
+        self._refresh_user_list()
+        self.stack_widget.setCurrentIndex(0)
