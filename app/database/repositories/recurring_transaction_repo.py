@@ -181,3 +181,10 @@ class RecurringTransactionRepo(BaseRepo):
             (category_id,),
         ).fetchone()
         return row is not None
+
+    def count_by_category(self, category_id: int) -> int:
+        count = self.db.execute(
+            "SELECT COUNT(*) FROM RECURRING_TRANSACTIONS WHERE CATEGORY_ID = ?",
+            (category_id,),
+        ).fetchone()
+        return count[0] if count else 0

@@ -118,7 +118,7 @@ class CategoryRepo(BaseRepo):
                     PARENT_ID = ?,
                     NAME = ?,
                     OPERATION_TYPE = ?,
-                    COLOR = ?
+                    COLOR = ?,
                     IS_PROTECTED = ?
                 WHERE
                     ID = ?
