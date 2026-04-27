@@ -1,5 +1,6 @@
 # main.py
 import os, sys, locale
+from PySide6.QtCore import QDir
 from PySide6.QtWidgets import QApplication
 from app.config import DATA_DIR, DB_PATH
 from app.database.connection import Database
@@ -21,6 +22,19 @@ def main():
 
     theme = ThemeManager(app)
     theme.apply_theme("light")
+
+    QDir.addSearchPath(
+        "images",
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "images"),
+    )
+    QDir.addSearchPath(
+        "icons",
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "icons"),
+    )
+    QDir.addSearchPath(
+        "svg",
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "svg"),
+    )
 
     window = MainWindow(database=db)
     window.show()

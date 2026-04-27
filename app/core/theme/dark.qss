@@ -90,7 +90,7 @@ QDateEdit::down-arrow {
 }
 
 /* --- Buttons --- */
-QPushButton {
+QPushButton, QRadioButton {
     background-color: #353535;
     color: #ffffff;
     border: none;
@@ -98,11 +98,11 @@ QPushButton {
     padding: 6px 12px;
 }
 
-QPushButton:hover {
+QPushButton:hover, QRadioButton:hover {
     background-color: #4a4a4a;
 }
 
-QPushButton:pressed {
+QPushButton:pressed, QRadioButton:pressed {
     background-color: #2a82da;
 }
 
