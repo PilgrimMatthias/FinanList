@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="80" height="80">
+  <!-- Document/receipt shape -->
+  <rect x="22" y="8" width="36" height="48" rx="3" ry="3"
+        fill="none" stroke="{{ICON_COLOR}}" stroke-width="2" opacity="0.35"/>
+  <!-- Torn bottom edge -->
+  <path d="M22,56 L27,52 L32,56 L37,52 L42,56 L47,52 L52,56 L57,52 L58,56"
+        fill="none" stroke="{{ICON_COLOR}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.35"/>
+  <!-- Receipt lines -->
+  <line x1="30" y1="20" x2="50" y2="20" stroke="{{ICON_COLOR}}" stroke-width="2" stroke-linecap="round" opacity="0.25"/>
+  <line x1="30" y1="28" x2="46" y2="28" stroke="{{ICON_COLOR}}" stroke-width="2" stroke-linecap="round" opacity="0.25"/>
+  <line x1="30" y1="36" x2="42" y2="36" stroke="{{ICON_COLOR}}" stroke-width="2" stroke-linecap="round" opacity="0.25"/>
+  <!-- Empty/none circle -->
+  <circle cx="54" cy="58" r="15" fill="none" stroke="{{ICON_COLOR}}" stroke-width="2" opacity="0.45"/>
+  <!-- Slash through circle -->
+  <line x1="43.4" y1="68.6" x2="64.6" y2="47.4" stroke="{{ICON_COLOR}}" stroke-width="2" stroke-linecap="round" opacity="0.45"/>
+</svg>

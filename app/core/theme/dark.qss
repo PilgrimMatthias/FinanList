@@ -225,3 +225,317 @@ QMenu#DropDownMenu {
     border: 2px solid #b5c0c9; 
     border-radius:10px;
     }
+
+/* ==========================================
+   QTABLEVIEW STYLING
+   Append to dark.qss
+   ========================================== */
+
+QTableView {
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+    border: 0.5px solid #45475a;
+    border-radius: 8px;
+    gridline-color: transparent;
+    selection-background-color: transparent;
+    selection-color: #cdd6f4;
+    outline: 0;
+}
+
+QTableView::item {
+    padding: 10px 14px;
+    border-bottom: 0.5px solid #313244;
+    border-radius: 0;
+}
+
+QTableView::item:hover {
+    background-color: #313244;
+}
+
+QTableView::item:selected {
+    background-color: #313244;
+    color: #cdd6f4;
+}
+
+QTableView::item:selected:hover {
+    background-color: #3a3a52;
+}
+
+QTableView::item:focus {
+    outline: 0;
+    border: none;
+}
+
+/* --- Header --- */
+QHeaderView {
+    background-color: transparent;
+    border: none;
+}
+
+QHeaderView::section {
+    background-color: #1a1a26;
+    color: #a6adc8;
+    padding: 10px 14px;
+    border: none;
+    border-bottom: 0.5px solid #45475a;
+    font-weight: 500;
+    font-size: 13px;
+}
+
+QHeaderView::section:hover {
+    background-color: #25253a;
+    color: #cdd6f4;
+}
+
+QHeaderView::section:first {
+    border-top-left-radius: 8px;
+}
+
+QHeaderView::section:last {
+    border-top-right-radius: 8px;
+}
+
+QHeaderView::down-arrow,
+QHeaderView::up-arrow {
+    subcontrol-position: center right;
+    subcontrol-origin: padding;
+    right: 8px;
+    width: 10px;
+    height: 10px;
+}
+
+
+/* --- Corner button (top-left, between headers and scrollbars) --- */
+QTableCornerButton::section {
+    background-color: #1a1a26;
+    border: none;
+    border-bottom: 0.5px solid #45475a;
+}
+
+/* --- Scrollbars (for table) --- */
+QTableView QScrollBar:vertical {
+    background-color: transparent;
+    width: 10px;
+    margin: 4px 2px 4px 0;
+    border: none;
+}
+
+QTableView QScrollBar::handle:vertical {
+    background-color: #45475a;
+    border-radius: 4px;
+    min-height: 30px;
+}
+
+QTableView QScrollBar::handle:vertical:hover {
+    background-color: #585b70;
+}
+
+QTableView QScrollBar::add-line:vertical,
+QTableView QScrollBar::sub-line:vertical {
+    height: 0;
+    background: none;
+    border: none;
+}
+
+QTableView QScrollBar:horizontal {
+    background-color: transparent;
+    height: 10px;
+    margin: 0 4px 2px 4px;
+    border: none;
+}
+
+QTableView QScrollBar::handle:horizontal {
+    background-color: #45475a;
+    border-radius: 4px;
+    min-width: 30px;
+}
+
+QTableView QScrollBar::handle:horizontal:hover {
+    background-color: #585b70;
+}
+
+QTableView QScrollBar::add-line:horizontal,
+QTableView QScrollBar::sub-line:horizontal {
+    width: 0;
+    background: none;
+    border: none;
+}
+
+QLabel#infoBanner {
+    background-color: #1a3a5c;
+    color: #89b4fa;
+    border: 1px solid #2a5a8c;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 12px;
+}
+
+/*  CALENDAR POPUP STYLING - DARK THEME */
+
+/* --- Calendar container --- */
+QCalendarWidget {
+    background-color: #1e1e2e;
+    border: 1px solid #45475a;
+    border-radius: 8px;
+}
+
+/* --- Navigation bar (month/year header) --- */
+QCalendarWidget QWidget#qt_calendar_navigationbar {
+    background-color: #1a1a26;
+    border-bottom: 1px solid #45475a;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    padding: 4px 8px;
+}
+
+/* --- Month/Year label --- */
+QCalendarWidget QToolButton {
+    color: #cdd6f4;
+    font-size: 13px;
+    font-weight: 500;
+    background-color: transparent;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    margin: 2px;
+}
+
+QCalendarWidget QToolButton:hover {
+    background-color: #313244;
+}
+
+QCalendarWidget QToolButton:pressed {
+    background-color: #45475a;
+}
+
+/* --- Prev/Next month arrows --- */
+QCalendarWidget QToolButton#qt_calendar_prevmonth {
+    qproperty-icon: none;
+    qproperty-text: "◀";
+    font-size: 10px;
+    padding: 4px 8px;
+}
+
+QCalendarWidget QToolButton#qt_calendar_nextmonth {
+    qproperty-icon: none;
+    qproperty-text: "▶";
+    font-size: 10px;
+    padding: 4px 8px;
+}
+
+/* --- Month dropdown (QMenu) --- */
+QCalendarWidget QMenu {
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+    border: 1px solid #45475a;
+    border-radius: 6px;
+    padding: 4px;
+}
+
+QCalendarWidget QMenu::item {
+    padding: 6px 16px;
+    border-radius: 4px;
+}
+
+QCalendarWidget QMenu::item:selected {
+    background-color: #2a82da;
+    color: #ffffff;
+}
+
+/* --- Year spinbox --- */
+QCalendarWidget QSpinBox {
+    color: #cdd6f4;
+    background-color: #313244;
+    border: 1px solid #45475a;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 13px;
+    selection-background-color: #2a82da;
+    selection-color: #ffffff;
+}
+
+QCalendarWidget QSpinBox::up-button,
+QCalendarWidget QSpinBox::down-button {
+    subcontrol-origin: border;
+    width: 18px;
+    background-color: #45475a;
+    border: none;
+}
+
+QCalendarWidget QSpinBox::up-button {
+    border-top-right-radius: 4px;
+    subcontrol-position: top right;
+}
+
+QCalendarWidget QSpinBox::down-button {
+    border-bottom-right-radius: 4px;
+    subcontrol-position: bottom right;
+}
+
+QCalendarWidget QSpinBox::up-button:hover,
+QCalendarWidget QSpinBox::down-button:hover {
+    background-color: #585b70;
+}
+
+QCalendarWidget QSpinBox::up-arrow {
+    image: url(svg:up_arrow.svg);
+    width: 8px;
+    height: 8px;
+}
+
+QCalendarWidget QSpinBox::down-arrow {
+    image: url(svg:down_arrow.svg);
+    width: 8px;
+    height: 8px;
+}
+
+/* --- Day header (Mon, Tue, Wed...) --- */
+QCalendarWidget QWidget {
+    alternate-background-color: transparent;
+}
+
+QCalendarWidget QAbstractItemView:enabled {
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+    font-size: 13px;
+    selection-background-color: #2a82da;
+    selection-color: #ffffff;
+    outline: 0;
+    border: none;
+}
+
+/* --- Day cells --- */
+QCalendarWidget QAbstractItemView::item {
+    padding: 6px;
+    margin: 1px;
+    border-radius: 4px;
+}
+
+QCalendarWidget QAbstractItemView::item:hover {
+    background-color: #313244;
+}
+
+QCalendarWidget QAbstractItemView::item:selected {
+    background-color: #2a82da;
+    color: #ffffff;
+    border-radius: 4px;
+}
+
+/* --- Today highlight --- */
+QCalendarWidget QAbstractItemView::item:focus {
+    background-color: #45475a;
+    border: 1px solid #2a82da;
+    border-radius: 4px;
+}
+
+/* --- Days from other months (grayed) --- */
+QCalendarWidget QAbstractItemView:disabled {
+    color: #585b70;
+}
+
+/* --- Weekday header row --- */
+QCalendarWidget QWidget#qt_calendar_calendarview {
+    background-color: #1e1e2e;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}

@@ -1,6 +1,6 @@
 from .analysis.view import AnalysisView
 from .dashboard.view import DashboardView
-from .history.view import HistoryView
+from .history import HistoryView, HistoryService
 from .investments.view import InvestmentView
 from .savings.view import SavingsView
 from .settings.view import SettingsView
@@ -15,6 +15,7 @@ __all__ = [
     "AnalysisView",
     "DashboardView",
     "HistoryView",
+    "HistoryService",
     "InvestmentView",
     "SavingsView",
     "SettingsView",

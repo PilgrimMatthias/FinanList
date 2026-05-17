@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="80" height="80">
+  <!-- Open box base -->
+  <path d="M16 36 L40 48 L64 36 L64 58 Q64 62 60 62 L20 62 Q16 62 16 58 Z"
+        fill="none" stroke="{{ICON_COLOR}}" stroke-width="2" stroke-linejoin="round" opacity="0.3"/>
+  <!-- Box lid flaps -->
+  <path d="M16 36 L10 28 L40 16 L70 28 L64 36 L40 48 Z"
+        fill="none" stroke="{{ICON_COLOR}}" stroke-width="2" stroke-linejoin="round" opacity="0.4"/>
+  <!-- Center divider -->
+  <line x1="40" y1="48" x2="40" y2="62" stroke="{{ICON_COLOR}}" stroke-width="1.5" opacity="0.2"/>
+  <!-- Rising sparkle lines (nothing inside) -->
+  <line x1="33" y1="26" x2="33" y2="20" stroke="{{ICON_COLOR}}" stroke-width="1.5" stroke-linecap="round" opacity="0.25"/>
+  <line x1="40" y1="24" x2="40" y2="16" stroke="{{ICON_COLOR}}" stroke-width="1.5" stroke-linecap="round" opacity="0.3"/>
+  <line x1="47" y1="26" x2="47" y2="20" stroke="{{ICON_COLOR}}" stroke-width="1.5" stroke-linecap="round" opacity="0.25"/>
+</svg>
