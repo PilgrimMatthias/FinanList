@@ -1,6 +1,15 @@
 from .base_repo import BaseRepo
 from ..models import Transaction
 
+SORT_COLUMNS = {
+    "date": "t.date",
+    "amount": "t.amount",
+    "merchant": "t.merchant",
+    "title": "t.title",
+    "type": "t.operation_type",
+    "category": "sub_cat.name",
+}
+
 
 class TransactionRepo(BaseRepo):
     """Handles CRUD for financial operations."""
@@ -149,3 +158,145 @@ class TransactionRepo(BaseRepo):
             (category_id,),
         ).fetchone()
         return count[0] if count else 0
+
+    def get_paginated(
+        self,
+        wallet_id: int,
+        page: int = 1,
+        page_size: int = 100,
+        sort_by: str = "date",
+        sort_order: str = "DESC",
+        search: str = "",
+    ) -> list[tuple]:
+        # TODO: implement search option
+        offset = (page - 1) * page_size
+        sort_column = SORT_COLUMNS[sort_by]
+
+        if sort_by == "amount":
+            # Sort by signed amount so expenses and income order intuitively
+            sort_column = """
+            CASE 
+                WHEN T.OPERATION_TYPE = 'Income' then T.AMOUNT
+                ELSE -T.AMOUNT
+            END 
+            """
+
+        sort_direction = "DESC" if sort_order.upper() == "DESC" else "ASC"
+
+        query = f"""
+            SELECT
+                T.ID,
+                T.WALLET_ID,
+                T.CATEGORY_ID,
+                T.TITLE,
+                T.DESCRIPTION,
+                T.DATE,
+                T.OPERATION_TYPE,
+                T.AMOUNT,
+                T.MERCHANT,
+                T.RECURRING_ID,
+                T.CREATED_AT,
+                MAIN_CAT.NAME AS MAIN_NAME,
+                MAIN_CAT.COLOR AS MAIN_COLOR,
+                SUB_CAT.NAME AS SUB_MAIN,
+                SUB_CAT.COLOR AS SUB_COLOR
+            FROM
+                TRANSACTIONS T
+            LEFT JOIN CATEGORIES SUB_CAT 
+            ON
+                T.CATEGORY_ID == SUB_CAT.ID
+            LEFT JOIN CATEGORIES MAIN_CAT
+            ON
+                SUB_CAT.PARENT_ID == MAIN_CAT.ID
+            WHERE T.WALLET_ID = ?
+                and (t.title like ?
+                or t.DESCRIPTION  like ?
+                or t.DATE like ?
+                or t.AMOUNT like ?
+                or t.MERCHANT like ?)
+            ORDER BY {sort_column} {sort_direction}
+            LIMIT ? OFFSET ?
+        """
+        search_pattern = f"%{search}%"
+        params = (
+            wallet_id,
+            search_pattern,
+            search_pattern,
+            search_pattern,
+            search_pattern,
+            search_pattern,
+            page_size,
+            offset,
+        )
+        rows = self.db.execute(query=query, params=params).fetchall()
+
+        return rows
+
+    def get_exported(self, wallet_id: int, ids: list[int]):
+        placeholders = ",".join(["?" for _ in ids])
+
+        query = f"""
+            SELECT
+                T.TITLE,
+                WALLETS.NAME as WALLET_NAME,
+                MAIN_CAT.NAME AS MAIN_CATEGORY_NAME,
+                SUB_CAT.NAME AS SUB_CATEGORY_NAME,
+                T.DESCRIPTION,
+                T.DATE,
+                T.OPERATION_TYPE,
+                T.MERCHANT,
+                T.AMOUNT,
+                WALLETS.CURRENCY
+            FROM
+                TRANSACTIONS T
+            LEFT JOIN WALLETS 
+            ON
+                T.WALLET_ID  == WALLETS.ID
+            LEFT JOIN CATEGORIES SUB_CAT 
+            ON
+                T.CATEGORY_ID == SUB_CAT.ID
+            LEFT JOIN CATEGORIES MAIN_CAT
+            ON
+                SUB_CAT.PARENT_ID == MAIN_CAT.ID
+            WHERE
+                T.WALLET_ID = ?
+                AND T.ID IN ({placeholders})
+        """
+        params = (wallet_id, *ids)
+        rows = self.db.execute(query=query, params=params).fetchall()
+
+        return rows
+
+    def get_count(self, wallet_id: int, search: str = "") -> int:
+        query = """
+            SELECT
+                COUNT(*)
+            FROM
+                TRANSACTIONS T
+            WHERE T.WALLET_ID = ?
+                and (t.title like ?
+                or t.DESCRIPTION  like ?
+                or t.DATE like ?
+                or t.AMOUNT like ?
+                or t.MERCHANT like ?)
+        """
+        search_pattern = f"%{search}%"
+        params = (
+            wallet_id,
+            search_pattern,
+            search_pattern,
+            search_pattern,
+            search_pattern,
+            search_pattern,
+        )
+        count = self.db.execute(query=query, params=params).fetchone()
+
+        return count[0] if count else 0
+
+    def delete_many(self, ids: list[int]) -> None:
+        placeholders = ",".join(["?" for _ in ids])
+        with self.db.transaction():
+            self.db.execute(
+                f"DELETE FROM TRANSACTIONS WHERE ID IN ({placeholders})",
+                tuple(ids),
+            )
