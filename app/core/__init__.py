@@ -13,6 +13,7 @@ from .widgets.confirmation_dialog import show_confirmation
 from .widgets.radio_input import RadioInput
 from .widgets.color_picker import ColorPicker, ColorCircle
 from .widgets.expand_toggle_btn import ExpandToggleButton
+from .widgets.svg_icon import SvgIcon
 
 __all__ = [
     "AppState",
@@ -28,6 +29,7 @@ __all__ = [
     "RadioInput",
     "ColorPicker",
     "ColorCircle",
+    "SvgIcon",
     "ExpandToggleButton",
     "center_window," "filter_func," "is_number," "is_date",
     "set_next_due_date",

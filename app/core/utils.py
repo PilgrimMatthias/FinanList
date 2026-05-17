@@ -126,3 +126,20 @@ def set_next_due_date(start_date: datetime, interval: RecurrenceInterval) -> dat
         return next_due_date
 
     return start_date
+
+
+def cast_date_to_proper_format(date: str, format: str = "%d.%m.%Y"):
+    # new_date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+    new_date = datetime.strptime(date, "%Y-%m-%d")
+
+    return new_date.strftime(format=format)
+
+
+# def cast_str_to_datetime(date: datetime, format="%Y-%m-%d %H:%M:%S"):
+def cast_str_to_datetime(date: datetime, format="%Y-%m-%d"):
+    try:
+        new_date = datetime.strptime(date, format)
+
+        return new_date
+    except Exception as e:
+        return date

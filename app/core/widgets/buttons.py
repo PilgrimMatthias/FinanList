@@ -46,9 +46,12 @@ class PushButton(QPushButton):
         clicked_btn_style = "background-color: {0}; border-style: solid; border-color: {0}; border-width: 2px; border-radius: 10px; font-size: {1}pt; font-weight:{2};".format(
             bg_color_clicked, font_size, "bold" if bold_font else "normal"
         )
-        self.setText(text)
 
-        self.setStyleSheet(
+        disabled_btn_style = "background-color: {0}; border-style: solid; border-color: {0}; border-width: 2px; border-radius: 10px; font-size: {1}pt; font-weight:{2};".format(
+            "#d9d9d9", font_size, "bold" if bold_font else "normal"
+        )
+
+        self.enabled_stylesheet = (
             "QPushButton {"
             + (btn_style if not alternate_look else alternate_btn_style)
             + "} "
@@ -56,6 +59,18 @@ class PushButton(QPushButton):
             + (clicked_btn_style if not alternate_look else alternate_clicked_btn_style)
             + "} "
         )
+
+        self.disabled_stylesheet = (
+            "QPushButton {"
+            + (disabled_btn_style)
+            + "} "
+            + "QPushButton::pressed {"
+            + (disabled_btn_style)
+            + "} "
+        )
+
+        self.setText(text)
+        self.setStyleSheet(self.enabled_stylesheet)
         self.setMinimumHeight(height)
         self.setMaximumHeight(height)
         self.setMinimumWidth(width)
@@ -72,3 +87,17 @@ class PushButton(QPushButton):
     def set_btn_text(self, text) -> None:
         """set button text"""
         self.setText(text)
+
+    def set_width(self, width: int):
+        """Set width for button"""
+        self.setMinimumWidth(width)
+        self.setMaximumWidth(width)
+
+    def set_enabled(self, enabled: bool):
+        self.setEnabled(enabled)
+
+        if self.isEnabled():
+
+            self.setStyleSheet(self.enabled_stylesheet)
+        else:
+            self.setStyleSheet(self.disabled_stylesheet)

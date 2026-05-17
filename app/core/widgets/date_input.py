@@ -12,6 +12,7 @@ class DateInput(QWidget):
         on_date_change=None,
         nullable=False,
         placeholder="Select date",
+        default_date: date = None,
     ):
         """
          Date input box with placeholder and label of the box.
@@ -21,6 +22,7 @@ class DateInput(QWidget):
             on_date_change (_type_, optional): on date change function. Defaults to None.
             nullable (bool, optional): can date input be blank (null). Defaults to False.
             placeholder (str, optional): placeholder for nullabel box. Defaults to "Select date".
+            default_date (date, optional): .default date to fill. Defaults to None,
         """
         super().__init__(parent)
 
@@ -45,6 +47,10 @@ class DateInput(QWidget):
             self.date_input.setDate(self.date_input.minimumDate())
         else:
             self.date_input.setDate(QDate.currentDate())
+
+        if default_date is not None:
+            date = QDate.fromString(default_date, "yyyy-MM-dd")
+            self.date_input.setDate(date)
 
         if on_date_change is not None:
             self.date_input.dateChanged.connect(on_date_change)
@@ -78,3 +84,7 @@ class DateInput(QWidget):
         if self.date_input.date().toPython() is None:
             return False
         return True
+
+    def set_label_text(self, text: str):
+        """Update text above input"""
+        self.label.setText(text)
