@@ -101,7 +101,7 @@ class HistoryTableModel(QAbstractTableModel):
                 amount = row.transaction.amount
                 op_type = row.transaction.operation_type
                 sign = "+" if op_type == OperationType.INCOME else "−"
-                return f"{sign}{amount:,.2f}"
+                return f"{sign}{amount:,.2f}".replace(",", " ").replace(".", ",")
 
         if role == Qt.TextAlignmentRole:
             if col in [

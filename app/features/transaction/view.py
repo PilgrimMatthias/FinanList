@@ -335,7 +335,7 @@ class TransactionView(QDialog):
 
     def _set_amount(self):
         return (
-            f"{self.transaction.amount:,.2f}".replace(".", ",")
+            f"{self.transaction.amount:,.2f}".replace(",", " ").replace(".", ",")
             if self.transaction is not None
             else None
         )
