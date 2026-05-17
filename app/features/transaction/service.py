@@ -60,6 +60,21 @@ class TransactionService:
             if not category.is_protected
         ]
 
+    def get_main_category_by_id(self, sub_id: int) -> Category:
+        """Method to get all sub categories for the wallet"""
+        sub_category = self.category_repo.get_by_id(id=sub_id)
+        main_category = self.category_repo.get_by_id(id=sub_category.parent_id)
+
+        return main_category
+
+    def get_sub_category_by_id(self, id: int) -> Category:
+        """Method to get all sub categories for the wallet"""
+        category = self.category_repo.get_by_id(id=id)
+        return category
+
+    def get_recurring_transaction_by_id(self, id: int) -> RecurringTransaction:
+        return self.recurring_transaction_repo.get_by_id(id=id)
+
     def validate_start_date(
         self, start_date: datetime, interval: RecurrenceInterval
     ) -> datetime | None:
@@ -216,3 +231,27 @@ class TransactionService:
             self.transaction_repo.create(transaction=new_transaction)
 
             self.app_state.emit_transaction_change()
+
+    def _validate_update(self, transaction: Transaction | RecurringTransaction):
+        if transaction.amount <= 0:
+            raise ValidationError("Amount must be positive")
+        if not transaction.title.strip():
+            raise ValidationError("Title is required")
+
+    def update_transaction(
+        self,
+        transaction: Transaction,
+    ):
+        self._validate_update(transaction=transaction)
+        self.transaction_repo.update(transaction=transaction)
+
+        self.app_state.emit_transaction_change()
+
+    def update_recurring_transaction(
+        self,
+        transaction: RecurringTransaction,
+    ):
+        self._validate_update(transaction=transaction)
+        self.recurring_transaction_repo.update(transaction=transaction)
+
+        self.app_state.emit_recurring_transaction_change()
