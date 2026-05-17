@@ -26,6 +26,7 @@ from app.features import (
     DashboardView,
     AnalysisView,
     HistoryView,
+    HistoryService,
     InvestmentView,
     SavingsView,
     SettingsView,
@@ -83,6 +84,9 @@ class MainWindow(QMainWindow):
             transaction_repo=self.transaction_repo,
             recurring_transaction_repo=self.recurring_repo,
             app_state=self.app_state,
+        )
+        self.history_service = HistoryService(
+            transaction_repo=self.transaction_repo, app_state=self.app_state
         )
 
         # Connect app state
@@ -205,7 +209,11 @@ class MainWindow(QMainWindow):
         # Creating app sections
         self.dashboard_section = DashboardView()
         self.analysis_section = AnalysisView()
-        self.history_section = HistoryView()
+        self.history_section = HistoryView(
+            service=self.history_service,
+            transaction_service=self.transaction_service,
+            app_state=self.app_state,
+        )
         self.upcoming_section = UpcomingView()
         self.savings_section = SavingsView()
         self.investment_section = InvestmentView()

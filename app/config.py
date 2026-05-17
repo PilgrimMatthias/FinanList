@@ -7,7 +7,7 @@ APP_AUTHOR = "STASIMAC"
 APP_LOGO = "logo.svg"
 
 # Window settings
-WINDOW_WIDTH = 900
+WINDOW_WIDTH = 1000
 WINDOW_HEIGHT = 600
 
 
@@ -20,6 +20,9 @@ SVG_DIR = Path(__file__).resolve().parent.parent / "assets" / "svg"
 APP_LOGO_SVG = ICONS_DIR / APP_LOGO
 DOWN_ARROW_ICON = SVG_DIR / "down_arrow.svg"
 RIGHT_ARROW_ICON = SVG_DIR / "right_arrow.svg"
+SEARCH_ICON = SVG_DIR / "search_icon.svg"
+EMPTY_TRANSACTIONS = SVG_DIR / "empty_transactions.svg"
+EMPTY_BOX = SVG_DIR / "empty_box.svg"
 
 # New transaction window
 TRANSACTION_WINDOW_WIDTH = 500
