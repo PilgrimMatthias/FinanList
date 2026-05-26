@@ -56,3 +56,27 @@ class WalletRepo(BaseRepo):
             )
 
         return self.get_by_user_id(user_id=wallet.user_id)
+
+    def get_balance(self, wallet_id: int) -> float:
+        """Returns balance of wallet
+
+        Counted as Initial Balance + sum of Incomes - sum of other operation types
+        """
+        query = """
+            SELECT 
+                w.INITIAL_BALANCE + COALESCE(SUM(CASE 
+                    WHEN T.OPERATION_TYPE <> "Income" then -T.AMOUNT 
+                    ELSE T.AMOUNT
+                END),0) AS BALANCE
+            FROM WALLETS w
+            LEFT JOIN TRANSACTIONS t
+            on t.WALLET_ID = w.ID 
+            where w.id = ?;
+        """
+        balance = self.db.execute(query=query, params=(wallet_id,)).fetchone()
+
+        return balance[0] if balance else 0
+
+    def delete_by_id(self, wallet_id: int):
+        with self.db.transaction():
+            self.db.execute("DELETE FROM WALLETS WHERE ID = ?", (wallet_id,))
