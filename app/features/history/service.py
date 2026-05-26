@@ -1,7 +1,5 @@
 from app.core import AppState
 from app.database.repositories import (
-    # WalletRepo,
-    # CategoryRepo,
     TransactionRepo,
 )
 from app.database.models import Transaction
