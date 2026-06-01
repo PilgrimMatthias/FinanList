@@ -33,21 +33,21 @@ class PushButton(QPushButton):
         """
         super().__init__()
 
-        alternate_btn_style = "background-color: #ffffff; border-style: solid; border-color: {0}; border-width: 2px; border-radius: 10px; font-size: {1}pt; color:{0}; font-weight:{2};".format(
+        alternate_btn_style = "background-color: #ffffff; border-style: solid; border-color: {0}; border-width: 2px; border-radius: 10px; font-size: {1}pt; color:{0}; font-weight:{2}; padding: 0px;".format(
             bg_color, font_size, "bold" if bold_font else "normal"
         )
-        alternate_clicked_btn_style = "background-color: {0}; border-style: solid; border-color: {0}; border-width: 2px; border-radius: 10px; font-size: {1}pt; color:#ffffff; font-weight:{2};".format(
+        alternate_clicked_btn_style = "background-color: {0}; border-style: solid; border-color: {0}; border-width: 2px; border-radius: 10px; font-size: {1}pt; color:#ffffff; font-weight:{2};padding: 0px;".format(
             bg_color_clicked, font_size, "bold" if bold_font else "normal"
         )
 
-        btn_style = "background-color: {0}; border-style: solid; border-color: {0}; border-width: 2px; border-radius: 10px; font-size: {1}pt; font-weight:{2};".format(
+        btn_style = "background-color: {0}; border-style: solid; border-color: {0}; border-width: 2px; border-radius: 10px; font-size: {1}pt; font-weight:{2};padding: 0px;".format(
             bg_color, font_size, "bold" if bold_font else "normal"
         )
-        clicked_btn_style = "background-color: {0}; border-style: solid; border-color: {0}; border-width: 2px; border-radius: 10px; font-size: {1}pt; font-weight:{2};".format(
+        clicked_btn_style = "background-color: {0}; border-style: solid; border-color: {0}; border-width: 2px; border-radius: 10px; font-size: {1}pt; font-weight:{2};padding: 0px;".format(
             bg_color_clicked, font_size, "bold" if bold_font else "normal"
         )
 
-        disabled_btn_style = "background-color: {0}; border-style: solid; border-color: {0}; border-width: 2px; border-radius: 10px; font-size: {1}pt; font-weight:{2};".format(
+        disabled_btn_style = "background-color: {0}; border-style: solid; border-color: {0}; border-width: 2px; border-radius: 10px; font-size: {1}pt; font-weight:{2};padding: 0px;".format(
             "#d9d9d9", font_size, "bold" if bold_font else "normal"
         )
 
