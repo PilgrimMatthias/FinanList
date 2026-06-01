@@ -3,6 +3,7 @@ from ..models import Wallet
 
 
 class WalletRepo(BaseRepo):
+    """Handles CRUD for wallets."""
 
     def create(self, wallet: Wallet) -> Wallet:
         with self.db.transaction():
@@ -55,7 +56,7 @@ class WalletRepo(BaseRepo):
                 (wallet.name, wallet.currency, wallet.initial_balance, wallet.id),
             )
 
-        return self.get_by_user_id(user_id=wallet.user_id)
+        return self.get_by_id(id=wallet.id)
 
     def get_balance(self, wallet_id: int) -> float:
         """Returns balance of wallet

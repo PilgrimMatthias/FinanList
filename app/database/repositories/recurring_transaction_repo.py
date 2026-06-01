@@ -123,6 +123,22 @@ class RecurringTransactionRepo(BaseRepo):
         rows = self.db.execute(query, tuple(params)).fetchall()
         return [RecurringTransaction.from_row(row) for row in rows]
 
+    def count_by_wallet_id(self, wallet_id: int) -> int:
+        """Count recurring transactions by wallet id"""
+        cursor = self.db.execute(
+            f"""
+            SELECT
+                COUNT(*)
+            FROM
+                RECURRING_TRANSACTIONS
+            WHERE
+                WALLET_ID = ?
+            """,
+            (wallet_id,),
+        ).fetchone()
+
+        return cursor[0] if cursor else 0
+
     def update(
         self, recurring_transaction: RecurringTransaction
     ) -> RecurringTransaction:

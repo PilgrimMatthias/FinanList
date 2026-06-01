@@ -159,6 +159,22 @@ class TransactionRepo(BaseRepo):
         ).fetchone()
         return count[0] if count else 0
 
+    def count_by_wallet_id(self, wallet_id: int) -> int:
+        """Count transactions by wallet id"""
+        cursor = self.db.execute(
+            f"""
+            SELECT
+                COUNT(*)
+            FROM
+                TRANSACTIONS
+            WHERE
+                WALLET_ID = ?
+            """,
+            (wallet_id,),
+        ).fetchone()
+
+        return cursor[0] if cursor else 0
+
     def get_paginated(
         self,
         wallet_id: int,

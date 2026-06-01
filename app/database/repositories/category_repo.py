@@ -63,6 +63,22 @@ class CategoryRepo(BaseRepo):
         ).fetchall()
         return [Category.from_row(row) for row in rows]
 
+    def count_by_wallet_id(self, wallet_id: int) -> int:
+        """Count categories by wallet id"""
+        cursor = self.db.execute(
+            f"""
+            SELECT
+                COUNT(*)
+            FROM
+                CATEGORIES
+            WHERE
+                WALLET_ID = ?
+            """,
+            (wallet_id,),
+        ).fetchone()
+
+        return cursor[0] if cursor else 0
+
     def get_main_categories(self, wallet_id: int) -> list[Category]:
         rows = self.db.execute(
             f"""
