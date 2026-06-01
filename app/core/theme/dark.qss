@@ -539,3 +539,68 @@ QCalendarWidget QWidget#qt_calendar_calendarview {
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
 }
+
+
+/* === WALLET CARDS === */
+QFrame#walletCard {
+    border-radius: 12px;
+    padding: 5px;
+}
+
+/* Force all children transparent */
+QFrame#walletCard QWidget {
+    background: transparent;
+}
+
+/* Active card — same gradient on both themes */
+QFrame#walletCard[active="true"] {
+    background: qlineargradient(
+        x1: 0, y1: 0, x2: 1, y2: 1,
+        stop: 0 #1a5fb4,
+        stop: 1 #2a82da
+    );
+    border: none;
+}
+
+/* Inactive card */
+QFrame#walletCard[active="false"] {
+    background-color: #2b2b2b;
+    border: 1px solid #45475a;
+}
+
+/* --- Text colors --- */
+QFrame#walletCard[active="true"] QLabel {
+    color: #ffffff;
+}
+
+QFrame#walletCard[active="false"] QLabel {
+    color: #cdd6f4;
+}
+
+QFrame#walletCard[active="true"] QLabel#walletCardMuted,
+QFrame#walletCard[active="true"] QLabel#walletCardCurrency {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+QFrame#walletCard[active="false"] QLabel#walletCardMuted,
+QFrame#walletCard[active="false"] QLabel#walletCardCurrency {
+    color: #808080;
+}
+
+QLabel#walletCardName {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+QLabel#walletCardBalance {
+    font-size: 22px;
+    font-weight: 500;
+}
+
+QFrame#walletCard[active="true"] QLabel#walletActiveBadge {
+    background-color: rgba(255, 255, 255, 0.25);
+    color: white;
+    padding: 2px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+}
