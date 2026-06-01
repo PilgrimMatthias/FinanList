@@ -5,9 +5,10 @@ from app.database.repositories import (
     TransactionRepo,
     RecurringTransactionRepo,
 )
-from app.database.models import Wallet
-from app.core.enums import Currency
+from app.database.models import Wallet, Category
+from app.core.enums import Currency, OperationType
 from app.core.exceptions import ValidationError
+from app.core.constants import DEFAULT_MAIN_CATEGORIES, DEFAULT_SUB_CATEGORIES
 
 
 class WalletService:
@@ -37,21 +38,48 @@ class WalletService:
 
     def get_delete_impact(self, wallet_id: int) -> dict:
         """Returns deletion impact for wallet"""
-        categories_count = len(self.category_repo.get_by_wallet_id(wallet_id=wallet_id))
-        transaction_count = len(
-            self.transaction_repo.get_by_wallet_id(wallet_id=wallet_id)
-        )
-        rec_transaction_count = len(
-            self.recurring_transaction_repo.get_by_wallet_id(wallet_id=wallet_id)
-        )
-
-        impact_dict = {
-            "categories": categories_count,
-            "transactions": transaction_count,
-            "recurring": rec_transaction_count,
+        return {
+            "categories": self.category_repo.count_by_wallet_id(wallet_id),
+            "transactions": self.transaction_repo.count_by_wallet_id(wallet_id),
+            "recurring": self.recurring_transaction_repo.count_by_wallet_id(wallet_id),
         }
 
-        return impact_dict
+    def _seed_default_categories(self, wallet_id: int):
+        """Create default categories for wallet"""
+        for main_category in DEFAULT_MAIN_CATEGORIES:
+            temp_main_category = Category(
+                wallet_id=wallet_id,
+                name=main_category,
+                operation_type=OperationType.EXPENSE,
+            )
+            temp_main_category = self.category_repo.create(temp_main_category)
+
+            for sub_category in DEFAULT_SUB_CATEGORIES:
+                temp_sub_category = Category(
+                    wallet_id=wallet_id,
+                    name=sub_category,
+                    operation_type=OperationType.EXPENSE,
+                    parent_id=temp_main_category.id,
+                )
+                temp_sub_category = self.category_repo.create(temp_sub_category)
+
+            if main_category == "Private":
+                temp_sub_category = Category(
+                    wallet_id=wallet_id,
+                    name="Income",
+                    operation_type=OperationType.INCOME,
+                    parent_id=temp_main_category.id,
+                )
+                temp_sub_category = self.category_repo.create(temp_sub_category)
+
+        # Uncathegorized category
+        temp_sub_category = Category(
+            wallet_id=wallet_id,
+            name="Uncategorized",
+            operation_type=OperationType.EXPENSE,
+            is_protected=True,
+        )
+        temp_sub_category = self.category_repo.create(temp_sub_category)
 
     def create_wallet(
         self, user_id: int, name: str, currency: Currency, initial_balance: float
@@ -60,7 +88,9 @@ class WalletService:
         # Validation
         if not name.strip():
             raise ValidationError("Name is required")
-        if currency is not None and currency in Currency:
+        if currency is None:
+            raise ValidationError("Currency is required")
+        if currency not in Currency:
             raise ValidationError("Currency must be valid")
 
         # Define wallet
@@ -71,9 +101,13 @@ class WalletService:
             initial_balance=initial_balance,
         )
 
-        self.wallet_repo.create(wallet=wallet)
+        wallet = self.wallet_repo.create(wallet=wallet)
 
-        self.app_state.wallet_changed.emit()
+        self._seed_default_categories(wallet.id)
+
+        self.app_state.wallet_changed.emit(wallet.id)
+
+        return wallet
 
     def update_wallet(self, wallet: Wallet):
         """Updates wallet"""
@@ -83,27 +117,26 @@ class WalletService:
 
         wallet_in_db = self.wallet_repo.get_by_id(id=wallet.id)
         if wallet_in_db.currency != wallet.currency:
-            raise ("Currency can not be changed!")
+            raise ValidationError("Currency can not be changed!")
 
-        self.wallet_repo.update(wallet=wallet)
-        self.app_state.wallet_changed.emit()
+        wallet = self.wallet_repo.update(wallet=wallet)
+        self.app_state.wallet_changed.emit(wallet.id)
 
     def delete_wallet(self, wallet_id: int):
         """Deletes wallet by id"""
         if self.app_state.active_wallet_id == wallet_id:
-            raise ("Wallet is active! Can not delete active wallet!")
+            raise ValidationError("Wallet is active! Can not delete active wallet!")
 
         self.wallet_repo.delete_by_id(wallet_id=wallet_id)
-        self.app_state.wallet_changed.emit()
+        self.app_state.wallet_changed.emit(wallet_id)
 
     def set_active_wallet(self, wallet_id: int):
         """Sets choosen wallet as active"""
         wallet = self.wallet_repo.get_by_id(id=wallet_id)
 
         if wallet is None:
-            raise ("Wallet does not exists!")
+            raise ValidationError("Wallet does not exists!")
         if wallet.user_id != self.app_state.active_user_id:
-            raise ("Wallet does not belong to current user!")
+            raise ValidationError("Wallet does not belong to current user!")
 
         self.app_state.set_active_wallet(wallet_id=wallet_id)
-        self.app_state.wallet_changed.emit()

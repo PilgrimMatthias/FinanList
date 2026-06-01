@@ -5,7 +5,7 @@ from .investments.view import InvestmentView
 from .savings.view import SavingsView
 from .settings.view import SettingsView
 from .upcoming.view import UpcomingView
-from .wallets.view import WalletsView
+from .wallets import WalletsView, WalletService
 from .categories import CategoriesView, CategoryService
 from .profile.view import ProfileView
 from .transaction import TransactionView, TransactionService
@@ -23,6 +23,7 @@ __all__ = [
     "CategoriesView",
     "CategoryService",
     "WalletsView",
+    "WalletService",
     "ProfileView",
     "TransactionView",
     "TransactionService",

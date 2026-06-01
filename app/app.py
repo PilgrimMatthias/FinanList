@@ -32,6 +32,7 @@ from app.features import (
     SettingsView,
     UpcomingView,
     WalletsView,
+    WalletService,
     CategoriesView,
     CategoryService,
     ProfileView,
@@ -87,6 +88,13 @@ class MainWindow(QMainWindow):
         )
         self.history_service = HistoryService(
             transaction_repo=self.transaction_repo, app_state=self.app_state
+        )
+        self.wallet_service = WalletService(
+            wallet_repo=self.wallet_repo,
+            category_repo=self.category_repo,
+            transaction_repo=self.transaction_repo,
+            recurring_transaction_repo=self.recurring_repo,
+            app_state=self.app_state,
         )
 
         # Connect app state
@@ -220,7 +228,9 @@ class MainWindow(QMainWindow):
         self.categories_section = CategoriesView(
             service=self.category_service, app_state=self.app_state, parent=self
         )
-        self.wallets_window = WalletsView()
+        self.wallets_window = WalletsView(
+            service=self.wallet_service, app_state=self.app_state, parent=self
+        )
         self.settings_window = SettingsView()
         self.profile_window = ProfileView()
 
