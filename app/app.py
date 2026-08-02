@@ -31,6 +31,8 @@ from app.features import (
     SavingsView,
     SettingsView,
     UpcomingView,
+    UpcomingService,
+    DueTransactionDialog,
     WalletsView,
     WalletService,
     CategoriesView,
@@ -49,6 +51,8 @@ class MainWindow(QMainWindow):
 
         self.database = database
         self.app_state = AppState()
+
+        self._due_check_done = False
 
         self._init_services()
         self._init_ui()
@@ -89,6 +93,9 @@ class MainWindow(QMainWindow):
         self.history_service = HistoryService(
             transaction_repo=self.transaction_repo, app_state=self.app_state
         )
+        self.upcoming_service = UpcomingService(
+            recurring_transaction_repo=self.recurring_repo, transaction_repo=self.transaction_repo, app_state=self.app_state
+        )
         self.wallet_service = WalletService(
             wallet_repo=self.wallet_repo,
             category_repo=self.category_repo,
@@ -99,6 +106,7 @@ class MainWindow(QMainWindow):
 
         # Connect app state
         self.app_state.user_changed.connect(self.log_in)
+        self.app_state.wallet_changed.connect(self._check_due_transactions)
 
     def _init_ui(self):
         """
@@ -222,7 +230,10 @@ class MainWindow(QMainWindow):
             transaction_service=self.transaction_service,
             app_state=self.app_state,
         )
-        self.upcoming_section = UpcomingView()
+        self.upcoming_section = UpcomingView(
+            service=self.upcoming_service,
+            transaction_service=self.transaction_service,
+            app_state=self.app_state,)
         self.savings_section = SavingsView()
         self.investment_section = InvestmentView()
         self.categories_section = CategoriesView(
@@ -276,8 +287,7 @@ class MainWindow(QMainWindow):
             text="Profile",
             height=30,
             width=125,
-            bg_color="#566876",
-            bg_color_clicked="#899ba9",
+            object_name="neutralButton",
             on_click=lambda: self.profile_window.show(),
         )
 
@@ -286,8 +296,7 @@ class MainWindow(QMainWindow):
             text="App Settings",
             height=30,
             width=125,
-            bg_color="#566876",
-            bg_color_clicked="#899ba9",
+            object_name="neutralButton",
             on_click=lambda: self.settings_window.show(),
         )
 
@@ -296,8 +305,7 @@ class MainWindow(QMainWindow):
             text="Wallets",
             height=30,
             width=125,
-            bg_color="#566876",
-            bg_color_clicked="#899ba9",
+            object_name="neutralButton",
             on_click=lambda: self.wallets_window.show(),
         )
 
@@ -306,8 +314,7 @@ class MainWindow(QMainWindow):
             text="Log out",
             height=30,
             width=125,
-            bg_color="#566876",
-            bg_color_clicked="#899ba9",
+            object_name="neutralButton",
             on_click=self.log_out,
         )
 
@@ -346,6 +353,21 @@ class MainWindow(QMainWindow):
         Method used for showing window with user wallets.
         """
         self.user_menu.hide()
+        self._due_check_done = False
         self.app_state.set_active_user(None)
         self.app_state.set_active_wallet(None)
         self.root_widget.setCurrentIndex(0)
+
+
+    def _check_due_transactions(self):
+        """Check due transaction and show dialog"""
+        if self._due_check_done:
+            return
+        wallet_id = self.app_state.active_wallet_id
+        if wallet_id is None:
+            return
+
+        self._due_check_done = True
+        if self.upcoming_service.get_due_count(wallet_id) > 0:
+            dialog = DueTransactionDialog(service=self.upcoming_service, parent=self)
+            dialog.exec()

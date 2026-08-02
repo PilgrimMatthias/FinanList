@@ -1,5 +1,5 @@
 from .app_state import AppState
-from .utils import center_window, filter_func, is_number, is_date, set_next_due_date
+from .utils import center_window, filter_func, is_number, is_date, set_next_due_date,cast_datetime_to_str
 from .widgets.buttons import PushButton
 from .widgets.frame import Frame
 from .widgets.logo_widget import LogoWidget
@@ -14,6 +14,8 @@ from .widgets.radio_input import RadioInput
 from .widgets.color_picker import ColorPicker, ColorCircle
 from .widgets.expand_toggle_btn import ExpandToggleButton
 from .widgets.svg_icon import SvgIcon
+from .widgets.checkbox_delegate import CheckboxDelegate
+from .widgets.category_dot_delegate import CategoryDotDelegate
 
 __all__ = [
     "AppState",
@@ -31,8 +33,11 @@ __all__ = [
     "ColorCircle",
     "SvgIcon",
     "ExpandToggleButton",
+    "CheckboxDelegate",
+    "CategoryDotDelegate",
     "center_window," "filter_func," "is_number," "is_date",
     "set_next_due_date",
+    "cast_datetime_to_str",
     "show_error",
     "show_confirmation",
 ]
