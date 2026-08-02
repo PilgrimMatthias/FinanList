@@ -604,3 +604,249 @@ QFrame#walletCard[active="true"] QLabel#walletActiveBadge {
     border-radius: 8px;
     font-size: 11px;
 }
+
+/* ==========================================
+   DUE TRANSACTIONS DIALOG - DARK THEME
+   Append to dark.qss
+   ========================================== */
+
+/* --- Dialog header --- */
+QLabel#dueDialogTitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: #cdd6f4;
+}
+
+QLabel#dueDialogSubtitle {
+    font-size: 12px;
+    color: #a6adc8;
+}
+
+/* --- Group card --- */
+QFrame#dueTransactionRow {
+    background-color: #1e1e2e;
+    border: 2px solid #45475a;
+    border-radius: 8px;
+}
+
+QFrame#dueTransactionRow QWidget {
+    background: transparent;
+}
+
+QLabel#dueRowTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: #cdd6f4;
+}
+
+QLabel#dueRowCount {
+    font-size: 11px;
+    color: #a6adc8;
+}
+
+QLabel#dueRowSummary {
+    font-size: 11px;
+    color: #a6adc8;
+}
+
+/* --- Amount, colored via setProperty("operation", ...) --- */
+QLabel#dueRowAmount {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+QLabel#dueRowAmount[operation="income"] {
+    color: #1d9e75;
+}
+
+QLabel#dueRowAmount[operation="expense"] {
+    color: #e24b4a;
+}
+
+QLabel#dueRowAmount[operation="saving"] {
+    color: #6c8cff;
+}
+
+QLabel#dueRowAmount[operation="investment"] {
+    color: #ba7517;
+}
+
+/* --- Occurrence rows --- */
+QLabel#occurrenceDate {
+    font-size: 13px;
+    color: #cdd6f4;
+}
+
+QLabel#occurrenceTimeline {
+    font-size: 11px;
+    color: #a6adc8;
+}
+
+QLabel#occurrenceTimeline[overdue="true"] {
+    color: #e24b4a;
+}
+
+/* --- Skip button (replaces inline bg_color) --- */
+QPushButton#dueSkipButton {
+    background-color: #4a2a2a;
+    color: #f5b3b3;
+    border: 1px solid #6b3a3a;
+    border-radius: 8px;
+    padding: 6px 12px;
+}
+
+QPushButton#dueSkipButton:hover {
+    background-color: #5c3333;
+}
+
+QPushButton#dueSkipButton:pressed {
+    background-color: #7a4040;
+    color: #ffffff;
+}
+
+/* --- Scroll area inside a group card --- */
+QFrame#dueTransactionRow QScrollBar:vertical {
+    background-color: transparent;
+    width: 8px;
+    margin: 0;
+    border: none;
+}
+
+QFrame#dueTransactionRow QScrollBar::handle:vertical {
+    background-color: #45475a;
+    border-radius: 4px;
+    min-height: 24px;
+}
+
+QFrame#dueTransactionRow QScrollBar::handle:vertical:hover {
+    background-color: #585b70;
+}
+
+QFrame#dueTransactionRow QScrollBar::add-line:vertical,
+QFrame#dueTransactionRow QScrollBar::sub-line:vertical {
+    height: 0;
+    background: none;
+    border: none;
+}
+
+
+/* ==========================================
+   PUSH BUTTON VARIANTS - DARK THEME
+   Append to dark.qss
+
+   Use with PushButton(object_name="primaryButton") etc.
+   Themed buttons skip their inline stylesheet, so these rules apply.
+   ========================================== */
+
+/* --- Primary: solid accent fill --- */
+QPushButton#primaryButton {
+    background-color: #2a82da;
+    color: #ffffff;
+    border: 2px solid #2a82da;
+    border-radius: 10px;
+    font-size: 10pt;
+    font-weight: bold;
+    padding: 0px;
+}
+
+QPushButton#primaryButton:hover {
+    background-color: #3d92e8;
+    border-color: #3d92e8;
+}
+
+QPushButton#primaryButton:pressed {
+    background-color: #1a5fb4;
+    border-color: #1a5fb4;
+    color: #ffffff;
+}
+
+QPushButton#primaryButton:disabled {
+    background-color: #313244;
+    border-color: #313244;
+    color: #6c7086;
+}
+
+/* --- Secondary: outlined, fills on press (the old alternate_look) --- */
+QPushButton#secondaryButton {
+    background-color: transparent;
+    color: #89b4fa;
+    border: 2px solid #2a82da;
+    border-radius: 10px;
+    font-size: 10pt;
+    font-weight: bold;
+    padding: 0px;
+}
+
+QPushButton#secondaryButton:hover {
+    background-color: #253048;
+}
+
+QPushButton#secondaryButton:pressed {
+    background-color: #1a5fb4;
+    border-color: #1a5fb4;
+    color: #ffffff;
+}
+
+QPushButton#secondaryButton:disabled {
+    background-color: transparent;
+    border-color: #45475a;
+    color: #6c7086;
+}
+
+/* --- Neutral: quiet, for low-emphasis actions --- */
+QPushButton#neutralButton {
+    background-color: #313244;
+    color: #cdd6f4;
+    border: 1px solid #45475a;
+    border-radius: 10px;
+    font-size: 10pt;
+    font-weight: bold;
+    padding: 0px;
+}
+
+QPushButton#neutralButton:hover {
+    background-color: #3a3a52;
+}
+
+QPushButton#neutralButton:pressed {
+    background-color: #45475a;
+    color: #ffffff;
+}
+
+QPushButton#neutralButton:disabled {
+    background-color: #26263a;
+    border-color: #313244;
+    color: #6c7086;
+}
+
+/* --- Danger: destructive actions --- */
+QPushButton#dangerButton {
+    background-color: #4a2a2a;
+    color: #f5b3b3;
+    border: 1px solid #6b3a3a;
+    border-radius: 10px;
+    font-size: 10pt;
+    font-weight: bold;
+    padding: 0px;
+}
+
+QPushButton#dangerButton:hover {
+    background-color: #5c3333;
+}
+
+QPushButton#dangerButton:pressed {
+    background-color: #7a4040;
+    color: #ffffff;
+}
+
+QPushButton#dangerButton:disabled {
+    background-color: #26263a;
+    border-color: #313244;
+    color: #6c7086;
+}
+
+/* --- Small size modifier: pair via setProperty("size", "small") --- */
+QPushButton[size="small"] {
+    font-size: 8pt;
+    border-radius: 8px;
+}
