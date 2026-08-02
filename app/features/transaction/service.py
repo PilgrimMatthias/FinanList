@@ -89,6 +89,14 @@ class TransactionService:
                 return now
 
         return None
+    
+    def validate_end_date(self, start_date: datetime, end_date: datetime):
+        """Returns corrected date if start_date is newer than end_date, end_date if it's lower."""
+
+        if start_date >= end_date:
+            return start_date
+
+        return end_date
 
     def validate_send_date(self, start_date, end_date) -> datetime | None:
         """Returns corrected date if end_date is invalid, None if it's already valid."""
@@ -204,9 +212,9 @@ class TransactionService:
             merchant=merchant,
             amount=amount,
             recurrence_interval=repeat_interval,
-            start_date=str(start_date),
-            end_date=str(end_date) if end_date is not None else None,
-            next_due_date=str(next_due_date),
+            start_date=start_date,
+            end_date= end_date if end_date is not None else None,
+            next_due_date=next_due_date,
             is_active=True,
         )
         new_recurring_transaction = self.recurring_transaction_repo.create(
@@ -252,6 +260,6 @@ class TransactionService:
         transaction: RecurringTransaction,
     ):
         self._validate_update(transaction=transaction)
-        self.recurring_transaction_repo.update(transaction=transaction)
+        self.recurring_transaction_repo.update(recurring_transaction=transaction)
 
         self.app_state.emit_recurring_transaction_change()

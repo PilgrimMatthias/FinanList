@@ -1,22 +1,22 @@
 import math
 from PySide6.QtCore import QAbstractTableModel, QModelIndex, Qt, Signal
-from PySide6.QtGui import QColor, QFont
-from ..service import HistoryService
+from PySide6.QtGui import QColor
+from ..service import UpcomingService
 from app.core.app_state import AppState
-from ..models import TransactionDisplay
+from ..models import RecurringTransactionDisplay
 from PySide6.QtCore import Qt
 
 from app.core.enums import OperationType
 from app.core.utils import cast_date_to_proper_format
 
 
-class HistoryTableModel(QAbstractTableModel):
+class UpcomingTableModel(QAbstractTableModel):
     checkbox_clicked = Signal()
 
-    COLUMNS = ["", "Name", "Merchant", "Date", "Type", "Category", "Amount"]
+    COLUMNS = ["", "Name", "Interval", "Next Due", "Category", "Amount", "Active"]
     CHECKBOX_COL = 0
-    TYPE_COL = 4
-    CATEGORY_COL = 5
+    CATEGORY_COL = 4
+    ACTIVE_COL = 6
 
     INCOME_COLOR = QColor("#008000")
     EXPENSE_COLOR = QColor("#ff3333")
@@ -28,16 +28,16 @@ class HistoryTableModel(QAbstractTableModel):
     BG_SAVINGS_COLOR = QColor("#bcc5f6")
     BG_INVESTMENT_COLOR = QColor("#bdd4f5")
 
-    def __init__(self, service: HistoryService, app_state: AppState, parent=None):
+    def __init__(self, service: UpcomingService, app_state: AppState, parent=None):
         super().__init__(parent)
         self._service = service
         self._app_state = app_state
-        self._rows: list[TransactionDisplay] = []
+        self._rows: list[RecurringTransactionDisplay] = []
         self._total_count = 0
         self._page = 1
         self._page_size = 100
-        self._sort_by = "date"
-        self._sort_order = "DESC"
+        self._sort_by = "next_due_date"
+        self._sort_order = "ASC"
         self._search = ""
         self._is_selection_mode = False
         self._selected_ids: set[int] = set()
@@ -64,27 +64,27 @@ class HistoryTableModel(QAbstractTableModel):
             if role == Qt.CheckStateRole and self._is_selection_mode:
                 return (
                     Qt.Checked
-                    if row.transaction.id in self._selected_ids
+                    if row.recurring.id in self._selected_ids
                     else Qt.Unchecked
                 )
             return None  # No display text in checkbox column
-
-        # Type col setting
-        if col == self.TYPE_COL:
-            if role == Qt.UserRole:
-                return row.transaction.operation_type  # Pass the enum directly
-            if role == Qt.DisplayRole:
-                return ""  # Leave empty — delegate handles painting
-            return None
 
         # Category col setting
         if col == self.CATEGORY_COL:
             if role == Qt.UserRole:
                 return (
-                    1,
+                    row.recurring.is_active,
                     row.sub_category_color,
                     f"{row.main_category_name} / {row.sub_category_name}",
                 )
+            if role == Qt.DisplayRole:
+                return ""
+            return None
+        
+        # Active col setting
+        if col == self.ACTIVE_COL:
+            if role == Qt.UserRole:
+                return (row.recurring.is_active, row.recurring.id)
             if role == Qt.DisplayRole:
                 return ""
             return None
@@ -93,36 +93,39 @@ class HistoryTableModel(QAbstractTableModel):
         if role == Qt.DisplayRole:
             # The text shown in the cell
             if col == 1:
-                return row.transaction.title
-            if col == 2:
-                return row.transaction.merchant or "—"
-            if col == 3:
-                return cast_date_to_proper_format(row.transaction.date)
-            if col == 6:
-                amount = row.transaction.amount
-                op_type = row.transaction.operation_type
-                sign = "+" if op_type == OperationType.INCOME else "−"
+                return row.recurring.title
+            if col == 5:
+                amount = row.recurring.amount
+                op_type = row.recurring.operation_type
+                sign = "+" if op_type == OperationType.INCOME else "-"
                 return f"{sign}{amount:,.2f}".replace(",", " ").replace(".", ",")
+            if col == 2:
+                return row.recurring.recurrence_interval
+            if col == 3:
+                if not row.recurring.is_active: 
+                    return "-"
+                if row.is_overdue:
+                    return "{0} (overdue)".format(cast_date_to_proper_format(row.recurring.next_due_date))
+                
+                return cast_date_to_proper_format(row.recurring.next_due_date)
 
         if role == Qt.TextAlignmentRole:
             if col in [
                 1,
                 2,
             ]:
-                return Qt.AlignVCenter | Qt.AlignLeft
+                return int(Qt.AlignVCenter | Qt.AlignLeft)
             else:
-                return Qt.AlignCenter
-
-        if role == Qt.FontRole:
-            if col == 1 and row.is_recurring:  # Recurring transactions — italic
-                font = QFont()
-                font.setItalic(True)
-                return font
+                return int(Qt.AlignCenter)
 
         if role == Qt.ForegroundRole:
-            if col == 6:
+            if not row.recurring.is_active and col in [1,2,3,4,5]:
+                return QColor("#808080")
+            if col == 3 and row.is_overdue:
+                return QColor("#ff3333")
+            if col == 5:
                 return self._color_for_type(
-                    row.transaction.operation_type, role=Qt.ForegroundRole
+                    row.recurring.operation_type, role=Qt.ForegroundRole
                 )
 
         return None  # Always return None for unhandled roles
@@ -141,7 +144,7 @@ class HistoryTableModel(QAbstractTableModel):
             return False
 
         if index.column() == self.CHECKBOX_COL and role == Qt.CheckStateRole:
-            tx_id = self._rows[index.row()].transaction.id
+            tx_id = self._rows[index.row()].recurring.id
             if value == Qt.Checked:
                 self._selected_ids.add(tx_id)
             else:
@@ -234,15 +237,7 @@ class HistoryTableModel(QAbstractTableModel):
 
     def select_all(self):
         """Select all displayed rows"""
-        self._selected_ids = set()
-        for row in self._rows:
-            row_id = row.transaction.id
-
-            if row_id not in self._selected_ids:
-                self._selected_ids.add(row_id)
-            else:
-                self._selected_ids.discard(row_id)
-
+        self._selected_ids = {row.recurring.id for row in self._rows}
         self._notify_checkbox_column_changed()
 
     def deselect_all(self):
@@ -274,10 +269,10 @@ class HistoryTableModel(QAbstractTableModel):
         """Get selected ids"""
         return list(self._selected_ids)
 
-    def get_row_transaction(self, row: int):
+    def get_row_recurring(self, row: int):
         """Get tranasaction for row id"""
         if 0 <= row < len(self._rows):
-            return self._rows[row].transaction
+            return self._rows[row].recurring
         return None
 
     def total_pages(self) -> int:
@@ -295,7 +290,7 @@ class HistoryTableModel(QAbstractTableModel):
         return self._total_count
 
     @property
-    def is_selection_mode(self) -> int:
+    def is_selection_mode(self) -> bool:
         return self._is_selection_mode
 
     @property

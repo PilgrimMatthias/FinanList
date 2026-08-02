@@ -10,6 +10,7 @@ class CategoryDotDelegate(QStyledItemDelegate):
     RIGHT_PADDING = 8
     LINE_SPACING = 2
     MAX_LINES = 2
+    OFF_COLOR = QColor("#808080")
 
     def paint(self, painter, option, index):
         super().paint(painter, option, index)
@@ -18,7 +19,7 @@ class CategoryDotDelegate(QStyledItemDelegate):
         if not data:
             return
 
-        color_hex, text = data
+        is_active, color_hex, text = data
         text_x = option.rect.x() + self.LEFT_PADDING + self.DOT_SIZE + self.GAP
         available_width = option.rect.right() - text_x - self.RIGHT_PADDING
 
@@ -43,11 +44,11 @@ class CategoryDotDelegate(QStyledItemDelegate):
             self.DOT_SIZE,
         )
         painter.setPen(Qt.NoPen)
-        painter.setBrush(QColor(color_hex))
+        painter.setBrush(QColor(color_hex) if is_active else self.OFF_COLOR)
         painter.drawEllipse(dot_rect)
 
         # Draw each line
-        painter.setPen(QColor(option.palette.text().color()))
+        painter.setPen(QColor(option.palette.text().color()) if is_active else self.OFF_COLOR)
         for i, line in enumerate(lines):
             line_y = block_y + i * (line_height + self.LINE_SPACING)
             line_rect = QRect(text_x, line_y, available_width, line_height)

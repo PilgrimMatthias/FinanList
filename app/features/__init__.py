@@ -4,7 +4,7 @@ from .history import HistoryView, HistoryService
 from .investments.view import InvestmentView
 from .savings.view import SavingsView
 from .settings.view import SettingsView
-from .upcoming.view import UpcomingView
+from .upcoming import UpcomingView, UpcomingService, DueTransactionDialog
 from .wallets import WalletsView, WalletService
 from .categories import CategoriesView, CategoryService
 from .profile.view import ProfileView
@@ -20,6 +20,8 @@ __all__ = [
     "SavingsView",
     "SettingsView",
     "UpcomingView",
+    "UpcomingService",
+    "DueTransactionDialog",
     "CategoriesView",
     "CategoryService",
     "WalletsView",

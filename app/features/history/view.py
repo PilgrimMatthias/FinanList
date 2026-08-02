@@ -20,9 +20,8 @@ from app.core.app_state import AppState
 from app.config import SEARCH_ICON, EMPTY_TRANSACTIONS
 from .service import HistoryService
 from .widgets.history_table import HistoryTableModel
-from .widgets.checkbox_delegate import CheckboxDelegate
+from app.core import CheckboxDelegate, CategoryDotDelegate
 from .widgets.pagination_widget import PaginationWidget
-from .widgets.category_dot_delegate import CategoryDotDelegate
 from .widgets.type_pill_delegate import TypePillDelegate
 
 from datetime import datetime
