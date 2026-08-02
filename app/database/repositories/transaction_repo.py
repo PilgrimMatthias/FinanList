@@ -16,34 +16,7 @@ class TransactionRepo(BaseRepo):
 
     def create(self, transaction: Transaction) -> Transaction:
         with self.db.transaction():
-            cursor = self.db.execute(
-                """
-                INSERT
-                    INTO
-                    TRANSACTIONS (WALLET_ID,
-                    CATEGORY_ID,
-                    TITLE,
-                    DESCRIPTION,
-                    DATE,
-                    OPERATION_TYPE,
-                    AMOUNT,
-                    MERCHANT,
-                    RECURRING_ID)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                (
-                    transaction.wallet_id,
-                    transaction.category_id,
-                    transaction.title,
-                    transaction.description,
-                    transaction.date,
-                    transaction.operation_type,
-                    transaction.amount,
-                    transaction.merchant,
-                    transaction.recurring_id,
-                ),
-            )
-            transaction.id = cursor.lastrowid
-            return transaction
+            return self.create_no_commit(transaction)
 
     def get_by_id(self, id: int) -> Transaction | None:
         row = self.db.execute(
@@ -183,8 +156,8 @@ class TransactionRepo(BaseRepo):
         sort_by: str = "date",
         sort_order: str = "DESC",
         search: str = "",
-    ) -> list[tuple]:
-        # TODO: implement search option
+    ) -> list[Transaction]:
+        """Returns transactions for paginations"""
         offset = (page - 1) * page_size
         sort_column = SORT_COLUMNS[sort_by]
 
@@ -284,6 +257,7 @@ class TransactionRepo(BaseRepo):
         return rows
 
     def get_count(self, wallet_id: int, search: str = "") -> int:
+        """Return count of transaction"""
         query = """
             SELECT
                 COUNT(*)
@@ -309,10 +283,57 @@ class TransactionRepo(BaseRepo):
 
         return count[0] if count else 0
 
+    def get_dates_for_recurring(self, recurring_id) -> list[str]:
+        """Return dates for  with specified recurring id"""
+        query = """
+            SELECT
+                T.DATE
+            FROM
+                TRANSACTIONS T
+            WHERE T.RECURRING_ID = ?
+        """
+        params = (recurring_id, )
+        rows = self.db.execute(query=query, params=params).fetchall()
+
+        return [row[0] for row in rows]
+
     def delete_many(self, ids: list[int]) -> None:
+        """Delete many transactions"""
         placeholders = ",".join(["?" for _ in ids])
         with self.db.transaction():
             self.db.execute(
                 f"DELETE FROM TRANSACTIONS WHERE ID IN ({placeholders})",
                 tuple(ids),
             )
+
+
+    def create_no_commit(self, transaction: Transaction) -> Transaction:
+        """Insert without opening a transaction. Caller must wrap in db.transaction()."""
+        cursor = self.db.execute(
+            """
+            INSERT
+                INTO
+                TRANSACTIONS (WALLET_ID,
+                CATEGORY_ID,
+                TITLE,
+                DESCRIPTION,
+                DATE,
+                OPERATION_TYPE,
+                AMOUNT,
+                MERCHANT,
+                RECURRING_ID)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                transaction.wallet_id,
+                transaction.category_id,
+                transaction.title,
+                transaction.description,
+                transaction.date,
+                transaction.operation_type,
+                transaction.amount,
+                transaction.merchant,
+                transaction.recurring_id,
+            ),
+        )
+        transaction.id = cursor.lastrowid
+        return transaction
