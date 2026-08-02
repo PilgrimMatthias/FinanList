@@ -109,7 +109,9 @@ def is_date(value, format):
 
 
 def set_next_due_date(start_date: datetime, interval: RecurrenceInterval) -> datetime:
+    """sets next due date"""
     now = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+
     next_due_date = now
 
     if start_date <= now.date():
@@ -119,16 +121,24 @@ def set_next_due_date(start_date: datetime, interval: RecurrenceInterval) -> dat
             case RecurrenceInterval.WEEKLY:
                 next_due_date += relativedelta(weeks=1)
             case RecurrenceInterval.MONTHLY:
-                next_due_date += relativedelta(months=1)
+                next_due_date += relativedelta(months=1, day = start_date.day)
             case RecurrenceInterval.YEARLY:
-                next_due_date += relativedelta(years=1)
+                next_due_date += relativedelta(years=1, day = start_date.day, month = start_date.month)
 
-        return next_due_date
+        return next_due_date.strftime(format="%Y-%m-%d")
 
     return start_date
 
+def cast_datetime_to_str(date: datetime, format: str = "%d.%m.%Y"):
+    """Casts datetime date to string with proper format"""
+    try:
+        return date.strftime(format)
+    except Exception as e:
+        print("Error during convert to string from datetime", e)
+
 
 def cast_date_to_proper_format(date: str, format: str = "%d.%m.%Y"):
+    "Casts date as string to datetime"
     # new_date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
     new_date = datetime.strptime(date, "%Y-%m-%d")
 
@@ -136,7 +146,8 @@ def cast_date_to_proper_format(date: str, format: str = "%d.%m.%Y"):
 
 
 # def cast_str_to_datetime(date: datetime, format="%Y-%m-%d %H:%M:%S"):
-def cast_str_to_datetime(date: datetime, format="%Y-%m-%d"):
+def cast_str_to_datetime(date: str, format="%Y-%m-%d"):
+    """Casts string to datetime"""
     try:
         new_date = datetime.strptime(date, format)
 
