@@ -259,6 +259,10 @@ class TransactionService:
         self,
         transaction: RecurringTransaction,
     ):
+        # update next due date
+        transaction.next_due_date = set_next_due_date(
+            start_date=transaction.start_date, interval=transaction.recurrence_interval
+        )
         self._validate_update(transaction=transaction)
         self.recurring_transaction_repo.update(recurring_transaction=transaction)
 

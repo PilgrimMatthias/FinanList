@@ -61,7 +61,7 @@ class CategoryDotDelegate(QStyledItemDelegate):
         if not data:
             return super().sizeHint(option, index)
 
-        color_hex, text = data
+        is_active, color_hex, text = data
         available_width = (
             option.rect.width()
             - self.LEFT_PADDING

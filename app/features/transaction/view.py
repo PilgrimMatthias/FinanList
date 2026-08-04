@@ -19,6 +19,7 @@ from app.core import (
     DateInput,
     HLine,
     show_error,
+    cast_datetime_to_str
 )
 
 from app.core.enums import OperationType, RecurrenceInterval
@@ -524,7 +525,7 @@ class TransactionView(QDialog):
         )
         updated_transaction.category_id = self.sub_category_input.get_data()
         updated_transaction.amount = self.amount_input.get_value()
-        updated_transaction.date = self.start_date_input.get_value()
+        updated_transaction.start_date = self.start_date_input.get_value()
         updated_transaction.end_date = self.end_date_input.get_value()
         updated_transaction.recurrence_interval = RecurrenceInterval(
             self.transaction_repeat_input.get_value()
