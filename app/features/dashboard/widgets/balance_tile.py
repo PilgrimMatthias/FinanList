@@ -21,7 +21,7 @@ class BalanceTile(QFrame):
 
         self.balance_label = QLabel(self)
         self.balance_label.setText(f"{format_balance(self.balance)} {self.currency.name}")
-        self.top_title.setObjectName("balanceTileAmount")
+        self.balance_label.setObjectName("balanceTileAmount")
 
         self.wallet_name_label = QLabel(self)
         self.wallet_name_label.setText(self.wallet_name)
