@@ -388,3 +388,49 @@ class RecurringTransactionRepo(BaseRepo):
                 (recurring_id,),
             )
         return self.get_by_id(id=recurring_id)
+
+    def get_upcomings(self, wallet_id:int, date_from:str, limit: int = 5) -> list[tuple]:
+        """Returns upcoming transactions"""
+        query = """
+            SELECT
+                T.ID,
+                T.WALLET_ID,
+                T.CATEGORY_ID,
+                T.TITLE,
+                T.DESCRIPTION,
+                T.OPERATION_TYPE,
+                T.AMOUNT,
+                T.MERCHANT,
+                T.RECURRENCE_INTERVAL,
+                T.START_DATE,
+                T.END_DATE,
+                T.NEXT_DUE_DATE,
+                T.IS_ACTIVE,
+                T.CREATED_AT,
+                MAIN_CAT.NAME AS MAIN_NAME,
+                MAIN_CAT.COLOR AS MAIN_COLOR,
+                SUB_CAT.NAME AS SUB_MAIN,
+                SUB_CAT.COLOR AS SUB_COLOR,
+                WALLETS.CURRENCY AS CURRENCY
+            FROM
+                RECURRING_TRANSACTIONS T
+            LEFT JOIN CATEGORIES SUB_CAT ON
+                T.CATEGORY_ID = SUB_CAT.ID
+            LEFT JOIN CATEGORIES MAIN_CAT ON
+                SUB_CAT.PARENT_ID = MAIN_CAT.ID
+            LEFT JOIN WALLETS ON
+                T.WALLET_ID = WALLETS.ID
+            WHERE
+                T.WALLET_ID = ?
+                AND T.IS_ACTIVE = 1
+                AND T.NEXT_DUE_DATE > ?
+                AND (T.END_DATE IS NULL
+                    OR T.NEXT_DUE_DATE <= T.END_DATE)
+            ORDER BY
+                T.NEXT_DUE_DATE ASC
+            LIMIT ?;
+        """
+        params = (wallet_id, date_from, limit, )
+        rows = self.db.execute(query=query, params=params).fetchall()
+
+        return rows

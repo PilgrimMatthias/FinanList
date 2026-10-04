@@ -337,3 +337,52 @@ class TransactionRepo(BaseRepo):
         )
         transaction.id = cursor.lastrowid
         return transaction
+
+    def get_month_totals(self, wallet_id:int, date_from:str, date_to:str) -> list[tuple]:
+        """Returns month total amount per operation type"""
+        query = """
+            SELECT
+                OPERATION_TYPE,
+                SUM(AMOUNT) AS TOTAL
+            FROM
+                TRANSACTIONS
+            WHERE
+                WALLET_ID = ?
+                AND DATE >= ?
+                AND DATE <= ?
+            GROUP BY
+                OPERATION_TYPE;
+        """
+        params = (wallet_id, date_from, date_to, )
+        rows = self.db.execute(query=query, params=params).fetchall()
+
+        return rows
+
+    def get_category_totals(self, wallet_id:int, date_from:str, date_to:str) -> list[tuple]:
+        """Returns category totals from given month"""
+        query = """
+            SELECT
+                COALESCE(MAIN.ID, SUB.ID)       AS CAT_ID,
+                COALESCE(MAIN.NAME, SUB.NAME)   AS CAT_NAME,
+                COALESCE(MAIN.COLOR, SUB.COLOR) AS CAT_COLOR,
+                SUM(T.AMOUNT) AS TOTAL
+            FROM
+                TRANSACTIONS T
+            LEFT JOIN CATEGORIES SUB ON
+                T.CATEGORY_ID = SUB.ID
+            LEFT JOIN CATEGORIES MAIN ON
+                SUB.PARENT_ID = MAIN.ID
+            WHERE
+                T.WALLET_ID = ?
+                AND T.DATE >= ?
+                AND T.DATE <= ?
+                AND T.OPERATION_TYPE != 'Income'
+            GROUP BY
+                COALESCE(MAIN.ID, SUB.ID)
+            ORDER BY
+                TOTAL DESC;
+        """
+        params = (wallet_id, date_from, date_to, )
+        rows = self.db.execute(query=query, params=params).fetchall()
+
+        return rows
