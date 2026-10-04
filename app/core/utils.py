@@ -154,3 +154,7 @@ def cast_str_to_datetime(date: str, format="%Y-%m-%d"):
         return new_date
     except Exception as e:
         return date
+
+def format_balance(balance:float):
+    """Format balance"""
+    return f"{balance:,.2f}".replace(",", " ").replace(".", ",")

@@ -8,7 +8,7 @@ APP_LOGO = "logo.svg"
 
 # Window settings
 WINDOW_WIDTH = 1000
-WINDOW_HEIGHT = 600
+WINDOW_HEIGHT = 650
 
 
 DATA_DIR = Path(user_data_dir(APP_NAME, APP_AUTHOR))

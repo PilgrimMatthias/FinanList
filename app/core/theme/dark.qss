@@ -850,3 +850,255 @@ QPushButton[size="small"] {
     font-size: 8pt;
     border-radius: 8px;
 }
+
+QFrame#barTrack {
+    background-color: #313244;
+    border: none;
+    border-radius: 4px;
+}
+QWidget#barSpacer {
+    background: transparent;
+}
+
+/* DASHBOARD */
+/*  Shared card shell  */
+QFrame#balanceTile,
+QFrame#monthTile,
+QFrame#dueTile,
+QFrame#categoryBars,
+QFrame#recentOperationsCard,
+QFrame#upcomingCard {
+    background-color: #1e1e2e;
+    border: 1px solid #45475a;
+    border-radius: 10px;
+}
+
+/* Children transparent so the card background shows through */
+QFrame#balanceTile QWidget,
+QFrame#monthTile QWidget,
+QFrame#dueTile QWidget,
+QFrame#categoryBars QWidget,
+QFrame#recentOperationsCard QWidget,
+QFrame#upcomingCard QWidget {
+    background: transparent;
+}
+
+/* Alert state on the due tile - setProperty("alert", "true"/"false") */
+QFrame#dueTile[alert="true"] {
+    border: 1px solid #6b3a3a;
+}
+
+/*  Greeting row  */
+QLabel#dashboardNameLabel {
+    font-size: 18px;
+    font-weight: 600;
+    color: #cdd6f4;
+}
+
+QLabel#dashboardDate {
+    font-size: 12px;
+    color: #a6adc8;
+}
+
+/*  Shared tile label styles  */
+QLabel#balanceTileLabel,
+QLabel#monthTileTopLabel,
+QLabel#dueTileLabel {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: #a6adc8;
+}
+
+/*  Balance tile  */
+QLabel#balanceTileAmount {
+    font-size: 24px;
+    font-weight: 600;
+    color: #cdd6f4;
+}
+
+QLabel#balanceTileWallet {
+    font-size: 11px;
+    color: #a6adc8;
+}
+
+/*  Month tile - */
+QLabel#monthTileMiddleLabel {
+    font-size: 13px;
+    color: #a6adc8;
+}
+
+QLabel#monthTileBottomLabel {
+    font-size: 13px;
+    font-weight: 600;
+    color: #cdd6f4;
+}
+
+QLabel#monthTileIncome {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1d9e75;
+}
+
+QLabel#monthTileExpense {
+    font-size: 13px;
+    font-weight: 500;
+    color: #e24b4a;
+}
+
+/* Net flips sign - setProperty("positive", "true"/"false") */
+QLabel#monthTileNet {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+QLabel#monthTileNet[positive="true"] {
+    color: #1d9e75;
+}
+
+QLabel#monthTileNet[positive="false"] {
+    color: #e24b4a;
+}
+
+/*  Due tile  */
+QLabel#dueTileDueNum {
+    font-size: 20px;
+    font-weight: 600;
+    color: #cdd6f4;
+}
+
+QFrame#dueTile[alert="true"] QLabel#dueTileDueNum {
+    color: #e24b4a;
+}
+
+QLabel#dueTileBottom {
+    font-size: 11px;
+    color: #a6adc8;
+}
+
+/*  Category bars - */
+QLabel#categoryBarsTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: #cdd6f4;
+}
+
+QLabel#categoryBarsMonth,
+QLabel#categoryBarsTotal {
+    font-size: 11px;
+    color: #a6adc8;
+}
+
+QLabel#categoryBarName {
+    font-size: 13px;
+    color: #a6adc8;
+}
+
+QLabel#categoryBarTotal {
+    font-size: 13px;
+    color: #cdd6f4;
+}
+
+QLabel#categoryBarsEmptyState {
+    font-size: 12px;
+    color: #6c7086;
+}
+
+/* Bar track - fill colour stays inline, it is per-category data */
+QFrame#barTrack {
+    background-color: #313244;
+    border: none;
+    border-radius: 4px;
+}
+
+QWidget#barSpacer {
+    background: transparent;
+}
+
+/*  List cards - */
+QLabel#recOperTitle,
+QLabel#upcCardTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: #cdd6f4;
+}
+
+QLabel#recOperRowTitle,
+QLabel#upcCardRowTitle {
+    font-size: 13px;
+    color: #cdd6f4;
+}
+
+QLabel#recOperRowDate,
+QLabel#upcCardRowDate,
+QLabel#recOperRowMerchant {
+    font-size: 12px;
+    color: #a6adc8;
+}
+
+/* Amounts - setProperty("positive", "true"/"false") */
+QLabel#recOperRowAmount,
+QLabel#upcCardRowAmount {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+QLabel#recOperRowAmount[positive="true"],
+QLabel#upcCardRowAmount[positive="true"] {
+    color: #1d9e75;
+}
+
+QLabel#recOperRowAmount[positive="false"],
+QLabel#upcCardRowAmount[positive="false"] {
+    color: #e24b4a;
+}
+
+QLabel#recOperEmptyState,
+QLabel#upcCardEmptyState {
+    font-size: 12px;
+    color: #6c7086;
+}
+
+/*  "View all" link button  */
+QPushButton#viewAllButton {
+    background: transparent;
+    color: #89b4fa;
+    border: none;
+    font-size: 11px;
+    font-weight: 500;
+    text-align: right;
+}
+
+QPushButton#viewAllButton:hover {
+    color: #a6c8ff;
+    text-decoration: underline;
+}
+
+QPushButton#viewAllButton:pressed {
+    color: #6c8cff;
+}
+
+/*  SEPARATOR LINES */
+
+QFrame#hLine {
+    border: none;
+    border-top: 1px solid #313244;
+    max-height: 1px;
+    min-height: 1px;
+}
+
+QFrame#vLine {
+    border: none;
+    border-left: 1px solid #313244;
+    max-width: 1px;
+    min-width: 1px;
+}
+
+/* Stronger variant - setProperty("emphasis", "strong") */
+QFrame#hLine[emphasis="strong"] {
+    border-top: 1px solid #45475a;
+}
+
+QFrame#vLine[emphasis="strong"] {
+    border-left: 1px solid #45475a;
+}

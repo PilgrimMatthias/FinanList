@@ -24,6 +24,7 @@ from app.core import AppState, PushButton, center_window
 from app.config import APP_NAME, WINDOW_HEIGHT, WINDOW_WIDTH
 from app.features import (
     DashboardView,
+    DashboardService,
     AnalysisView,
     HistoryView,
     HistoryService,
@@ -101,6 +102,14 @@ class MainWindow(QMainWindow):
             category_repo=self.category_repo,
             transaction_repo=self.transaction_repo,
             recurring_transaction_repo=self.recurring_repo,
+            app_state=self.app_state,
+        )
+        self.dashboard_service = DashboardService(
+            wallet_repo=self.wallet_repo,
+            transaction_repo=self.transaction_repo,
+            recurring_transaction_repo=self.recurring_repo,
+            upcoming_service=self.upcoming_service,
+            user_repo=self.user_repo,
             app_state=self.app_state,
         )
 
@@ -223,7 +232,12 @@ class MainWindow(QMainWindow):
         self.content_layout.setSpacing(8)
 
         # Creating app sections
-        self.dashboard_section = DashboardView()
+        self.dashboard_section = DashboardView(
+            service = self.dashboard_service,
+            app_state = self.app_state
+        )
+        self.dashboard_section.review_recent_signal.connect(lambda: self.set_current_section(2))
+        self.dashboard_section.review_upcoming_signal.connect(lambda: self.set_current_section(3))
         self.analysis_section = AnalysisView()
         self.history_section = HistoryView(
             service=self.history_service,
@@ -359,13 +373,13 @@ class MainWindow(QMainWindow):
         self.root_widget.setCurrentIndex(0)
 
 
-    def _check_due_transactions(self):
+    def _check_due_transactions(self, wallet_id:int):
         """Check due transaction and show dialog"""
         if self._due_check_done:
             return
-        wallet_id = self.app_state.active_wallet_id
+
         if wallet_id is None:
-            return
+            return 
 
         self._due_check_done = True
         if self.upcoming_service.get_due_count(wallet_id) > 0:
