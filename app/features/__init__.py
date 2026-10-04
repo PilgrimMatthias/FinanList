@@ -1,5 +1,5 @@
 from .analysis.view import AnalysisView
-from .dashboard.view import DashboardView
+from .dashboard import DashboardView, DashboardService
 from .history import HistoryView, HistoryService
 from .investments.view import InvestmentView
 from .savings.view import SavingsView
@@ -14,6 +14,7 @@ from .auth import AuthView, AuthService
 __all__ = [
     "AnalysisView",
     "DashboardView",
+    "DashboardService",
     "HistoryView",
     "HistoryService",
     "InvestmentView",
