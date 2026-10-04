@@ -93,6 +93,7 @@ class CategoryBars(QFrame):
 
                 total += category_total.amount
 
+        self.bottom_layout.addStretch()
         self.total_label.setText(f"{format_balance(total)} {self.currency.name}")
         self.month_label.setText(f"{self.month.capitalize()}")
 
