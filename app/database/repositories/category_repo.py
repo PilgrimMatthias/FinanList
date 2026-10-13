@@ -11,29 +11,32 @@ class CategoryRepo(BaseRepo):
 
     def create(self, category: Category) -> Category:
         with self.db.transaction():
-            cursor = self.db.execute(
-                """
-                INSERT
-                    INTO
-                    CATEGORIES (WALLET_ID,
-                    PARENT_ID,
-                    NAME,
-                    OPERATION_TYPE,
-                    COLOR,
-                    IS_PROTECTED)
-                VALUES (?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    category.wallet_id,
-                    category.parent_id,
-                    category.name,
-                    category.operation_type,
-                    category.color,
-                    category.is_protected,
-                ),
-            )
-            category.id = cursor.lastrowid
-            return category
+            return self.create_no_commit(category=category)
+        
+    def create_no_commit(self, category: Category) -> Category:
+        cursor = self.db.execute(
+            """
+            INSERT
+                INTO
+                CATEGORIES (WALLET_ID,
+                PARENT_ID,
+                NAME,
+                OPERATION_TYPE,
+                COLOR,
+                IS_PROTECTED)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (
+                category.wallet_id,
+                category.parent_id,
+                category.name,
+                category.operation_type,
+                category.color,
+                category.is_protected,
+            ),
+        )
+        category.id = cursor.lastrowid
+        return category
 
     def get_by_id(self, id: int) -> Category | None:
         row = self.db.execute(

@@ -5,11 +5,14 @@ from ..models import User
 class UserRepo(BaseRepo):
     def create(self, user: User) -> User:
         with self.db.transaction():
-            cursor = self.db.execute(
-                "INSERT INTO users (name) VALUES (?)", (user.name,)
-            )
-            user.id = cursor.lastrowid
-            return user
+            return self.create_no_commit(user=user)
+        
+    def create_no_commit(self, user: User) -> User:
+        cursor = self.db.execute(
+            "INSERT INTO users (name) VALUES (?)", (user.name,)
+        )
+        user.id = cursor.lastrowid
+        return user
 
     def get_user_by_id(self, id: int) -> User | None:
         row = self.db.execute(
@@ -33,3 +36,19 @@ class UserRepo(BaseRepo):
     def delete_by_id(self, id: int) -> None:
         with self.db.transaction():
             self.db.execute("DELETE FROM USERS WHERE ID = ?", (id,))
+
+    def update_no_commit(self, user:User) -> User:
+        self.db.execute(
+            """
+            UPDATE
+                USERS
+            SET
+                NAME = ?
+            WHERE
+                ID = ?
+            """,
+            (
+                user.name,
+                user.id,
+            ),
+        )

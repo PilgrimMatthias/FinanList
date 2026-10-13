@@ -56,62 +56,64 @@ class AuthService:
         if initial_balance < 0:
             raise ValidationError("Inittial balance must equel or higher than 0")
 
-        # Create new user
-        new_user = User(name=name)
-        new_user = self.user_repo.create(user=new_user)
+        with self.user_repo.db.transaction():
+            # Create new user
+            new_user = User(name=name)
+            new_user = self.user_repo.create_no_commit(user=new_user)
 
-        # Create new user profile
-        new_user_profile = UserProfile(
-            user_id=new_user.id,
-            gross_salary_monthly=gross_salary_monthly,
-            net_salary_monthly=net_salary_monthly,
-            estimated_expenses_monthly=estimated_expenses_monthly,
-        )
-        new_user_profile = self.profile_repo.create(profile=new_user_profile)
-
-        # Create first wallet
-        new_wallet = Wallet(
-            user_id=new_user.id,
-            name="Private Wallet",
-            currency=currency,
-            initial_balance=initial_balance,
-        )
-        new_wallet = self.wallet_repo.create(wallet=new_wallet)
-
-        for main_category in DEFAULT_MAIN_CATEGORIES:
-            temp_main_category = Category(
-                wallet_id=new_wallet.id,
-                name=main_category,
-                operation_type=OperationType.EXPENSE,
+            # Create new user profile
+            new_user_profile = UserProfile(
+                user_id=new_user.id,
+                gross_salary_monthly=gross_salary_monthly,
+                net_salary_monthly=net_salary_monthly,
+                estimated_expenses_monthly=estimated_expenses_monthly,
+                currency=currency
             )
-            temp_main_category = self.category_repo.create(temp_main_category)
+            self.profile_repo.create_no_commit(profile=new_user_profile)
 
-            for sub_category in DEFAULT_SUB_CATEGORIES:
-                temp_sub_category = Category(
+            # Create first wallet
+            new_wallet = Wallet(
+                user_id=new_user.id,
+                name="Private Wallet",
+                currency=currency,
+                initial_balance=initial_balance,
+            )
+            new_wallet = self.wallet_repo.create_no_commit(wallet=new_wallet)
+
+            for main_category in DEFAULT_MAIN_CATEGORIES:
+                temp_main_category = Category(
                     wallet_id=new_wallet.id,
-                    name=sub_category,
+                    name=main_category,
                     operation_type=OperationType.EXPENSE,
-                    parent_id=temp_main_category.id,
                 )
-                temp_sub_category = self.category_repo.create(temp_sub_category)
+                temp_main_category = self.category_repo.create_no_commit(temp_main_category)
 
-            if main_category == "Private":
-                temp_sub_category = Category(
-                    wallet_id=new_wallet.id,
-                    name="Income",
-                    operation_type=OperationType.INCOME,
-                    parent_id=temp_main_category.id,
-                )
-                temp_sub_category = self.category_repo.create(temp_sub_category)
+                for sub_category in DEFAULT_SUB_CATEGORIES:
+                    temp_sub_category = Category(
+                        wallet_id=new_wallet.id,
+                        name=sub_category,
+                        operation_type=OperationType.EXPENSE,
+                        parent_id=temp_main_category.id,
+                    )
+                    temp_sub_category = self.category_repo.create_no_commit(temp_sub_category)
 
-        # Uncathegorized category
-        temp_sub_category = Category(
-            wallet_id=new_wallet.id,
-            name="Uncategorized",
-            operation_type=OperationType.EXPENSE,
-            is_protected=True,
-        )
-        temp_sub_category = self.category_repo.create(temp_sub_category)
+                if main_category == "Private":
+                    temp_sub_category = Category(
+                        wallet_id=new_wallet.id,
+                        name="Income",
+                        operation_type=OperationType.INCOME,
+                        parent_id=temp_main_category.id,
+                    )
+                    temp_sub_category = self.category_repo.create_no_commit(temp_sub_category)
+
+            # Uncathegorized category
+            temp_sub_category = Category(
+                wallet_id=new_wallet.id,
+                name="Uncategorized",
+                operation_type=OperationType.EXPENSE,
+                is_protected=True,
+            )
+            temp_sub_category = self.category_repo.create_no_commit(temp_sub_category)
 
         # Update state
         self.app_state.set_active_user(user_id=new_user.id)

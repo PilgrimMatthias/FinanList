@@ -36,9 +36,10 @@ class UserProfile:
     gross_salary_monthly: float = field(default=0)
     net_salary_monthly: float = field(default=0)
     estimated_expenses_monthly: float = field(default=0)
+    currency: Currency = field(default=Currency.PLN)
 
     # Column order must match from_row() index mapping
-    COLUMNS = "id, user_id, gross_salary_monthly, net_salary_monthly, estimated_expenses_monthly"
+    COLUMNS = "id, user_id, gross_salary_monthly, net_salary_monthly, estimated_expenses_monthly, currency"
 
     @classmethod
     def from_row(cls, row: tuple) -> "UserProfile":
@@ -48,6 +49,7 @@ class UserProfile:
             gross_salary_monthly=row[2],
             net_salary_monthly=row[3],
             estimated_expenses_monthly=row[4],
+            currency=Currency(row[5]) if row[5] else None
         )
 
 

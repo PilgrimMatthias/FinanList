@@ -7,25 +7,30 @@ class UserProfileRepo(BaseRepo):
 
     def create(self, profile: UserProfile) -> UserProfile:
         with self.db.transaction():
-            cursor = self.db.execute(
-                """
-                INSERT
-                    INTO
-                    USER_PROFILE (USER_ID,
-                    GROSS_SALARY_MONTHLY,
-                    NET_SALARY_MONTHLY,
-                    ESTIMATED_EXPENSES_MONTHLY)
-                VALUES (?,?,?,?)
-                """,
-                (
-                    profile.user_id,
-                    profile.gross_salary_monthly,
-                    profile.net_salary_monthly,
-                    profile.estimated_expenses_monthly,
-                ),
-            )
-            profile.id = cursor.lastrowid
-            return profile
+            return self.create_no_commit(profile=profile)
+        
+    def create_no_commit(self, profile: UserProfile) -> UserProfile:
+        cursor = self.db.execute(
+            """
+            INSERT
+                INTO
+                USER_PROFILE (USER_ID,
+                GROSS_SALARY_MONTHLY,
+                NET_SALARY_MONTHLY,
+                ESTIMATED_EXPENSES_MONTHLY,
+                CURRENCY)
+            VALUES (?,?,?,?)
+            """,
+            (
+                profile.user_id,
+                profile.gross_salary_monthly,
+                profile.net_salary_monthly,
+                profile.estimated_expenses_monthly,
+                profile.currency,
+            ),
+        )
+        profile.id = cursor.lastrowid
+        return profile
 
     def get_by_user_id(self, user_id: int) -> UserProfile | None:
         row = self.db.execute(
@@ -71,3 +76,25 @@ class UserProfileRepo(BaseRepo):
             )
 
         return self.get_by_user_id(user_id=profile.user_id)
+
+    def update_no_commit(self, user_profile:UserProfile) -> UserProfile:
+        self.db.execute(
+            """
+            UPDATE
+                USER_PROFILE
+            SET
+                GROSS_SALARY_MONTHLY = ?,
+                NET_SALARY_MONTHLY = ?,
+                ESTIMATED_EXPENSES_MONTHLY = ?,
+                CURRENCY = ?
+            WHERE
+                ID = ?
+            """,
+            (
+                user_profile.gross_salary_monthly,
+                user_profile.net_salary_monthly,
+                user_profile.estimated_expenses_monthly,
+                user_profile.currency,
+                user_profile.id,
+            ),
+        )

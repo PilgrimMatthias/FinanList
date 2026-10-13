@@ -7,12 +7,15 @@ class WalletRepo(BaseRepo):
 
     def create(self, wallet: Wallet) -> Wallet:
         with self.db.transaction():
-            cursor = self.db.execute(
-                "INSERT INTO WALLETS (USER_ID, NAME, CURRENCY, INITIAL_BALANCE) VALUES (?, ?, ?, ?)",
-                (wallet.user_id, wallet.name, wallet.currency, wallet.initial_balance),
-            )
-            wallet.id = cursor.lastrowid
-            return wallet
+            return self.create_no_commit(wallet=wallet)
+
+    def create_no_commit(self, wallet: Wallet) -> Wallet:
+        cursor = self.db.execute(
+            "INSERT INTO WALLETS (USER_ID, NAME, CURRENCY, INITIAL_BALANCE) VALUES (?, ?, ?, ?)",
+            (wallet.user_id, wallet.name, wallet.currency, wallet.initial_balance),
+        )
+        wallet.id = cursor.lastrowid
+        return wallet
 
     def get_by_id(self, id: int) -> Wallet | None:
         row = self.db.execute(
