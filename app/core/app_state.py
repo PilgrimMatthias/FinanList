@@ -31,6 +31,9 @@ class AppState(QObject):
     def active_wallet_id(self) -> int:
         return self._active_wallet_id
 
+    def emit_user_change(self):
+        self.user_changed.emit(self._active_user_id)
+
     # Category states
     def emit_categories_change(self):
         self.category_changed.emit(self._active_wallet_id)

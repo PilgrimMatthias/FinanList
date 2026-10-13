@@ -7,7 +7,7 @@ from .settings.view import SettingsView
 from .upcoming import UpcomingView, UpcomingService, DueTransactionDialog
 from .wallets import WalletsView, WalletService
 from .categories import CategoriesView, CategoryService
-from .profile.view import ProfileView
+from .profile import ProfileView, ProfileService
 from .transaction import TransactionView, TransactionService
 from .auth import AuthView, AuthService
 
@@ -28,6 +28,7 @@ __all__ = [
     "WalletsView",
     "WalletService",
     "ProfileView",
+    "ProfileService",
     "TransactionView",
     "TransactionService",
     "AuthView",

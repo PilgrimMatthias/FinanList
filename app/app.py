@@ -39,6 +39,7 @@ from app.features import (
     CategoriesView,
     CategoryService,
     ProfileView,
+    ProfileService,
     AuthView,
     AuthService,
     TransactionView,
@@ -111,6 +112,11 @@ class MainWindow(QMainWindow):
             upcoming_service=self.upcoming_service,
             user_repo=self.user_repo,
             app_state=self.app_state,
+        )
+        self.profile_service = ProfileService(
+            user_repo=self.user_repo,
+            user_profile_repo=self.profile_repo,
+            app_state=self.app_state
         )
 
         # Connect app state
@@ -257,7 +263,9 @@ class MainWindow(QMainWindow):
             service=self.wallet_service, app_state=self.app_state, parent=self
         )
         self.settings_window = SettingsView()
-        self.profile_window = ProfileView()
+        self.profile_window = ProfileView(
+            profile_service=self.profile_service, app_state=self.app_state, parent=self
+        )
 
         # Stacked widgest for sections
         self.stacked_pages = QStackedWidget()

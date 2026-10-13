@@ -1102,3 +1102,79 @@ QFrame#hLine[emphasis="strong"] {
 QFrame#vLine[emphasis="strong"] {
     border-left: 1px solid #45475a;
 }
+
+/* PROFILE DIALOG - DARK THEME*/
+
+/* Header  */
+QLabel#profileDialogTitle {
+    font-size: 17px;
+    font-weight: 600;
+    color: #cdd6f4;
+}
+
+QLabel#profileDialogSubtitle {
+    font-size: 12px;
+    color: #a6adc8;
+}
+
+/*  Avatar row  */
+QLabel#profileDialogInitial {
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+    border: 2px solid #585b70;
+    border-radius: 40px;
+    font-size: 25pt;
+    font-weight: bold;
+}
+
+QLabel#profileDialogNameLabel {
+    font-size: 15px;
+    font-weight: 600;
+    color: #cdd6f4;
+}
+
+QLabel#profileDialogMemberLabel {
+    font-size: 11px;
+    color: #a6adc8;
+}
+
+/*  Summary panel */
+QWidget#profileSummary {
+    background-color: #1e1e2e;
+    border: 1px solid #45475a;
+    border-radius: 10px;
+}
+
+QWidget#profileSummary QWidget {
+    background: transparent;
+}
+
+QLabel#leftMonthTitle,
+QLabel#savingsRateLabel {
+    font-size: 11px;
+    color: #a6adc8;
+}
+
+/* Values - setProperty("positive", "true"/"false") */
+QLabel#leftMonthAmount,
+QLabel#savingsRateAmount {
+    font-size: 19px;
+    font-weight: 600;
+    color: #cdd6f4;
+}
+
+QLabel#leftMonthAmount[positive="true"],
+QLabel#savingsRateAmount[positive="true"] {
+    color: #1d9e75;
+}
+
+QLabel#leftMonthAmount[positive="false"],
+QLabel#savingsRateAmount[positive="false"] {
+    color: #e24b4a;
+}
+
+/*  Footer */
+QLabel#profileUnsaved {
+    font-size: 11px;
+    color: #d4a259;
+}
