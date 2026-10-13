@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QVBoxLayout,
     QTextEdit,
+    QHBoxLayout
 )
 
 
@@ -14,6 +15,8 @@ class TextInput(QWidget):
         self,
         parent=None,
         text: str = None,
+        sub_text: str = None,
+        error_text:str = None,
         placeholder: str = None,
         default_text: str = None,
         validate_number=False,
@@ -27,7 +30,7 @@ class TextInput(QWidget):
             placeholder (str, optional): placeholder for combobox. Defaults to None.
             validate_number (bool, optional): validate number after editing is finished?. Defaults to False.
         """
-        super().__init__()
+        super().__init__(parent)
         self.validate_number = validate_number
 
         if self.validate_number and is_multiline:
@@ -37,10 +40,21 @@ class TextInput(QWidget):
         self.widget_layout.setContentsMargins(0, 5, 0, 5)
         self.widget_layout.setSpacing(5)
 
+        title_widget = QWidget(self)
+        title_layout = QHBoxLayout(title_widget)
+        title_layout.setContentsMargins(0, 0, 0, 0)
+        title_layout.setSpacing(5)
+
         self.label = QLabel(self)
+        self.sub_label = QLabel(self)
+        self.sub_label.setStyleSheet("color:grey; font-size:10pt;")
+        self.sub_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
         if text is not None:
             self.label.setText(text)
+
+        if sub_text is not None:
+            self.sub_label.setText(sub_text)
 
         if is_multiline:
             self.text_input = ResizableTextEdit(self, visible_lines=3)
@@ -56,8 +70,18 @@ class TextInput(QWidget):
         if self.validate_number:
             self._set_number_validator()
 
-        self.widget_layout.addWidget(self.label)
+        self.error_label = QLabel(self)
+        self.error_label.setStyleSheet("color:red; font-size:10pt;")
+        self.error_label.hide()
+        if error_text is not None:
+            self.error_label.setText(error_text)
+
+        title_layout.addWidget(self.label)
+        title_layout.addWidget(self.sub_label)
+        title_layout.addStretch()
+        self.widget_layout.addWidget(title_widget)
         self.widget_layout.addWidget(self.text_input)
+        self.widget_layout.addWidget(self.error_label)
 
     def get_value(self):
         """get value from line edit"""
@@ -78,6 +102,12 @@ class TextInput(QWidget):
         if self.text_input.text() == "":
             return False
         return True
+
+    def toggle_error(self, enabled):
+        self.error_label.setVisible(enabled)
+
+    def error_visibility(self) -> bool:
+        return self.error_label.isVisible()
 
     def _set_number_validator(self):
         """Set number validator"""
