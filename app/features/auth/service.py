@@ -6,7 +6,7 @@ from app.database.repositories import (
     CategoryRepo,
 )
 from app.database import User, UserProfile, Wallet, Category
-
+from app.features.settings.service import SettingsService
 from app.core.enums import Currency, OperationType
 from app.core.constants import DEFAULT_MAIN_CATEGORIES, DEFAULT_SUB_CATEGORIES
 from app.core.exceptions import ValidationError
@@ -19,6 +19,7 @@ class AuthService:
         profile_repo: UserProfileRepo,
         wallet_repo: WalletRepo,
         category_repo: CategoryRepo,
+        settings_service:SettingsService,
         app_state: AppState,
     ):
         super().__init__()
@@ -27,6 +28,7 @@ class AuthService:
         self.profile_repo = profile_repo
         self.wallet_repo = wallet_repo
         self.category_repo = category_repo
+        self.settings_service = settings_service
         self.app_state = app_state
 
     def get_all_users(self) -> list[User]:
@@ -127,9 +129,20 @@ class AuthService:
         if wallets:
             self.app_state.set_active_wallet(wallet_id=wallets[0].id)
 
+        if self.settings_service.get_remember_last_user():
+            self.settings_service.set_last_user_id(id=user_id)
+
     def check_auto_login(self):
         """Check if user is single and/or has auto login -> if yes user is automatically logged in"""
-        users = self.get_all_users()
+        if not self.settings_service.get_remember_last_user():
+            return
+        user_id = self.settings_service.get_last_user_id()
+        if user_id is None:
+            return
 
-        if len(users) == 1:
-            self.select_user(users[0].id)
+        user = self.user_repo.get_user_by_id(id=user_id)
+        if user is None:
+            self.settings_service.clear_last_user_id()
+            return
+
+        self.select_user(user_id=user.id)

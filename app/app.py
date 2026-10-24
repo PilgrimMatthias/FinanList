@@ -30,6 +30,7 @@ from app.features import (
     HistoryService,
     InvestmentView,
     SavingsView,
+    SettingsService,
     SettingsView,
     UpcomingView,
     UpcomingService,
@@ -48,11 +49,12 @@ from app.features import (
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, database: Database):
+    def __init__(self, database: Database, app_state:AppState, settings_service:SettingsService):
         super().__init__()
 
         self.database = database
-        self.app_state = AppState()
+        self.app_state = app_state
+        self.settings_service = settings_service
 
         self._due_check_done = False
 
@@ -76,6 +78,7 @@ class MainWindow(QMainWindow):
             profile_repo=self.profile_repo,
             wallet_repo=self.wallet_repo,
             category_repo=self.category_repo,
+            settings_service=self.settings_service,
             app_state=self.app_state,
         )
         self.transaction_service = TransactionService(
@@ -248,11 +251,13 @@ class MainWindow(QMainWindow):
         self.history_section = HistoryView(
             service=self.history_service,
             transaction_service=self.transaction_service,
+            settings_service=self.settings_service,
             app_state=self.app_state,
         )
         self.upcoming_section = UpcomingView(
             service=self.upcoming_service,
             transaction_service=self.transaction_service,
+            settings_service=self.settings_service,
             app_state=self.app_state,)
         self.savings_section = SavingsView()
         self.investment_section = InvestmentView()
@@ -262,7 +267,11 @@ class MainWindow(QMainWindow):
         self.wallets_window = WalletsView(
             service=self.wallet_service, app_state=self.app_state, parent=self
         )
-        self.settings_window = SettingsView()
+        self.settings_window = SettingsView(
+            service = self.settings_service,
+            app_state = self.app_state,
+            parent = self
+        )
         self.profile_window = ProfileView(
             profile_service=self.profile_service, app_state=self.app_state, parent=self
         )
@@ -368,12 +377,20 @@ class MainWindow(QMainWindow):
         dialog.show()
 
     def log_in(self):
+        if self.app_state.active_user_id is None:
+            return
+        if self.root_widget.currentIndex() == 1:
+            return 
+        
         self.root_widget.setCurrentIndex(1)
-
+        self.stacked_pages.setCurrentIndex(self.settings_service.get_default_page())
+        
     def log_out(self):
         """
         Method used for showing window with user wallets.
         """
+        self.settings_service.clear_last_user_id()
+
         self.user_menu.hide()
         self._due_check_done = False
         self.app_state.set_active_user(None)

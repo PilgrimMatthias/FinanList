@@ -15,7 +15,7 @@ from app.core.app_state import AppState
 from app.core.exceptions import ValidationError
 from app.database.models import Wallet
 from app.config import WALLET_WINDOW_WIDTH, WALLET_WINDOW_HEIGHT
-from .widgets.wallet_buttons import WalletButton
+from app.core.widgets.buttons import PushButton
 from .widgets.wallet_form_dialog import WalletFormDialog
 
 
@@ -68,11 +68,11 @@ class WalletsView(QDialog):
         main_layout.setSpacing(10)
         main_layout.setContentsMargins(5, 10, 5, 10)
 
-        self.add_btn = WalletButton(
+        self.add_btn = PushButton(
             text="+ Add Wallet",
-            variant="add_wallet",
             height=50,
             width=WALLET_WINDOW_WIDTH - 20,
+            object_name="walletCardBtnNeutral",
             on_click=self._show_wallet_dialog,
         )
 

@@ -1,6 +1,7 @@
 from PySide6.QtCore import Qt, QRect
 from PySide6.QtGui import QPainter, QColor, QFont
 from PySide6.QtWidgets import QStyledItemDelegate, QStyleOptionViewItem
+from app.core.theme.palette import Palette
 
 from app.core.enums import OperationType
 
@@ -8,19 +9,16 @@ from app.core.enums import OperationType
 class TypePillDelegate(QStyledItemDelegate):
     """Renders operation type as a colored rounded pill."""
 
-    COLORS = {
-        OperationType.INCOME: ("#008000", "#b3ffb3"),
-        OperationType.EXPENSE: ("#ff3333", "#ffcccc"),
-        OperationType.SAVING: ("#1e65c8", "#bcc5f6"),
-        OperationType.INVESTMENT: ("#0f1f70", "#bdd4f5"),
-    }
 
     def paint(self, painter: QPainter, option: QStyleOptionViewItem, index):
         super().paint(painter, option, index)
         # Get the operation type from the model — see UserRole tip below
         op_type = index.data(Qt.UserRole)
+        if op_type is None:
+            return
 
-        text_color, bg_color = self.COLORS.get(op_type, ("#888", "#eee"))
+        bg_color = Palette.operation(op_type, "pill_bg")
+        text_color = Palette.operation(op_type, "pill_text")
         text = op_type
 
         painter.save()
@@ -47,11 +45,11 @@ class TypePillDelegate(QStyledItemDelegate):
 
         # Draw pill background (fully rounded with high radius)
         painter.setPen(Qt.NoPen)
-        painter.setBrush(QColor(bg_color))
+        painter.setBrush(bg_color)
         painter.drawRoundedRect(pill_rect, pill_height // 2, pill_height // 2)
 
         # Draw text
-        painter.setPen(QColor(text_color))
+        painter.setPen(text_color)
         painter.drawText(pill_rect, Qt.AlignCenter, text)
 
         painter.restore()

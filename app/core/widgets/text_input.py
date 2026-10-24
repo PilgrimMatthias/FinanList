@@ -1,4 +1,4 @@
-from PySide6.QtCore import Qt, QEvent, QRect
+from PySide6.QtCore import Qt, QEvent, QRect, QLocale
 from PySide6.QtGui import QDoubleValidator, QPainter, QColor, QPen
 from PySide6.QtWidgets import (
     QWidget,
@@ -32,6 +32,8 @@ class TextInput(QWidget):
         """
         super().__init__(parent)
         self.validate_number = validate_number
+        self._locale = QLocale(QLocale.Language.English, QLocale.Country.Poland)
+
 
         if self.validate_number and is_multiline:
             raise ValueError("Number validation is not supported for multiline input")
@@ -47,7 +49,7 @@ class TextInput(QWidget):
 
         self.label = QLabel(self)
         self.sub_label = QLabel(self)
-        self.sub_label.setStyleSheet("color:grey; font-size:10pt;")
+        self.sub_label.setObjectName("inputSubLabel")
         self.sub_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
         if text is not None:
@@ -113,6 +115,7 @@ class TextInput(QWidget):
         """Set number validator"""
         validator = QDoubleValidator(0, 999999999, 2)
         validator.setNotation(QDoubleValidator.Notation.StandardNotation)
+        validator.setLocale(self._locale)
         self.text_input.setValidator(validator)
         self.text_input.editingFinished.connect(self._on_item_changed)
 

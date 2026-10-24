@@ -5,6 +5,7 @@ from ..service import UpcomingService
 from app.core.app_state import AppState
 from ..models import RecurringTransactionDisplay
 from PySide6.QtCore import Qt
+from app.core.theme.palette import Palette
 
 from app.core.enums import OperationType
 from app.core.utils import cast_date_to_proper_format
@@ -17,16 +18,6 @@ class UpcomingTableModel(QAbstractTableModel):
     CHECKBOX_COL = 0
     CATEGORY_COL = 4
     ACTIVE_COL = 6
-
-    INCOME_COLOR = QColor("#008000")
-    EXPENSE_COLOR = QColor("#ff3333")
-    SAVINGS_COLOR = QColor("#1e65c8")
-    INVESTMENT_COLOR = QColor("#0f1f70")
-
-    BG_INCOME_COLOR = QColor("#b3ffb3")
-    BG_EXPENSE_COLOR = QColor("#ffcccc")
-    BG_SAVINGS_COLOR = QColor("#bcc5f6")
-    BG_INVESTMENT_COLOR = QColor("#bdd4f5")
 
     def __init__(self, service: UpcomingService, app_state: AppState, parent=None):
         super().__init__(parent)
@@ -41,6 +32,8 @@ class UpcomingTableModel(QAbstractTableModel):
         self._search = ""
         self._is_selection_mode = False
         self._selected_ids: set[int] = set()
+
+        self._app_state.page_size_changed.connect(self.set_page_size)
 
     # QAbstractModel method
     def rowCount(self, parent=QModelIndex()) -> int:
@@ -120,12 +113,12 @@ class UpcomingTableModel(QAbstractTableModel):
 
         if role == Qt.ForegroundRole:
             if not row.recurring.is_active and col in [1,2,3,4,5]:
-                return QColor("#808080")
+                return Palette.color("text_muted") 
             if col == 3 and row.is_overdue:
-                return QColor("#ff3333")
+                return Palette.color("danger") 
             if col == 5:
-                return self._color_for_type(
-                    row.recurring.operation_type, role=Qt.ForegroundRole
+                return Palette.operation(
+                    row.recurring.operation_type
                 )
 
         return None  # Always return None for unhandled roles
@@ -162,22 +155,6 @@ class UpcomingTableModel(QAbstractTableModel):
             return base_flags | Qt.ItemIsUserCheckable
 
         return base_flags
-
-    def _color_for_type(self, op_type, role=Qt.BackgroundRole):
-        """Colors operation based on its type"""
-        if role == Qt.ForegroundRole:
-            return {
-                OperationType.INCOME: self.INCOME_COLOR,
-                OperationType.EXPENSE: self.EXPENSE_COLOR,
-                OperationType.SAVING: self.SAVINGS_COLOR,
-                OperationType.INVESTMENT: self.INVESTMENT_COLOR,
-            }.get(op_type)
-        return {
-            OperationType.INCOME: self.BG_INCOME_COLOR,
-            OperationType.EXPENSE: self.BG_EXPENSE_COLOR,
-            OperationType.SAVING: self.BG_SAVINGS_COLOR,
-            OperationType.INVESTMENT: self.BG_INVESTMENT_COLOR,
-        }.get(op_type)
 
     # Set & reload methods
     def reload(self):
@@ -281,6 +258,15 @@ class UpcomingTableModel(QAbstractTableModel):
             return 1
         return math.ceil(self._total_count / self._page_size)
 
+    def set_page_size(self, size: int):
+        self._page_size = size
+        self._page = 1 
+        self.reload()
+
+    @property
+    def page_size(self) -> int:
+        return self._page_size
+    
     @property
     def current_page(self) -> int:
         return self._page

@@ -5,6 +5,7 @@ from ..service import HistoryService
 from app.core.app_state import AppState
 from ..models import TransactionDisplay
 from PySide6.QtCore import Qt
+from app.core.theme.palette import Palette
 
 from app.core.enums import OperationType
 from app.core.utils import cast_date_to_proper_format
@@ -17,16 +18,6 @@ class HistoryTableModel(QAbstractTableModel):
     CHECKBOX_COL = 0
     TYPE_COL = 4
     CATEGORY_COL = 5
-
-    INCOME_COLOR = QColor("#008000")
-    EXPENSE_COLOR = QColor("#ff3333")
-    SAVINGS_COLOR = QColor("#1e65c8")
-    INVESTMENT_COLOR = QColor("#0f1f70")
-
-    BG_INCOME_COLOR = QColor("#b3ffb3")
-    BG_EXPENSE_COLOR = QColor("#ffcccc")
-    BG_SAVINGS_COLOR = QColor("#bcc5f6")
-    BG_INVESTMENT_COLOR = QColor("#bdd4f5")
 
     def __init__(self, service: HistoryService, app_state: AppState, parent=None):
         super().__init__(parent)
@@ -41,6 +32,8 @@ class HistoryTableModel(QAbstractTableModel):
         self._search = ""
         self._is_selection_mode = False
         self._selected_ids: set[int] = set()
+
+        self._app_state.page_size_changed.connect(self.set_page_size)
 
     # QAbstractModel method
     def rowCount(self, parent=QModelIndex()) -> int:
@@ -109,9 +102,9 @@ class HistoryTableModel(QAbstractTableModel):
                 1,
                 2,
             ]:
-                return Qt.AlignVCenter | Qt.AlignLeft
+                return int(Qt.AlignVCenter | Qt.AlignLeft)
             else:
-                return Qt.AlignCenter
+                return int(Qt.AlignCenter)
 
         if role == Qt.FontRole:
             if col == 1 and row.is_recurring:  # Recurring transactions — italic
@@ -121,8 +114,8 @@ class HistoryTableModel(QAbstractTableModel):
 
         if role == Qt.ForegroundRole:
             if col == 6:
-                return self._color_for_type(
-                    row.transaction.operation_type, role=Qt.ForegroundRole
+                return Palette.operation(
+                    row.transaction.operation_type
                 )
 
         return None  # Always return None for unhandled roles
@@ -159,22 +152,6 @@ class HistoryTableModel(QAbstractTableModel):
             return base_flags | Qt.ItemIsUserCheckable
 
         return base_flags
-
-    def _color_for_type(self, op_type, role=Qt.BackgroundRole):
-        """Colors operation based on its type"""
-        if role == Qt.ForegroundRole:
-            return {
-                OperationType.INCOME: self.INCOME_COLOR,
-                OperationType.EXPENSE: self.EXPENSE_COLOR,
-                OperationType.SAVING: self.SAVINGS_COLOR,
-                OperationType.INVESTMENT: self.INVESTMENT_COLOR,
-            }.get(op_type)
-        return {
-            OperationType.INCOME: self.BG_INCOME_COLOR,
-            OperationType.EXPENSE: self.BG_EXPENSE_COLOR,
-            OperationType.SAVING: self.BG_SAVINGS_COLOR,
-            OperationType.INVESTMENT: self.BG_INVESTMENT_COLOR,
-        }.get(op_type)
 
     # Set & reload methods
     def reload(self):
@@ -234,14 +211,7 @@ class HistoryTableModel(QAbstractTableModel):
 
     def select_all(self):
         """Select all displayed rows"""
-        self._selected_ids = set()
-        for row in self._rows:
-            row_id = row.transaction.id
-
-            if row_id not in self._selected_ids:
-                self._selected_ids.add(row_id)
-            else:
-                self._selected_ids.discard(row_id)
+        self._selected_ids = {row.transaction.id for row in self._rows}
 
         self._notify_checkbox_column_changed()
 
@@ -286,6 +256,11 @@ class HistoryTableModel(QAbstractTableModel):
             return 1
         return math.ceil(self._total_count / self._page_size)
 
+    def set_page_size(self, size: int):
+        self._page_size = size
+        self._page = 1 
+        self.reload()
+
     @property
     def current_page(self) -> int:
         return self._page
@@ -295,7 +270,7 @@ class HistoryTableModel(QAbstractTableModel):
         return self._total_count
 
     @property
-    def is_selection_mode(self) -> int:
+    def is_selection_mode(self) -> bool:
         return self._is_selection_mode
 
     @property

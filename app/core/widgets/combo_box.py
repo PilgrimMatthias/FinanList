@@ -1,4 +1,5 @@
 from PySide6.QtWidgets import QWidget, QLabel, QComboBox, QVBoxLayout
+from PySide6.QtCore import Qt
 
 
 class ComboBox(QWidget):
@@ -6,6 +7,7 @@ class ComboBox(QWidget):
         self,
         parent=None,
         text: str = None,
+        sub_text: str = None,
         placeholder: str = None,
         values: list[tuple[str, any]] = [],
         default_value: str = None,
@@ -28,8 +30,18 @@ class ComboBox(QWidget):
 
         self.label = QLabel(self)
 
+        self.label = QLabel(self)
+        self.sub_label = QLabel(self)
+        self.sub_label.setObjectName("inputSubLabel")
+        self.sub_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.sub_label.hide()
+
         if text is not None:
             self.label.setText(text)
+
+        if sub_text is not None:
+            self.sub_label.setText(sub_text)
+            self.sub_label.show()
 
         self.combo_box = QComboBox(self)
         self.add_items_with_data(items=values)
@@ -44,6 +56,7 @@ class ComboBox(QWidget):
             self.combo_box.setPlaceholderText(placeholder)
 
         self.widget_layout.addWidget(self.label)
+        self.widget_layout.addWidget(self.sub_label)
         self.widget_layout.addWidget(self.combo_box)
 
     def add_items_with_data(self, items: list[tuple[str, any]]):

@@ -134,6 +134,8 @@ class CategoriesView(QWidget):
             if widget is not None:
                 widget.deleteLater()
 
+        self._main_rows = [] 
+
     def _exit_selection_mode(self):
         if self._is_selection_mode:
             self._is_selection_mode = False

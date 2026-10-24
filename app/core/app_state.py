@@ -2,11 +2,13 @@ from PySide6.QtCore import QObject, Signal
 
 
 class AppState(QObject):
-    user_changed = Signal(int)  # emits user_id
-    wallet_changed = Signal(int)  # emits wallet_id
+    user_changed = Signal(object)  # emits user_id
+    wallet_changed = Signal(object)  # emits wallet_id
     category_changed = Signal(int)  # emits wallet_id
     transaction_changed = Signal(int)  # emits wallet_id
     recurring_transaction_changed = Signal(int)  # emits wallet_id
+    theme_changed = Signal(str)
+    page_size_changed = Signal(int)
 
     def __init__(self):
         super().__init__()

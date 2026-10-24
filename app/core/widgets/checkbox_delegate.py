@@ -1,7 +1,8 @@
 # core/widgets/checkbox_delegate.py
 from PySide6.QtCore import Qt, QRect, QEvent, QPoint
-from PySide6.QtGui import QPainter, QColor, QPen, QBrush
+from PySide6.QtGui import QPainter, QPen
 from PySide6.QtWidgets import QStyledItemDelegate
+from app.core.theme.palette import Palette
 
 
 class CheckboxDelegate(QStyledItemDelegate):
@@ -10,13 +11,6 @@ class CheckboxDelegate(QStyledItemDelegate):
     SIZE = 18
     BORDER_RADIUS = 4
     BORDER_WIDTH = 1.5
-
-    # Colors — adjust to match your theme
-    BORDER_COLOR = QColor("#808080")
-    BORDER_COLOR_HOVER = QColor("#2a82da")
-    FILL_COLOR_CHECKED = QColor("#2a82da")
-    FILL_COLOR_UNCHECKED = QColor("#ffffff")
-    CHECKMARK_COLOR = QColor("#ffffff")
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -40,20 +34,21 @@ class CheckboxDelegate(QStyledItemDelegate):
         painter.save()
         painter.setRenderHint(QPainter.Antialiasing)
 
+        border = Palette.color("checkbox_border_hover" if is_hovered else "checkbox_border")
+
         # Border / background
         if is_checked:
-            painter.setBrush(QBrush(self.FILL_COLOR_CHECKED))
-            painter.setPen(QPen(self.FILL_COLOR_CHECKED, self.BORDER_WIDTH))
+            painter.setBrush(Palette.color("checkbox_fill"))
+            painter.setPen(QPen(Palette.color("checkbox_fill"), self.BORDER_WIDTH))
         else:
-            border = self.BORDER_COLOR_HOVER if is_hovered else self.BORDER_COLOR
-            painter.setBrush(QBrush(self.FILL_COLOR_UNCHECKED))
+            painter.setBrush(Qt.NoBrush)
             painter.setPen(QPen(border, self.BORDER_WIDTH))
 
         painter.drawRoundedRect(rect, self.BORDER_RADIUS, self.BORDER_RADIUS)
 
         # Checkmark
         if is_checked:
-            pen = QPen(self.CHECKMARK_COLOR, 2.0)
+            pen = QPen(Palette.color("checkbox_check"), 2.0)
             pen.setCapStyle(Qt.RoundCap)
             pen.setJoinStyle(Qt.RoundJoin)
             painter.setPen(pen)

@@ -1,6 +1,7 @@
 from PySide6.QtCore import Qt, QRect, QEvent, Signal
 from PySide6.QtGui import QPainter, QColor
 from PySide6.QtWidgets import QStyledItemDelegate
+from app.core.theme.palette import Palette
 
 
 class ActiveToggleDelegate(QStyledItemDelegate):
@@ -11,8 +12,6 @@ class ActiveToggleDelegate(QStyledItemDelegate):
     TRACK_W = 36
     TRACK_H = 18
     KNOB = 14
-    ON_COLOR = QColor("#1D9E75")
-    OFF_COLOR = QColor("#808080")
 
     def paint(self, painter, option, index):
         super().paint(painter, option, index)
@@ -31,12 +30,12 @@ class ActiveToggleDelegate(QStyledItemDelegate):
         track = QRect(x, y, self.TRACK_W, self.TRACK_H)
 
         painter.setPen(Qt.NoPen)
-        painter.setBrush(self.ON_COLOR if is_active else self.OFF_COLOR)
+        painter.setBrush(Palette.color("toggle_on" if is_active else "toggle_off"))
         painter.drawRoundedRect(track, self.TRACK_H // 2, self.TRACK_H // 2)
 
         knob_x = (x + self.TRACK_W - self.KNOB - 2) if is_active else (x + 2)
         knob_y = y + (self.TRACK_H - self.KNOB) // 2
-        painter.setBrush(QColor("#ffffff"))
+        painter.setBrush(Palette.color("toggle_knob"))
         painter.drawEllipse(QRect(knob_x, knob_y, self.KNOB, self.KNOB))
 
         painter.restore()

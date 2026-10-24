@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (
     QFrame,
 )
 from app.database.models import Wallet
-from .wallet_buttons import WalletButton
+from app.core.widgets.buttons import PushButton
 
 
 class WalletCard(QFrame):
@@ -87,7 +87,7 @@ class WalletCard(QFrame):
 
         # Active card — only Edit
         if self._is_active:
-            self.edit_btn = WalletButton("Edit", variant="active_card", width=60)
+            self.edit_btn = PushButton(text="Edit", width=60, height=25,font_size=8, object_name="walletCardBtnOnGradient")
             self.edit_btn.clicked.connect(lambda: self.edit_requested.emit(self.wallet))
             bottom_layout.addWidget(
                 self.edit_btn, alignment=Qt.AlignmentFlag.AlignBottom
@@ -95,12 +95,12 @@ class WalletCard(QFrame):
 
         # Inactive card — Set Active, Edit, Delete
         else:
-            self.activate_btn = WalletButton("Set Active", variant="primary", width=90)
+            self.activate_btn = PushButton(text="Set Active", width=70, height=25, font_size=8, object_name="walletCardBtnPrimary")
             self.activate_btn.clicked.connect(
                 lambda: self.set_active_requested.emit(self.wallet)
             )
 
-            self.edit_btn = WalletButton("Edit", variant="neutral", width=60)
+            self.edit_btn = PushButton(text="Edit", width=60, height=25,font_size=8, object_name="walletCardBtnNeutral")
             self.edit_btn.clicked.connect(lambda: self.edit_requested.emit(self.wallet))
 
             bottom_layout.addWidget(
@@ -110,7 +110,7 @@ class WalletCard(QFrame):
                 self.edit_btn, alignment=Qt.AlignmentFlag.AlignBottom
             )
             if not self.is_only_wallet:
-                self.delete_btn = WalletButton("Delete", variant="danger", width=60)
+                self.delete_btn = PushButton(text="Delete", width=60, height=25, font_size=8, object_name="walletCardBtnDanger")
                 self.delete_btn.clicked.connect(
                     lambda: self.delete_requested.emit(self.wallet)
                 )

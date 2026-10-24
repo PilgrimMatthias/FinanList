@@ -110,6 +110,9 @@ class DashboardView(QWidget):
         if wallet_id is None or self.app_state._active_user_id is None:
             return
 
+        if wallet_id != self.app_state.active_wallet_id:
+            return
+
         # Get info for widgets
         user_name = self.service.get_user_name(user_id=self.app_state.active_user_id)
         wallet = self.service.get_wallet(wallet_id=wallet_id)

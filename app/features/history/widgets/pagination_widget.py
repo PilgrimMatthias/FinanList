@@ -113,11 +113,12 @@ class PaginationWidget(QWidget):
         if self.current_page < self.total_pages:
             self.page_changed.emit(self.total_pages)
 
-    def reload(self, current_page: int, total_pages: int, total_count: int):
+    def reload(self, current_page: int, total_pages: int, total_count: int, page_size:int):
         """Reload widget - update information displayed for user in number of pages and current count."""
         self.current_page = current_page
         self.total_pages = total_pages
         self.total_count = total_count
+        self.page_size = page_size
 
         count_from = (self.current_page - 1) * self.page_size + 1
         count_to = min(self.current_page * self.page_size, self.total_count)

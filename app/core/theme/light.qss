@@ -94,7 +94,7 @@ QDateEdit::drop-down {
 
 QComboBox::down-arrow,
 QDateEdit::down-arrow {
-    image: url(images:down_icon.png);
+    image: url(svg:down_arrow_light.svg);
 }
 
 /* --- Buttons --- */
@@ -144,7 +144,7 @@ QScrollBar::sub-line:vertical {
     border-top-right-radius: 5px;
     subcontrol-position: top;
     subcontrol-origin: margin;
-    image: url(images:up_icon.png);
+    image: url(svg:up_arrow_light.svg);
 }
 
 QScrollBar::add-line:vertical {
@@ -153,7 +153,7 @@ QScrollBar::add-line:vertical {
     border-bottom-right-radius: 5px;
     subcontrol-position: bottom;
     subcontrol-origin: margin;
-    image: url(images:down_icon.png);
+    image: url(svg:down_arrow_light.svg);
 }
 
 QScrollBar::sub-line:vertical:hover,
@@ -935,6 +935,14 @@ QPushButton#dangerButton:disabled {
     border-color: #ededed;
     color: #b3b3b3;
 }
+QPushButton#walletCardBtnOnGradient {
+    background-color: rgba(255,255,255,0.2);
+    color: #ffffff;
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 6px;
+}
+QPushButton#walletCardBtnOnGradient:hover   { background-color: rgba(255,255,255,0.35); }
+QPushButton#walletCardBtnOnGradient:pressed { background-color: rgba(255,255,255,0.5); }
 
 /* --- Small size modifier: pair via setProperty("size", "small") --- */
 QPushButton[size="small"] {
@@ -1268,4 +1276,226 @@ QLabel#savingsRateAmount[positive="false"] {
 QLabel#profileUnsaved {
     font-size: 11px;
     color: #b07d2b;
+}
+
+QLabel#inputLabel     { font-size: 13px; color: #1e1e1e; }
+QLabel#inputSubLabel  { font-size: 11px; color: #808080; }
+
+/*    WALLET CARD BUTTONS - LIGHT THEME*/
+
+/* --- Set Active ----------------------------------------------------- */
+QPushButton#walletCardBtnPrimary {
+    background-color: #e8f0fb;
+    color: #1a5fb4;
+    border: 1px solid #bcd4f0;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 0px;
+}
+
+QPushButton#walletCardBtnPrimary:hover {
+    background-color: #d4e4f7;
+    border-color: #bcd4f0;
+}
+
+QPushButton#walletCardBtnPrimary:pressed {
+    background-color: #bcd4f0;
+    color: #0d4a8a;
+    border-color: #9abde0;
+}
+
+/* --- Edit, on an inactive card -------------------------------------- */
+QPushButton#walletCardBtnNeutral {
+    background-color: #f5f5f5;
+    color: #333333;
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 0px;
+}
+
+QPushButton#walletCardBtnNeutral:hover {
+    background-color: #e8e8e8;
+}
+
+QPushButton#walletCardBtnNeutral:pressed {
+    background-color: #d9d9d9;
+    color: #1e1e1e;
+    border-color: #bfbfbf;
+}
+
+/* --- Delete --------------------------------------------------------- */
+QPushButton#walletCardBtnDanger {
+    background-color: #fdeaea;
+    color: #c53030;
+    border: 1px solid #f5c6c6;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 0px;
+}
+
+QPushButton#walletCardBtnDanger:hover {
+    background-color: #fad4d4;
+}
+
+QPushButton#walletCardBtnDanger:pressed {
+    background-color: #f5b3b3;
+    color: #8b1a1a;
+    border-color: #e09a9a;
+}
+
+/* --- Any button sitting on the active card's blue gradient ----------
+   Identical in both themes - the gradient does not change.            */
+QPushButton#walletCardBtnOnGradient {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 0px;
+}
+
+QPushButton#walletCardBtnOnGradient:hover {
+    background-color: rgba(255, 255, 255, 0.35);
+    border-color: rgba(255, 255, 255, 0.45);
+}
+
+QPushButton#walletCardBtnOnGradient:pressed {
+    background-color: rgba(255, 255, 255, 0.5);
+    border-color: rgba(255, 255, 255, 0.55);
+}
+
+/* --- Add Wallet ----------------------------------------------------- */
+QPushButton#addWalletBtn {
+    background-color: transparent;
+    color: #888888;
+    border: 2px solid #d0d0d0;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 14px;
+}
+
+QPushButton#addWalletBtn:hover {
+    background-color: #f5f5f5;
+    color: #555555;
+    border-color: #b0b0b0;
+}
+
+QPushButton#addWalletBtn:pressed {
+    background-color: #e0e0e0;
+    color: #333333;
+    border-color: #999999;
+}
+
+/* --- Disabled ------------------------------------------------------
+   PushButton skips its inline disabled_stylesheet when themed, so the
+   disabled look has to live here or it simply will not appear.        */
+QPushButton#walletCardBtnPrimary:disabled,
+QPushButton#walletCardBtnNeutral:disabled,
+QPushButton#walletCardBtnDanger:disabled,
+QPushButton#addWalletBtn:disabled {
+    background-color: #f5f5f5;
+    color: #b3b3b3;
+    border-color: #ededed;
+}
+
+QPushButton#walletCardBtnOnGradient:disabled {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.4);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+/*   SETTINGS DIALOG */
+
+/*  Dialog shell  */
+QDialog#settingsDialog {
+    background-color: #ffffff;
+}
+
+/* - Header - */
+QLabel#settingsDialogTitle {
+    font-size: 17px;
+    font-weight: 600;
+    color: #1e1e1e;
+}
+
+QLabel#settingsDialogSubtitle {
+    font-size: 12px;
+    color: #808080;
+}
+
+/* - Section headers (APPEARANCE, STARTUP, DATA, REGIONAL) -
+   margin-top is what separates one group from the next - the HLine
+   underneath sits tight against the label.                            */
+QLabel#settingsSectionLabel {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: #808080;
+    margin-top: 10px;
+}
+
+/* - Footer note  */
+QLabel#settingsApplyNote {
+    font-size: 11px;
+    color: #808080;
+}
+
+/* - Scroll area -
+   Children must be transparent or they paint over the dialog.        */
+QScrollArea#settingsScrollArea {
+    background: transparent;
+    border: none;
+}
+
+QScrollArea#settingsScrollArea > QWidget > QWidget {
+    background: transparent;
+}
+
+QScrollArea#settingsScrollArea QScrollBar:vertical {
+    background-color: transparent;
+    width: 8px;
+    margin: 0;
+    border: none;
+}
+
+QScrollArea#settingsScrollArea QScrollBar::handle:vertical {
+    background-color: #d0d0d0;
+    border-radius: 4px;
+    min-height: 24px;
+}
+
+QScrollArea#settingsScrollArea QScrollBar::handle:vertical:hover {
+    background-color: #b3b3b3;
+}
+
+QScrollArea#settingsScrollArea QScrollBar::add-line:vertical,
+QScrollArea#settingsScrollArea QScrollBar::sub-line:vertical {
+    height: 0;
+    background: none;
+    border: none;
+}
+
+QScrollArea#settingsScrollArea QScrollBar::add-page:vertical,
+QScrollArea#settingsScrollArea QScrollBar::sub-page:vertical {
+    background: none;
+}
+
+/* - Shared input labels -
+   Used by ComboBox, TextInput and SwitchInput. If you already added
+   these for the switch widget, keep ONE copy - they are global, not
+   specific to this dialog.                                            */
+QLabel#inputLabel {
+    font-size: 13px;
+    color: #1e1e1e;
+}
+
+QLabel#inputSubLabel {
+    font-size: 11px;
+    color: #808080;
 }

@@ -26,6 +26,7 @@ from .widgets.due_transaction_dialog import DueTransactionDialog
 from ..transaction.service import TransactionService
 from ..transaction.view import TransactionView
 
+from app.features.settings.service import SettingsService
 
 class UpcomingView(QWidget):
     SORT_KEYS = {
@@ -41,20 +42,24 @@ class UpcomingView(QWidget):
         self,
         service: UpcomingService,
         transaction_service: TransactionService,
+        settings_service: SettingsService,
         app_state: AppState,
         parent=None,
     ):
         super().__init__(parent=parent)
         self.service = service
         self.transaction_service = transaction_service
+        self.settings_service = settings_service
         self.app_state = app_state
 
         self._total_wallet_count = 0
+        self._due_count = 0
 
         self._init_view()
 
         self.app_state.wallet_changed.connect(self._reload)
         self.app_state.recurring_transaction_changed.connect(self._reload)
+        self.app_state.page_size_changed.connect(lambda _: self._update_ui())
 
     def _init_view(self):
         "Initialize view"
@@ -216,8 +221,9 @@ class UpcomingView(QWidget):
         # Set alignment of widget
         main_layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
-    def _reload(self, wallet_id: int):
+    def _reload(self, wallet_id: int = None):
         """Full reload — model + UI"""
+        wallet_id = wallet_id or self.app_state.active_wallet_id
         if wallet_id is None:
             return
 
@@ -239,9 +245,10 @@ class UpcomingView(QWidget):
             current_page=self.upcoming_table_model.current_page,
             total_pages=self.upcoming_table_model.total_pages(),
             total_count=self.upcoming_table_model.total_count,
+            page_size=self.settings_service.get_page_size()
         )
 
-        if self.upcoming_table_model.total_count > self.upcoming_table_model._page_size:
+        if self.upcoming_table_model.total_count > self.upcoming_table_model.page_size:
             self.pagination_widget.show()
         else:
             self.pagination_widget.hide()
