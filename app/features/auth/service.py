@@ -66,9 +66,6 @@ class AuthService:
             # Create new user profile
             new_user_profile = UserProfile(
                 user_id=new_user.id,
-                gross_salary_monthly=gross_salary_monthly,
-                net_salary_monthly=net_salary_monthly,
-                estimated_expenses_monthly=estimated_expenses_monthly,
                 currency=currency
             )
             self.profile_repo.create_no_commit(profile=new_user_profile)
@@ -79,6 +76,8 @@ class AuthService:
                 name="Private Wallet",
                 currency=currency,
                 initial_balance=initial_balance,
+                net_salary_monthly=net_salary_monthly,
+                estimated_expenses_monthly=estimated_expenses_monthly,
             )
             new_wallet = self.wallet_repo.create_no_commit(wallet=new_wallet)
 

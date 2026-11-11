@@ -28,7 +28,7 @@ class ProfileView(QDialog):
         title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         subtitle_label = QLabel(self)
-        subtitle_label.setText("Basic information used for estimates and forecasting")
+        subtitle_label.setText("")
         subtitle_label.setObjectName("profileDialogSubtitle")
         subtitle_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -74,88 +74,6 @@ class ProfileView(QDialog):
         )
         self.name_edit.text_input.textEdited.connect(self._check_user_changes)
         self.name_edit.text_input.textEdited.connect(self._update_name)
-
-        salary_widget = QWidget(self)
-        salary_layout = QHBoxLayout(salary_widget)
-        salary_layout.setSpacing(5)
-        salary_layout.setContentsMargins(0,0,0,0)
-        
-        self.net_salary_edit = TextInput(
-            self,
-            text = "Net Salary",
-            sub_text="monthly",
-            default_text="10000",
-            validate_number=True
-        )
-        self.net_salary_edit.text_input.textEdited.connect(self._update_summary)
-        self.net_salary_edit.text_input.textEdited.connect(self._check_user_changes)
-
-        self.gross_salary_edit = TextInput(
-            self,
-            text = "Gross Salary",
-            sub_text="monthly",
-            default_text="10000",
-            validate_number=True
-        )
-        self.gross_salary_edit.text_input.textEdited.connect(self._check_gross_salary)
-        self.gross_salary_edit.text_input.textEdited.connect(self._check_user_changes)
-
-        salary_layout.addWidget(self.net_salary_edit)
-        salary_layout.addWidget(self.gross_salary_edit)
-        
-        self.expenses_edit = TextInput(
-            self,
-            text = "Estimated expenses",
-            sub_text="monthly, used for forecasting",
-            default_text="10000",
-            error_text="Gross salary is usually higher than net salary",
-            validate_number=True
-        )
-        self.expenses_edit.toggle_error(False)
-        self.expenses_edit.text_input.textEdited.connect(self._update_summary)
-        self.expenses_edit.text_input.textEdited.connect(self._check_user_changes)
-
-        summary_widget = QWidget(self)
-        summary_widget.setObjectName("profileSummary")
-        summary_layout = QHBoxLayout(summary_widget)
-        summary_layout.setSpacing(5)
-        summary_layout.setContentsMargins(10,10,10,10)
-
-
-        left_month_widget = QWidget(self)
-        left_month_layout = QVBoxLayout(left_month_widget)
-        left_month_layout.setSpacing(5)
-        left_month_layout.setContentsMargins(0,0,0,0)
-
-        left_title = QLabel(self)
-        left_title.setText("Left each month")
-        left_title.setObjectName("leftMonthTitle")
-
-        self.left_amount = QLabel(self)
-        self.left_amount.setText("+ 0 000,00 PLN")
-        self.left_amount.setObjectName("leftMonthAmount")
-
-        left_month_layout.addWidget(left_title)
-        left_month_layout.addWidget(self.left_amount)
-
-        savings_rate_widget = QWidget(self)
-        savings_rate_layout = QVBoxLayout(savings_rate_widget)
-        savings_rate_layout.setSpacing(5)
-        savings_rate_layout.setContentsMargins(0,0,0,0)
-
-        savings_title = QLabel(self)
-        savings_title.setText("Savings rate")
-        savings_title.setObjectName("savingsRateLabel")
-
-        self.savings_rate_amount = QLabel(self)
-        self.savings_rate_amount.setText("38,8 %")
-        self.savings_rate_amount.setObjectName("savingsRateAmount")
-
-        savings_rate_layout.addWidget(savings_title)
-        savings_rate_layout.addWidget(self.savings_rate_amount)
-
-        summary_layout.addWidget(left_month_widget)
-        summary_layout.addWidget(savings_rate_widget)
 
         bottom_hline = HLine()
 
@@ -203,9 +121,7 @@ class ProfileView(QDialog):
         main_layout.addWidget(top_hline)
         main_layout.addWidget(icon_widget)
         main_layout.addWidget(self.name_edit)
-        main_layout.addWidget(salary_widget)
-        main_layout.addWidget(self.expenses_edit)
-        main_layout.addWidget(summary_widget)
+        main_layout.addStretch()
         main_layout.addWidget(bottom_hline)
         main_layout.addWidget(button_widget)
 
@@ -217,11 +133,6 @@ class ProfileView(QDialog):
         
         self.user = self.profile_service.get_user(user_id=user_id)
         self.user_profile = self.profile_service.get_user_profile(user_id=user_id)
-        self.profile_summary = self.profile_service.calculate_summary(
-            net=self.user_profile.net_salary_monthly,
-            expenses=self.user_profile.estimated_expenses_monthly
-        )
-
         self.profile_circle.setText(self.user.name[0] if self.user.name else "?")
         self.name_edit.text_input.setText(self.user.name)
         self.name_label.setText(self.user.name)
@@ -232,21 +143,6 @@ class ProfileView(QDialog):
         )
         self.member_label.setText(f"Member since {created_at.strftime("%d %B %Y")}")
         
-        self.net_salary_edit.text_input.setText(format_balance(self.user_profile.net_salary_monthly))
-        self.gross_salary_edit.text_input.setText(format_balance(self.user_profile.gross_salary_monthly))
-        self.expenses_edit.text_input.setText(format_balance(self.user_profile.estimated_expenses_monthly))
-
-        sign = "+" if self.profile_summary.left_each_month >= 0 else "-"
-        self.left_amount.setText(f"{sign}{format_balance(abs(self.profile_summary.left_each_month))} {self.user_profile.currency.name}")
-
-        self.savings_rate_amount.setText(f"{format_balance(self.profile_summary.savings_rate * 100)}%")
-
-        positive = "true" if self.profile_summary.left_each_month >= 0 else "false"
-        for label in (self.left_amount, self.savings_rate_amount):
-            label.setProperty("positive", positive)
-            label.style().unpolish(label)
-            label.style().polish(label)
-
     def showEvent(self, event):
         """Override show with reload mechanism"""
         super().showEvent(event)
@@ -256,36 +152,7 @@ class ProfileView(QDialog):
         """Updates name label and profile initial"""
         name = self.name_edit.get_value()
         self.name_label.setText(str(name).capitalize())
-        self.profile_circle.setText(str(name)[0].upper() if self.user.name else "?")
-
-    def _update_summary(self):
-        """Updates summary widget - live recompute"""
-        if self.user_profile is None:
-            return
-    
-        net = self.net_salary_edit.get_value()
-        expenses = self.expenses_edit.get_value()
-        self.profile_summary = self.profile_service.calculate_summary(
-            net = net,
-            expenses = expenses
-        )
-        sign = "+" if self.profile_summary.left_each_month >= 0 else "-"
-        self.left_amount.setText(f"{sign}{format_balance(abs(self.profile_summary.left_each_month))} {self.user_profile.currency.name}")
-
-        self.savings_rate_amount.setText(f"{format_balance(self.profile_summary.savings_rate * 100)}%")
-
-        positive = "true" if self.profile_summary.left_each_month >= 0 else "false"
-        for label in (self.left_amount, self.savings_rate_amount):
-            label.setProperty("positive", positive)
-            label.style().unpolish(label)
-            label.style().polish(label)
-        
-    def _check_gross_salary(self):
-        """Check if gross salary is lower than net salary"""
-        gross_salary = self.gross_salary_edit.get_value()
-        net_salary = self.net_salary_edit.get_value()
-
-        self.expenses_edit.toggle_error(enabled=gross_salary < net_salary)
+        self.profile_circle.setText(str(name)[0].upper() if name else "?")
 
     def _check_user_changes(self):
         """Checks user changes to all fields"""
@@ -293,18 +160,9 @@ class ProfileView(QDialog):
             return
         
         name = self.name_edit.get_value()
-        gross_salary = self.gross_salary_edit.get_value()
-        net_salary = self.net_salary_edit.get_value()
-        expenses = self.expenses_edit.get_value()
 
         changes = False
         if name != self.user.name:
-            changes = True
-        if gross_salary != self.user_profile.gross_salary_monthly:
-            changes = True
-        if net_salary != self.user_profile.net_salary_monthly:
-            changes = True
-        if expenses != self.user_profile.estimated_expenses_monthly:
             changes = True
 
         self.changes_label.setVisible(changes)
@@ -315,17 +173,10 @@ class ProfileView(QDialog):
         self._update_name()
 
         name = self.name_edit.get_value()
-        gross_salary = self.gross_salary_edit.get_value()
-        net_salary = self.net_salary_edit.get_value()
-        expenses = self.expenses_edit.get_value()
-
         try:
             self.profile_service.update_profile(
                 user_id = self.user.id,
                 name = name,
-                net = net_salary,
-                gross = gross_salary,
-                expenses = expenses,
                 currency = self.user_profile.currency.name
             )
             

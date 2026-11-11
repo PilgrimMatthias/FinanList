@@ -9,6 +9,9 @@ from app.database.models import Wallet, Category
 from app.core.enums import Currency, OperationType
 from app.core.exceptions import ValidationError
 from app.core.constants import DEFAULT_MAIN_CATEGORIES, DEFAULT_SUB_CATEGORIES
+from .models import WalletSummary, PlanSuggestion
+from datetime import date
+from app.core.utils import month_window
 
 
 class WalletService:
@@ -82,7 +85,7 @@ class WalletService:
         temp_sub_category = self.category_repo.create(temp_sub_category)
 
     def create_wallet(
-        self, user_id: int, name: str, currency: Currency, initial_balance: float
+        self, user_id: int, name: str, currency: Currency, initial_balance: float, net_salary_monthly:float, estimated_expenses_monthly:float
     ) -> Wallet:
         """Creates wallet in database"""
         # Validation
@@ -99,6 +102,8 @@ class WalletService:
             name=name,
             currency=currency,
             initial_balance=initial_balance,
+            net_salary_monthly=net_salary_monthly,
+            estimated_expenses_monthly=estimated_expenses_monthly
         )
 
         wallet = self.wallet_repo.create(wallet=wallet)
@@ -140,3 +145,64 @@ class WalletService:
             raise ValidationError("Wallet does not belong to current user!")
 
         self.app_state.set_active_wallet(wallet_id=wallet_id)
+
+    def calculate_summary(self, net: float | None, expenses: float | None) -> WalletSummary:
+        """
+        Returns calculated profile summary
+
+        Args:
+            net (float): net income
+            expenses (float): expenses monthly
+
+        Returns:
+            WalletSummary: Profile summary for dipslay
+        """
+
+        net = net or 0.0
+        expenses = expenses or 0.0
+        left = net - expenses
+        return WalletSummary(
+            left_each_month=left,
+            savings_rate=left / net if net else None,
+        )
+
+    def get_months_of_history(self, wallet_id: int, today: date = None) -> int:
+        """Complete months between the first transaction and this month.
+ 
+        A month with no transactions still counts - the user genuinely spent
+        nothing. Months before the first transaction do not, because the
+        wallet had no history to average.
+        """
+        first = self.transaction_repo.get_first_transaction_date(wallet_id)
+        if first is None:
+            return 0
+ 
+        today = today or date.today()
+        first_date = date.fromisoformat(first[:10])
+        return (today.year - first_date.year) * 12 + (today.month - first_date.month)
+ 
+    def get_plan_suggestion(
+        self,
+        wallet_id: int,
+        months: int,
+        today: date = None,
+    ) -> PlanSuggestion | None:
+        available = self.get_months_of_history(wallet_id, today)
+        if available == 0:
+            return None
+ 
+        counted = min(months, available)
+        date_from, date_to = month_window(counted, today)
+ 
+        income = self.transaction_repo.sum_by_type(
+            wallet_id, [OperationType.INCOME], date_from, date_to
+        )
+        expenses = self.transaction_repo.sum_by_type(
+            wallet_id, [OperationType.EXPENSE], date_from, date_to
+        )
+ 
+        return PlanSuggestion(
+            income=income / counted,
+            expenses=expenses / counted,
+            months_counted=counted,
+        )

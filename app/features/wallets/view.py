@@ -73,7 +73,7 @@ class WalletsView(QDialog):
             height=50,
             width=WALLET_WINDOW_WIDTH - 20,
             object_name="walletCardBtnNeutral",
-            on_click=self._show_wallet_dialog,
+            on_click=lambda: self._show_wallet_dialog(wallet=None),
         )
 
         # Add widgets

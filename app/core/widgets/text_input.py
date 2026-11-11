@@ -50,7 +50,7 @@ class TextInput(QWidget):
         self.label = QLabel(self)
         self.sub_label = QLabel(self)
         self.sub_label.setObjectName("inputSubLabel")
-        self.sub_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.sub_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignBottom)
 
         if text is not None:
             self.label.setText(text)
@@ -94,6 +94,10 @@ class TextInput(QWidget):
             return self.text_input.toPlainText().strip()
 
         return self.text_input.text().strip()
+
+    def set_value(self, value:str):
+        "Sets value"
+        self.text_input.setText(value)
 
     def clear(self):
         """clear line edit"""

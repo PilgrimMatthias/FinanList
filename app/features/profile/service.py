@@ -24,7 +24,7 @@ class ProfileService:
         """Returns user profile"""
         return self.user_profile_repo.get_by_user_id(user_id=user_id)
 
-    def update_profile(self, user_id:int, name:str, net: float, gross:float, expenses:float, currency:Currency) -> None:
+    def update_profile(self, user_id:int, name:str, currency: Currency) -> None:
         """
         Update user and user profile with new values
 
@@ -43,17 +43,10 @@ class ProfileService:
         if not name.strip():
             raise ValidationError("Name is required!")
 
-        for label, value in (("Net salary", net), ("Gross salary", gross),("Estimated expenses", expenses)):
-            if value < 0:
-                raise ValidationError(f"{label} cannot be negative")
-
         user = self.get_user(user_id = user_id)
         user_profile = self.get_user_profile(user_id = user_id)
 
         user.name = name.strip()
-        user_profile.net_salary_monthly = net
-        user_profile.gross_salary_monthly = gross
-        user_profile.estimated_expenses_monthly = expenses
         user_profile.currency = currency
 
         with self.user_repo.db.transaction():
@@ -61,29 +54,3 @@ class ProfileService:
             self.user_profile_repo.update_no_commit(user_profile=user_profile)
 
         self.app_state.emit_user_change() 
-        # self.app_state.wallet_changed.emit(self.app_state._active_wallet_id)
-
-    def calculate_summary(self, net:float, expenses:float) -> ProfileSummary:
-        """
-        Returns calculated profile summary
-
-        Args:
-            net (float): net income
-            expenses (float): expenses monthly
-
-        Returns:
-            ProfileSummary: Profile summary for dipslay
-        """
-
-        left_each_month = net - expenses
-        try:
-            savings_total = left_each_month / net
-        except ZeroDivisionError:
-            savings_total = 0.0
-
-        new_profile_summary = ProfileSummary(
-            left_each_month=left_each_month,
-            savings_rate=savings_total
-        )
-
-        return new_profile_summary

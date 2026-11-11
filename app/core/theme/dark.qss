@@ -1,69 +1,148 @@
-/* ==========================================
-   DARK THEME
-   ========================================== */
+/* 
+   FINANLIST - DARK THEME
 
-/* --- Global --- */
-QMainWindow {
-    background-color: #353535;
-}
+   Palette tokens (for reference - QSS has no variables):
+
+     #181825  base         main window, table header, page background
+     #11111b  sidebar      navigation rail
+     #1e1e2e  surface      cards, tables, dialogs, calendar
+     #313244  surface_alt  inputs, bar tracks, neutral fills
+     #3a3a52  surface_hi   hover on surface_alt
+     #45475a  border
+     #585b70  border_hi    hover / focus borders
+     #6c7086  muted        disabled text, empty states
+     #a6adc8  text_2       secondary text
+     #cdd6f4  text_1       primary text
+     #2a82da  accent
+     #89b4fa  accent_lt    links, outlined button text
+     #1a5fb4  accent_dk    pressed accent
+
+   Elevation rule: raised surfaces are LIGHTER than what they sit on.
+   base < surface < surface_alt. Do not put a #1e1e2e card on #353535.
+
+   Section order matches light.qss line for line - diff the two files to
+   spot a rule that exists in only one theme.
+    */
+
+
+/* 
+   1. GLOBAL
+    */
 
 QWidget {
-    color: #ffffff;
+    color: #cdd6f4;
     background-color: transparent;
     font-family: "Segoe UI";
     font-size: 14px;
 }
 
+/* Only top-level containers paint a background. Everything else is
+   transparent and inherits, which is why there are no
+   "SomeCard QWidget { background: transparent; }" rules anywhere below. */
+QMainWindow {
+    background-color: #181825;
+}
+
+QDialog {
+    background-color: #1e1e2e;
+}
+
+QLabel {
+    color: #cdd6f4;
+}
+
 QToolTip {
-    background-color: #353535;
-    color: #ffffff;
-    padding: 2px;
+    background-color: #313244;
+    color: #cdd6f4;
+    border: 1px solid #45475a;
+    border-radius: 4px;
+    padding: 4px 6px;
     font-size: 10pt;
-    border: 1px solid #555555;
 }
 
-/* --- Sidebar --- */
+/* --- Sidebar ------------------------------------------------------------ */
 QFrame#sidebar {
-    background-color: #2b2b2b;
+    background-color: #11111b;
 }
 
-/* --- Input Fields --- */
+
+/* 
+   2. INPUT FIELDS
+    */
+
+/* Height clamp applies only to single-line controls. QTextEdit is excluded
+   on purpose - it used to inherit max-height: 20px here, which silently
+   crushed ResizableTextEdit and anything else subclassing QTextEdit. */
 QComboBox,
 QLineEdit,
-QTextEdit,
 QDateEdit {
-    background-color: #191919;
-    color: #ffffff;
-    border: 2px solid #555555;
+    background-color: #313244;
+    color: #cdd6f4;
+    border: 2px solid #45475a;
     border-radius: 10px;
     padding: 6px;
-    combobox-popup: 0;
     min-height: 20px;
     max-height: 20px;
 }
-QTextEdit#Description{
-    background-color: #191919;
-    color: #ffffff;
-    border: 2px solid #555555;
+
+QComboBox {
+    combobox-popup: 0;
+}
+
+QTextEdit {
+    background-color: #313244;
+    color: #cdd6f4;
+    border: 2px solid #45475a;
     border-radius: 10px;
     padding: 6px;
-    combobox-popup: 0;
+}
+
+QTextEdit#Description {
     min-height: 58px;
     max-height: 58px;
 }
+
 QComboBox:focus,
-QTextEdit:focus,
 QLineEdit:focus,
-QDateEdit:focus {
+QDateEdit:focus,
+QTextEdit:focus {
     border-color: #2a82da;
 }
 
-/* --- ComboBox Dropdown --- */
+QComboBox:disabled,
+QLineEdit:disabled,
+QDateEdit:disabled,
+QTextEdit:disabled {
+    background-color: #26263a;
+    color: #6c7086;
+    border-color: #313244;
+}
+
+/* --- ComboBox / DateEdit drop-down ------------------------------------- */
+QComboBox::drop-down,
+QDateEdit::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    background-color: #45475a;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+QComboBox::down-arrow,
+QDateEdit::down-arrow {
+    image: url(svg:down_arrow_dark.svg);
+    width: 10px;
+    height: 10px;
+}
+
 QComboBox QAbstractItemView {
-    background-color: #2b2b2b;
-    color: #ffffff;
-    border: 2px solid #555555;
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+    border: 2px solid #45475a;
     border-radius: 5px;
+    selection-background-color: #2a82da;
+    selection-color: #ffffff;
+    outline: 0;
 }
 
 QComboBox QAbstractItemView::item {
@@ -72,64 +151,116 @@ QComboBox QAbstractItemView::item {
 }
 
 QComboBox QAbstractItemView::item:hover {
-    background-color: #555555;
+    background-color: #313244;
 }
 
-QComboBox::drop-down,
-QDateEdit::drop-down {
-    subcontrol-origin: padding;
-    subcontrol-position: top right;
-    background-color: #444444;
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 8px;
+
+/* 
+   3. CHECKBOX
+
+   Single-colon pseudo-states. The old ::checked / ::hover were sub-control
+   syntax and never matched, so the tick never appeared.
+
+   check_icon.svg has no baked colour variant, so the checked indicator is
+   filled light here and the existing dark tick reads on it. If you add
+   {{ICON_COLOR}} to that template and re-bake, switch to an accent fill
+   plus check_icon_dark.svg.
+    */
+
+QCheckBox {
+    color: #cdd6f4;
+    spacing: 8px;
 }
 
-QComboBox::down-arrow,
-QDateEdit::down-arrow {
-    image: url(svg:down_arrow_dark.svg);
+QCheckBox::indicator {
+    width: 15px;
+    height: 15px;
+    border-radius: 4px;
+    border: 2px solid #585b70;
+    background-color: #313244;
 }
 
-/* --- Buttons --- */
-QPushButton, QRadioButton {
-    background-color: #353535;
-    color: #ffffff;
-    border: none;
-    border-radius: 8px;
-    padding: 6px 12px;
+QCheckBox::indicator:hover {
+    border-color: #2a82da;
 }
 
-QPushButton:hover, QRadioButton:hover {
-    background-color: #4a4a4a;
+QCheckBox::indicator:checked {
+    background-color: #cdd6f4;
+    border-color: #2a82da;
+    image: url(svg:check_icon.svg);
 }
 
-QPushButton:pressed, QRadioButton:pressed {
+QCheckBox::indicator:disabled {
+    border-color: #313244;
+    background-color: #26263a;
+}
+
+QCheckBox:disabled {
+    color: #6c7086;
+}
+
+
+/* 
+   4. MENUS
+    */
+
+QMenu {
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+    border: 2px solid #45475a;
+    border-radius: 10px;
+    padding: 4px;
+}
+
+QMenu::item {
+    padding: 6px 16px;
+    border-radius: 6px;
+}
+
+QMenu::item:selected {
     background-color: #2a82da;
+    color: #ffffff;
 }
 
-/* --- Scrollbar Vertical --- */
+QMenu::separator {
+    height: 1px;
+    background-color: #45475a;
+    margin: 4px 8px;
+}
+
+QMenu#DropDownMenu {
+    border: 2px solid #585b70;
+    border-radius: 10px;
+}
+
+
+/* 
+   5. SCROLLBARS (application-wide)
+    */
+
 QScrollBar:vertical {
     border: none;
-    background-color: #2b2b2b;
+    background-color: #11111b;
     width: 12px;
     margin: 15px 0px 15px 0px;
 }
 
 QScrollBar::handle:vertical {
-    background-color: #555555;
+    background-color: #45475a;
     border-radius: 4px;
     min-height: 20px;
 }
 
 QScrollBar::handle:vertical:hover {
-    background-color: #666666;
+    background-color: #585b70;
 }
 
 QScrollBar::handle:vertical:pressed {
-    background-color: #777777;
+    background-color: #6c7086;
 }
 
 QScrollBar::sub-line:vertical {
-    border: 1px solid #555555;
+    border: 1px solid #45475a;
     height: 15px;
     border-top-right-radius: 5px;
     subcontrol-position: top;
@@ -138,7 +269,7 @@ QScrollBar::sub-line:vertical {
 }
 
 QScrollBar::add-line:vertical {
-    border: 1px solid #555555;
+    border: 1px solid #45475a;
     height: 15px;
     border-bottom-right-radius: 5px;
     subcontrol-position: bottom;
@@ -148,12 +279,12 @@ QScrollBar::add-line:vertical {
 
 QScrollBar::sub-line:vertical:hover,
 QScrollBar::add-line:vertical:hover {
-    background-color: #4a4a4a;
+    background-color: #313244;
 }
 
 QScrollBar::sub-line:vertical:pressed,
 QScrollBar::add-line:vertical:pressed {
-    background-color: #555555;
+    background-color: #45475a;
 }
 
 QScrollBar::add-page:vertical,
@@ -161,80 +292,55 @@ QScrollBar::sub-page:vertical {
     background: none;
 }
 
-/* --- Checkbox --- */
-QCheckBox {
-    color: #ffffff;
+/* --- Slim variant: scroll areas nested inside cards and dialogs --------
+   One rule set instead of the near-identical copies that used to live in
+   the due-dialog and settings sections. */
+QFrame#dueTransactionRow QScrollBar:vertical,
+QScrollArea#settingsScrollArea QScrollBar:vertical {
+    background-color: transparent;
+    width: 8px;
+    margin: 0;
+    border: none;
 }
 
-QCheckBox::indicator {
-    width: 20px;
-    height: 20px;
+QFrame#dueTransactionRow QScrollBar::handle:vertical,
+QScrollArea#settingsScrollArea QScrollBar::handle:vertical {
+    background-color: #45475a;
+    border-radius: 4px;
+    min-height: 24px;
 }
 
-/* --- Table --- */
-QTableWidget {
-    background-color: #191919;
-    color: #ffffff;
-    border: 1px solid #555555;
-    gridline-color: #444444;
+QFrame#dueTransactionRow QScrollBar::handle:vertical:hover,
+QScrollArea#settingsScrollArea QScrollBar::handle:vertical:hover {
+    background-color: #585b70;
 }
 
-QTableWidget::item:selected {
-    background-color: #2a82da;
+QFrame#dueTransactionRow QScrollBar::add-line:vertical,
+QFrame#dueTransactionRow QScrollBar::sub-line:vertical,
+QScrollArea#settingsScrollArea QScrollBar::add-line:vertical,
+QScrollArea#settingsScrollArea QScrollBar::sub-line:vertical {
+    height: 0;
+    background: none;
+    border: none;
+    image: none;
 }
 
-QHeaderView::section {
-    background-color: #353535;
-    color: #ffffff;
-    border: 1px solid #555555;
-    padding: 4px;
-}
-
-/* --- Labels --- */
-QLabel {
-    color: #ffffff;
-}
-
-/* --- Menu --- */
-QMenu {
-    background-color: #2b2b2b;
-    color: #ffffff;
-    border: 2px solid #555555;
-    border-radius: 10px;
-}
-
-QMenu::item:selected {
-    background-color: #2a82da;
+QFrame#dueTransactionRow QScrollBar::add-page:vertical,
+QFrame#dueTransactionRow QScrollBar::sub-page:vertical,
+QScrollArea#settingsScrollArea QScrollBar::add-page:vertical,
+QScrollArea#settingsScrollArea QScrollBar::sub-page:vertical {
+    background: none;
 }
 
 
-QPushButton#profileCircleButton {
-    background-color: #ffffff;
-    border: 2px solid #808080;
-    border-radius: 60px;
-    font-size: 25pt;
-    font-weight: bold;
-}
-
-QLabel#logoLabel { font-size: 25pt; color: #ffffff; }
-
-
-QLabel#transactionLabel { font-size: 18pt; font-weight:bold; color: #ffffff;}
-
-QMenu#DropDownMenu {
-    border: 2px solid #b5c0c9; 
-    border-radius:10px;
-    }
-
-/* ==========================================
-   QTABLEVIEW STYLING
-   Append to dark.qss
-   ========================================== */
+/* 
+   6. QTABLEVIEW
+    */
 
 QTableView {
     background-color: #1e1e2e;
     color: #cdd6f4;
-    border: 0.5px solid #45475a;
+    border: 1px solid #45475a;
     border-radius: 8px;
     gridline-color: transparent;
     selection-background-color: transparent;
@@ -244,7 +350,7 @@ QTableView {
 
 QTableView::item {
     padding: 10px 14px;
-    border-bottom: 0.5px solid #313244;
+    border-bottom: 1px solid #313244;
     border-radius: 0;
 }
 
@@ -266,18 +372,18 @@ QTableView::item:focus {
     border: none;
 }
 
-/* --- Header --- */
+/* --- Header ------------------------------------------------------------ */
 QHeaderView {
     background-color: transparent;
     border: none;
 }
 
 QHeaderView::section {
-    background-color: #1a1a26;
+    background-color: #181825;
     color: #a6adc8;
     padding: 10px 14px;
     border: none;
-    border-bottom: 0.5px solid #45475a;
+    border-bottom: 1px solid #45475a;
     font-weight: 500;
     font-size: 13px;
 }
@@ -295,24 +401,33 @@ QHeaderView::section:last {
     border-top-right-radius: 8px;
 }
 
-QHeaderView::down-arrow,
-QHeaderView::up-arrow {
-    subcontrol-position: center right;
+/* The sort indicator. These blocks previously set geometry but no image,
+   so clicking a header produced no visible arrow at all. */
+QHeaderView::down-arrow {
+    image: url(svg:down_arrow_dark.svg);
     subcontrol-origin: padding;
+    subcontrol-position: center right;
     right: 8px;
     width: 10px;
     height: 10px;
 }
 
-
-/* --- Corner button (top-left, between headers and scrollbars) --- */
-QTableCornerButton::section {
-    background-color: #1a1a26;
-    border: none;
-    border-bottom: 0.5px solid #45475a;
+QHeaderView::up-arrow {
+    image: url(svg:up_arrow_dark.svg);
+    subcontrol-origin: padding;
+    subcontrol-position: center right;
+    right: 8px;
+    width: 10px;
+    height: 10px;
 }
 
-/* --- Scrollbars (for table) --- */
+QTableCornerButton::section {
+    background-color: #181825;
+    border: none;
+    border-bottom: 1px solid #45475a;
+}
+
+/* --- Table scrollbars -------------------------------------------------- */
 QTableView QScrollBar:vertical {
     background-color: transparent;
     width: 10px;
@@ -335,6 +450,7 @@ QTableView QScrollBar::sub-line:vertical {
     height: 0;
     background: none;
     border: none;
+    image: none;
 }
 
 QTableView QScrollBar:horizontal {
@@ -359,36 +475,32 @@ QTableView QScrollBar::sub-line:horizontal {
     width: 0;
     background: none;
     border: none;
+    image: none;
 }
 
-QLabel#infoBanner {
-    background-color: #1a3a5c;
-    color: #89b4fa;
-    border: 1px solid #2a5a8c;
-    border-radius: 6px;
-    padding: 8px 12px;
-    font-size: 12px;
-}
 
-/*  CALENDAR POPUP STYLING - DARK THEME */
+/* 
+   7. CALENDAR POPUP
+    */
 
-/* --- Calendar container --- */
 QCalendarWidget {
     background-color: #1e1e2e;
     border: 1px solid #45475a;
     border-radius: 8px;
 }
 
-/* --- Navigation bar (month/year header) --- */
+QCalendarWidget QWidget {
+    alternate-background-color: transparent;
+}
+
 QCalendarWidget QWidget#qt_calendar_navigationbar {
-    background-color: #1a1a26;
+    background-color: #181825;
     border-bottom: 1px solid #45475a;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
     padding: 4px 8px;
 }
 
-/* --- Month/Year label --- */
 QCalendarWidget QToolButton {
     color: #cdd6f4;
     font-size: 13px;
@@ -408,22 +520,20 @@ QCalendarWidget QToolButton:pressed {
     background-color: #45475a;
 }
 
-/* --- Prev/Next month arrows --- */
 QCalendarWidget QToolButton#qt_calendar_prevmonth {
     qproperty-icon: none;
-    qproperty-text: "◀";
+    qproperty-text: "\25C0";
     font-size: 10px;
     padding: 4px 8px;
 }
 
 QCalendarWidget QToolButton#qt_calendar_nextmonth {
     qproperty-icon: none;
-    qproperty-text: "▶";
+    qproperty-text: "\25B6";
     font-size: 10px;
     padding: 4px 8px;
 }
 
-/* --- Month dropdown (QMenu) --- */
 QCalendarWidget QMenu {
     background-color: #1e1e2e;
     color: #cdd6f4;
@@ -442,7 +552,7 @@ QCalendarWidget QMenu::item:selected {
     color: #ffffff;
 }
 
-/* --- Year spinbox --- */
+/* --- Year spinbox ------------------------------------------------------ */
 QCalendarWidget QSpinBox {
     color: #cdd6f4;
     background-color: #313244;
@@ -489,11 +599,7 @@ QCalendarWidget QSpinBox::down-arrow {
     height: 8px;
 }
 
-/* --- Day header (Mon, Tue, Wed...) --- */
-QCalendarWidget QWidget {
-    alternate-background-color: transparent;
-}
-
+/* --- Day grid ---------------------------------------------------------- */
 QCalendarWidget QAbstractItemView:enabled {
     background-color: #1e1e2e;
     color: #cdd6f4;
@@ -504,7 +610,10 @@ QCalendarWidget QAbstractItemView:enabled {
     border: none;
 }
 
-/* --- Day cells --- */
+QCalendarWidget QAbstractItemView:disabled {
+    color: #585b70;
+}
+
 QCalendarWidget QAbstractItemView::item {
     padding: 6px;
     margin: 1px;
@@ -521,19 +630,12 @@ QCalendarWidget QAbstractItemView::item:selected {
     border-radius: 4px;
 }
 
-/* --- Today highlight --- */
 QCalendarWidget QAbstractItemView::item:focus {
     background-color: #45475a;
     border: 1px solid #2a82da;
     border-radius: 4px;
 }
 
-/* --- Days from other months (grayed) --- */
-QCalendarWidget QAbstractItemView:disabled {
-    color: #585b70;
-}
-
-/* --- Weekday header row --- */
 QCalendarWidget QWidget#qt_calendar_calendarview {
     background-color: #1e1e2e;
     border-bottom-left-radius: 8px;
@@ -541,204 +643,41 @@ QCalendarWidget QWidget#qt_calendar_calendarview {
 }
 
 
-/* === WALLET CARDS === */
-QFrame#walletCard {
-    border-radius: 12px;
-    padding: 5px;
-}
+/* 
+   8. BUTTONS - default look for buttons with no object name
+    */
 
-/* Force all children transparent */
-QFrame#walletCard QWidget {
-    background: transparent;
-}
-
-/* Active card — same gradient on both themes */
-QFrame#walletCard[active="true"] {
-    background: qlineargradient(
-        x1: 0, y1: 0, x2: 1, y2: 1,
-        stop: 0 #1a5fb4,
-        stop: 1 #2a82da
-    );
+QPushButton,
+QRadioButton {
+    background-color: #313244;
+    color: #cdd6f4;
     border: none;
-}
-
-/* Inactive card */
-QFrame#walletCard[active="false"] {
-    background-color: #2b2b2b;
-    border: 1px solid #45475a;
-}
-
-/* --- Text colors --- */
-QFrame#walletCard[active="true"] QLabel {
-    color: #ffffff;
-}
-
-QFrame#walletCard[active="false"] QLabel {
-    color: #cdd6f4;
-}
-
-QFrame#walletCard[active="true"] QLabel#walletCardMuted,
-QFrame#walletCard[active="true"] QLabel#walletCardCurrency {
-    color: rgba(255, 255, 255, 0.6);
-}
-
-QFrame#walletCard[active="false"] QLabel#walletCardMuted,
-QFrame#walletCard[active="false"] QLabel#walletCardCurrency {
-    color: #808080;
-}
-
-QLabel#walletCardName {
-    font-size: 20px;
-    font-weight: 600;
-}
-
-QLabel#walletCardBalance {
-    font-size: 22px;
-    font-weight: 500;
-}
-
-QFrame#walletCard[active="true"] QLabel#walletActiveBadge {
-    background-color: rgba(255, 255, 255, 0.25);
-    color: white;
-    padding: 2px 10px;
-    border-radius: 8px;
-    font-size: 11px;
-}
-
-/* ==========================================
-   DUE TRANSACTIONS DIALOG - DARK THEME
-   Append to dark.qss
-   ========================================== */
-
-/* --- Dialog header --- */
-QLabel#dueDialogTitle {
-    font-size: 16px;
-    font-weight: 600;
-    color: #cdd6f4;
-}
-
-QLabel#dueDialogSubtitle {
-    font-size: 12px;
-    color: #a6adc8;
-}
-
-/* --- Group card --- */
-QFrame#dueTransactionRow {
-    background-color: #1e1e2e;
-    border: 2px solid #45475a;
-    border-radius: 8px;
-}
-
-QFrame#dueTransactionRow QWidget {
-    background: transparent;
-}
-
-QLabel#dueRowTitle {
-    font-size: 14px;
-    font-weight: 600;
-    color: #cdd6f4;
-}
-
-QLabel#dueRowCount {
-    font-size: 11px;
-    color: #a6adc8;
-}
-
-QLabel#dueRowSummary {
-    font-size: 11px;
-    color: #a6adc8;
-}
-
-/* --- Amount, colored via setProperty("operation", ...) --- */
-QLabel#dueRowAmount {
-    font-size: 13px;
-    font-weight: 600;
-}
-
-QLabel#dueRowAmount[operation="income"] {
-    color: #1d9e75;
-}
-
-QLabel#dueRowAmount[operation="expense"] {
-    color: #e24b4a;
-}
-
-QLabel#dueRowAmount[operation="saving"] {
-    color: #6c8cff;
-}
-
-QLabel#dueRowAmount[operation="investment"] {
-    color: #ba7517;
-}
-
-/* --- Occurrence rows --- */
-QLabel#occurrenceDate {
-    font-size: 13px;
-    color: #cdd6f4;
-}
-
-QLabel#occurrenceTimeline {
-    font-size: 11px;
-    color: #a6adc8;
-}
-
-QLabel#occurrenceTimeline[overdue="true"] {
-    color: #e24b4a;
-}
-
-/* --- Skip button (replaces inline bg_color) --- */
-QPushButton#dueSkipButton {
-    background-color: #4a2a2a;
-    color: #f5b3b3;
-    border: 1px solid #6b3a3a;
     border-radius: 8px;
     padding: 6px 12px;
 }
 
-QPushButton#dueSkipButton:hover {
-    background-color: #5c3333;
+QPushButton:hover,
+QRadioButton:hover {
+    background-color: #3a3a52;
 }
 
-QPushButton#dueSkipButton:pressed {
-    background-color: #7a4040;
+QPushButton:pressed,
+QRadioButton:pressed {
+    background-color: #2a82da;
     color: #ffffff;
 }
 
-/* --- Scroll area inside a group card --- */
-QFrame#dueTransactionRow QScrollBar:vertical {
-    background-color: transparent;
-    width: 8px;
-    margin: 0;
-    border: none;
-}
-
-QFrame#dueTransactionRow QScrollBar::handle:vertical {
-    background-color: #45475a;
-    border-radius: 4px;
-    min-height: 24px;
-}
-
-QFrame#dueTransactionRow QScrollBar::handle:vertical:hover {
-    background-color: #585b70;
-}
-
-QFrame#dueTransactionRow QScrollBar::add-line:vertical,
-QFrame#dueTransactionRow QScrollBar::sub-line:vertical {
-    height: 0;
-    background: none;
-    border: none;
+QPushButton:disabled {
+    background-color: #26263a;
+    color: #6c7086;
 }
 
 
-/* ==========================================
-   PUSH BUTTON VARIANTS - DARK THEME
-   Append to dark.qss
+/* 
+   9. BUTTON VARIANTS - PushButton(object_name="primaryButton") etc.
+    */
 
-   Use with PushButton(object_name="primaryButton") etc.
-   Themed buttons skip their inline stylesheet, so these rules apply.
-   ========================================== */
-
-/* --- Primary: solid accent fill --- */
+/* --- Primary ----------------------------------------------------------- */
 QPushButton#primaryButton {
     background-color: #2a82da;
     color: #ffffff;
@@ -766,7 +705,7 @@ QPushButton#primaryButton:disabled {
     color: #6c7086;
 }
 
-/* --- Secondary: outlined, fills on press (the old alternate_look) --- */
+/* --- Secondary (outlined) ---------------------------------------------- */
 QPushButton#secondaryButton {
     background-color: transparent;
     color: #89b4fa;
@@ -793,7 +732,7 @@ QPushButton#secondaryButton:disabled {
     color: #6c7086;
 }
 
-/* --- Neutral: quiet, for low-emphasis actions --- */
+/* --- Neutral ----------------------------------------------------------- */
 QPushButton#neutralButton {
     background-color: #313244;
     color: #cdd6f4;
@@ -819,8 +758,9 @@ QPushButton#neutralButton:disabled {
     color: #6c7086;
 }
 
-/* --- Danger: destructive actions --- */
-QPushButton#dangerButton {
+/* --- Danger ------------------------------------------------------------ */
+QPushButton#dangerButton,
+QPushButton#dueSkipButton {
     background-color: #4a2a2a;
     color: #f5b3b3;
     border: 1px solid #6b3a3a;
@@ -830,47 +770,394 @@ QPushButton#dangerButton {
     padding: 0px;
 }
 
-QPushButton#dangerButton:hover {
+QPushButton#dangerButton:hover,
+QPushButton#dueSkipButton:hover {
     background-color: #5c3333;
+    border-color: #7a4040;
 }
 
-QPushButton#dangerButton:pressed {
+QPushButton#dangerButton:pressed,
+QPushButton#dueSkipButton:pressed {
     background-color: #7a4040;
     color: #ffffff;
+    border-color: #8b4a4a;
 }
 
-QPushButton#dangerButton:disabled {
+QPushButton#dangerButton:disabled,
+QPushButton#dueSkipButton:disabled {
     background-color: #26263a;
     border-color: #313244;
     color: #6c7086;
 }
 
-QPushButton#walletCardBtnOnGradient {
-    background-color: rgba(255,255,255,0.2);
-    color: #ffffff;
-    border: 1px solid rgba(255,255,255,0.35);
-    border-radius: 6px;
+/* --- Link ("View all") ------------------------------------------------- */
+QPushButton#viewAllButton {
+    background: transparent;
+    color: #89b4fa;
+    border: none;
+    font-size: 11px;
+    font-weight: 500;
+    text-align: right;
+    padding: 0px;
 }
-QPushButton#walletCardBtnOnGradient:hover   { background-color: rgba(255,255,255,0.35); }
-QPushButton#walletCardBtnOnGradient:pressed { background-color: rgba(255,255,255,0.5); }
 
-/* --- Small size modifier: pair via setProperty("size", "small") --- */
+QPushButton#viewAllButton:hover {
+    color: #a6c8ff;
+    text-decoration: underline;
+}
+
+QPushButton#viewAllButton:pressed {
+    background: transparent;
+    color: #6c8cff;
+}
+
+/* --- Profile circle ---------------------------------------------------- */
+QPushButton#profileCircleButton {
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+    border: 2px solid #585b70;
+    border-radius: 60px;
+    font-size: 25pt;
+    font-weight: bold;
+}
+
+QPushButton#profileCircleButton:hover {
+    background-color: #313244;
+    border-color: #6c7086;
+}
+
+QPushButton#profileCircleButton:pressed {
+    background-color: #45475a;
+}
+
+/* --- Small size modifier ----------------------------------------------
+   The bare QPushButton[size="small"] rule loses to every #objectName rule
+   above, so each variant needs its own scoped copy or font_size does
+   nothing on a themed button. */
 QPushButton[size="small"] {
     font-size: 8pt;
     border-radius: 8px;
 }
 
-QFrame#barTrack {
-    background-color: #313244;
-    border: none;
-    border-radius: 4px;
-}
-QWidget#barSpacer {
-    background: transparent;
+QPushButton#primaryButton[size="small"],
+QPushButton#secondaryButton[size="small"],
+QPushButton#neutralButton[size="small"],
+QPushButton#dangerButton[size="small"],
+QPushButton#dueSkipButton[size="small"] {
+    font-size: 8pt;
+    border-radius: 8px;
 }
 
-/* DASHBOARD */
-/*  Shared card shell  */
+
+/* 
+   10. SEPARATORS
+    */
+
+QFrame#hLine {
+    border: none;
+    border-top: 1px solid #313244;
+    max-height: 1px;
+    min-height: 1px;
+}
+
+QFrame#vLine {
+    border: none;
+    border-left: 1px solid #313244;
+    max-width: 1px;
+    min-width: 1px;
+}
+
+QFrame#hLine[emphasis="strong"] {
+    border-top: 1px solid #45475a;
+}
+
+QFrame#vLine[emphasis="strong"] {
+    border-left: 1px solid #45475a;
+}
+
+
+/* 
+   11. SHARED LABELS
+    */
+
+QLabel#inputLabel {
+    font-size: 13px;
+    color: #cdd6f4;
+}
+
+QLabel#inputSubLabel {
+    font-size: 11px;
+    color: #a6adc8;
+}
+
+QLabel#logoLabel {
+    font-size: 25pt;
+    color: #cdd6f4;
+}
+
+QLabel#transactionLabel {
+    font-size: 18pt;
+    font-weight: bold;
+    color: #cdd6f4;
+}
+
+QLabel#infoBanner {
+    background-color: #1a3a5c;
+    color: #89b4fa;
+    border: 1px solid #2a5a8c;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 12px;
+}
+
+QLabel#not_tr_label {
+    font-size: 11pt;
+    font-weight: bold;
+    color: #a6adc8;
+}
+
+QLabel#main_category_label {
+    font-size: 10.5pt;
+    font-weight: bold;
+    color: #cdd6f4;
+}
+
+QLabel#category_label {
+    font-size: 10pt;
+    color: #a6adc8;
+}
+
+
+/* 
+   12. OPERATION TYPE PILLS (QLabel form)
+
+   The QTableView uses TypePillDelegate instead. These are for the places
+   that still show an operation type as a plain label. They had no dark
+   equivalent at all, so they rendered as bare white text here.
+    */
+
+QLabel#Income,
+QLabel#Expense,
+QLabel#Saving,
+QLabel#Investment {
+    font-size: 10pt;
+    border-radius: 8px;
+    padding: 2px 8px;
+}
+
+QLabel#Income {
+    color: #8fe0c0;
+    background-color: #1e4034;
+    border: 1px solid #1e4034;
+}
+
+QLabel#Expense {
+    color: #f5b3b3;
+    background-color: #4a2a2a;
+    border: 1px solid #4a2a2a;
+}
+
+QLabel#Saving {
+    color: #b4b0f5;
+    background-color: #2b2a52;
+    border: 1px solid #2b2a52;
+}
+
+QLabel#Investment {
+    color: #e8c88a;
+    background-color: #4a3a1c;
+    border: 1px solid #4a3a1c;
+}
+
+
+/* 
+   13. WALLET CARDS
+    */
+
+QFrame#walletCard {
+    border-radius: 12px;
+    padding: 5px;
+}
+
+/* Active card - same gradient in both themes */
+QFrame#walletCard[active="true"] {
+    background: qlineargradient(
+        x1: 0, y1: 0, x2: 1, y2: 1,
+        stop: 0 #1a5fb4,
+        stop: 1 #2a82da
+    );
+    border: none;
+}
+
+QFrame#walletCard[active="false"] {
+    background-color: #1e1e2e;
+    border: 1px solid #45475a;
+}
+
+QFrame#walletCard[active="true"] QLabel {
+    color: #ffffff;
+}
+
+QFrame#walletCard[active="false"] QLabel {
+    color: #cdd6f4;
+}
+
+QFrame#walletCard[active="true"] QLabel#walletCardMuted,
+QFrame#walletCard[active="true"] QLabel#walletCardCurrency {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+QFrame#walletCard[active="false"] QLabel#walletCardMuted,
+QFrame#walletCard[active="false"] QLabel#walletCardCurrency {
+    color: #a6adc8;
+}
+
+QLabel#walletCardName {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+QLabel#walletCardBalance {
+    font-size: 22px;
+    font-weight: 500;
+}
+
+QFrame#walletCard[active="true"] QLabel#walletActiveBadge {
+    background-color: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    padding: 2px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+}
+
+/* --- Wallet card buttons ----------------------------------------------- */
+QPushButton#walletCardBtnPrimary {
+    background-color: #0c447c;
+    color: #b5d4f4;
+    border: 1px solid #185fa5;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 0px;
+}
+
+QPushButton#walletCardBtnPrimary:hover {
+    background-color: #185fa5;
+    color: #d8e8fa;
+    border-color: #378add;
+}
+
+QPushButton#walletCardBtnPrimary:pressed {
+    background-color: #378add;
+    color: #ffffff;
+    border-color: #85b7eb;
+}
+
+QPushButton#walletCardBtnNeutral {
+    background-color: #313244;
+    color: #cdd6f4;
+    border: 1px solid #45475a;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 0px;
+}
+
+QPushButton#walletCardBtnNeutral:hover {
+    background-color: #3a3a52;
+    border-color: #585b70;
+}
+
+QPushButton#walletCardBtnNeutral:pressed {
+    background-color: #45475a;
+    color: #ffffff;
+    border-color: #6c7086;
+}
+
+QPushButton#walletCardBtnDanger {
+    background-color: #4a2a2a;
+    color: #f5b3b3;
+    border: 1px solid #6b3a3a;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 0px;
+}
+
+QPushButton#walletCardBtnDanger:hover {
+    background-color: #5c3333;
+    border-color: #7a4040;
+}
+
+QPushButton#walletCardBtnDanger:pressed {
+    background-color: #7a4040;
+    color: #ffffff;
+    border-color: #8b4a4a;
+}
+
+/* Buttons on the active card's gradient - identical in both themes */
+QPushButton#walletCardBtnOnGradient {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 0px;
+}
+
+QPushButton#walletCardBtnOnGradient:hover {
+    background-color: rgba(255, 255, 255, 0.35);
+    border-color: rgba(255, 255, 255, 0.45);
+}
+
+QPushButton#walletCardBtnOnGradient:pressed {
+    background-color: rgba(255, 255, 255, 0.5);
+    border-color: rgba(255, 255, 255, 0.55);
+}
+
+QPushButton#addWalletBtn {
+    background-color: transparent;
+    color: #6c7086;
+    border: 2px solid #45475a;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 14px;
+}
+
+QPushButton#addWalletBtn:hover {
+    background-color: #262636;
+    color: #a6adc8;
+    border-color: #585b70;
+}
+
+QPushButton#addWalletBtn:pressed {
+    background-color: #313244;
+    color: #cdd6f4;
+    border-color: #6c7086;
+}
+
+QPushButton#walletCardBtnPrimary:disabled,
+QPushButton#walletCardBtnNeutral:disabled,
+QPushButton#walletCardBtnDanger:disabled,
+QPushButton#addWalletBtn:disabled {
+    background-color: #26263a;
+    color: #585b70;
+    border-color: #313244;
+}
+
+QPushButton#walletCardBtnOnGradient:disabled {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.4);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+
+/* 
+   14. DASHBOARD
+    */
+
 QFrame#balanceTile,
 QFrame#monthTile,
 QFrame#dueTile,
@@ -882,22 +1169,11 @@ QFrame#upcomingCard {
     border-radius: 10px;
 }
 
-/* Children transparent so the card background shows through */
-QFrame#balanceTile QWidget,
-QFrame#monthTile QWidget,
-QFrame#dueTile QWidget,
-QFrame#categoryBars QWidget,
-QFrame#recentOperationsCard QWidget,
-QFrame#upcomingCard QWidget {
-    background: transparent;
-}
-
-/* Alert state on the due tile - setProperty("alert", "true"/"false") */
 QFrame#dueTile[alert="true"] {
     border: 1px solid #6b3a3a;
 }
 
-/*  Greeting row  */
+/* --- Greeting row ------------------------------------------------------ */
 QLabel#dashboardNameLabel {
     font-size: 18px;
     font-weight: 600;
@@ -909,7 +1185,7 @@ QLabel#dashboardDate {
     color: #a6adc8;
 }
 
-/*  Shared tile label styles  */
+/* --- Shared tile captions ---------------------------------------------- */
 QLabel#balanceTileLabel,
 QLabel#monthTileTopLabel,
 QLabel#dueTileLabel {
@@ -919,7 +1195,7 @@ QLabel#dueTileLabel {
     color: #a6adc8;
 }
 
-/*  Balance tile  */
+/* --- Balance tile ------------------------------------------------------ */
 QLabel#balanceTileAmount {
     font-size: 24px;
     font-weight: 600;
@@ -931,7 +1207,7 @@ QLabel#balanceTileWallet {
     color: #a6adc8;
 }
 
-/*  Month tile - */
+/* --- Month tile -------------------------------------------------------- */
 QLabel#monthTileMiddleLabel {
     font-size: 13px;
     color: #a6adc8;
@@ -955,7 +1231,6 @@ QLabel#monthTileExpense {
     color: #e24b4a;
 }
 
-/* Net flips sign - setProperty("positive", "true"/"false") */
 QLabel#monthTileNet {
     font-size: 13px;
     font-weight: 600;
@@ -969,7 +1244,7 @@ QLabel#monthTileNet[positive="false"] {
     color: #e24b4a;
 }
 
-/*  Due tile  */
+/* --- Due tile ---------------------------------------------------------- */
 QLabel#dueTileDueNum {
     font-size: 20px;
     font-weight: 600;
@@ -985,7 +1260,7 @@ QLabel#dueTileBottom {
     color: #a6adc8;
 }
 
-/*  Category bars - */
+/* --- Category bars ----------------------------------------------------- */
 QLabel#categoryBarsTitle {
     font-size: 14px;
     font-weight: 600;
@@ -1013,7 +1288,7 @@ QLabel#categoryBarsEmptyState {
     color: #6c7086;
 }
 
-/* Bar track - fill colour stays inline, it is per-category data */
+/* Fill colour stays inline - it is per-category data, not theme */
 QFrame#barTrack {
     background-color: #313244;
     border: none;
@@ -1024,7 +1299,7 @@ QWidget#barSpacer {
     background: transparent;
 }
 
-/*  List cards - */
+/* --- List cards -------------------------------------------------------- */
 QLabel#recOperTitle,
 QLabel#upcCardTitle {
     font-size: 14px;
@@ -1045,7 +1320,6 @@ QLabel#recOperRowMerchant {
     color: #a6adc8;
 }
 
-/* Amounts - setProperty("positive", "true"/"false") */
 QLabel#recOperRowAmount,
 QLabel#upcCardRowAmount {
     font-size: 13px;
@@ -1068,53 +1342,90 @@ QLabel#upcCardEmptyState {
     color: #6c7086;
 }
 
-/*  "View all" link button  */
-QPushButton#viewAllButton {
-    background: transparent;
-    color: #89b4fa;
-    border: none;
+
+/* 
+   15. DUE TRANSACTIONS DIALOG
+    */
+
+QLabel#dueDialogTitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: #cdd6f4;
+}
+
+QLabel#dueDialogSubtitle {
+    font-size: 12px;
+    color: #a6adc8;
+}
+
+QFrame#dueTransactionRow {
+    background-color: #1e1e2e;
+    border: 2px solid #45475a;
+    border-radius: 8px;
+}
+
+QLabel#dueRowTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: #cdd6f4;
+}
+
+/* Interval chip - this existed only in light.qss before */
+QLabel#dueRowInterval {
+    font-size: 12px;
+    color: #a6adc8;
+    background-color: #313244;
+    border: 1px solid #45475a;
+    border-radius: 10px;
+    padding: 0px 10px;
+}
+
+QLabel#dueRowCount,
+QLabel#dueRowSummary {
     font-size: 11px;
-    font-weight: 500;
-    text-align: right;
+    color: #a6adc8;
 }
 
-QPushButton#viewAllButton:hover {
-    color: #a6c8ff;
-    text-decoration: underline;
+QLabel#dueRowAmount {
+    font-size: 13px;
+    font-weight: 600;
 }
 
-QPushButton#viewAllButton:pressed {
+QLabel#dueRowAmount[operation="income"] {
+    color: #1d9e75;
+}
+
+QLabel#dueRowAmount[operation="expense"] {
+    color: #e24b4a;
+}
+
+QLabel#dueRowAmount[operation="saving"] {
     color: #6c8cff;
 }
 
-/*  SEPARATOR LINES */
-
-QFrame#hLine {
-    border: none;
-    border-top: 1px solid #313244;
-    max-height: 1px;
-    min-height: 1px;
+QLabel#dueRowAmount[operation="investment"] {
+    color: #ba7517;
 }
 
-QFrame#vLine {
-    border: none;
-    border-left: 1px solid #313244;
-    max-width: 1px;
-    min-width: 1px;
+QLabel#occurrenceDate {
+    font-size: 13px;
+    color: #cdd6f4;
 }
 
-/* Stronger variant - setProperty("emphasis", "strong") */
-QFrame#hLine[emphasis="strong"] {
-    border-top: 1px solid #45475a;
+QLabel#occurrenceTimeline {
+    font-size: 11px;
+    color: #a6adc8;
 }
 
-QFrame#vLine[emphasis="strong"] {
-    border-left: 1px solid #45475a;
+QLabel#occurrenceTimeline[overdue="true"] {
+    color: #e24b4a;
 }
 
-/* PROFILE DIALOG - DARK THEME*/
 
-/* Header  */
+/* 
+   16. PROFILE DIALOG
+    */
+
 QLabel#profileDialogTitle {
     font-size: 17px;
     font-weight: 600;
@@ -1126,7 +1437,6 @@ QLabel#profileDialogSubtitle {
     color: #a6adc8;
 }
 
-/*  Avatar row  */
 QLabel#profileDialogInitial {
     background-color: #1e1e2e;
     color: #cdd6f4;
@@ -1147,15 +1457,10 @@ QLabel#profileDialogMemberLabel {
     color: #a6adc8;
 }
 
-/*  Summary panel */
 QWidget#profileSummary {
-    background-color: #1e1e2e;
+    background-color: #181825;
     border: 1px solid #45475a;
     border-radius: 10px;
-}
-
-QWidget#profileSummary QWidget {
-    background: transparent;
 }
 
 QLabel#leftMonthTitle,
@@ -1164,7 +1469,6 @@ QLabel#savingsRateLabel {
     color: #a6adc8;
 }
 
-/* Values - setProperty("positive", "true"/"false") */
 QLabel#leftMonthAmount,
 QLabel#savingsRateAmount {
     font-size: 19px;
@@ -1182,155 +1486,21 @@ QLabel#savingsRateAmount[positive="false"] {
     color: #e24b4a;
 }
 
-/*  Footer */
+/* Legacy - Settings moved to #settingsApplyNote. Drop if unreferenced. */
 QLabel#profileUnsaved {
     font-size: 11px;
     color: #d4a259;
 }
 
-QLabel#inputLabel     { font-size: 13px; color: #cdd6f4; }
-QLabel#inputSubLabel  { font-size: 11px; color: #a6adc8; }
 
-/*    WALLET CARD BUTTONS*/
+/* 
+   17. SETTINGS DIALOG
+    */
 
-/* --- Set Active ----------------------------------------------------- */
-QPushButton#walletCardBtnPrimary {
-    background-color: #0c447c;
-    color: #b5d4f4;
-    border: 1px solid #185fa5;
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: bold;
-    padding: 0px;
-}
-
-QPushButton#walletCardBtnPrimary:hover {
-    background-color: #185fa5;
-    color: #d8e8fa;
-    border-color: #378add;
-}
-
-QPushButton#walletCardBtnPrimary:pressed {
-    background-color: #378add;
-    color: #ffffff;
-    border-color: #85b7eb;
-}
-
-/* --- Edit, on an inactive card -------------------------------------- */
-QPushButton#walletCardBtnNeutral {
-    background-color: #313244;
-    color: #cdd6f4;
-    border: 1px solid #45475a;
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: bold;
-    padding: 0px;
-}
-
-QPushButton#walletCardBtnNeutral:hover {
-    background-color: #3a3a52;
-    border-color: #585b70;
-}
-
-QPushButton#walletCardBtnNeutral:pressed {
-    background-color: #45475a;
-    color: #ffffff;
-    border-color: #6c7086;
-}
-
-/* --- Delete ---------------------------------------------------------
-   Matches #dueSkipButton so destructive buttons read the same app-wide. */
-QPushButton#walletCardBtnDanger {
-    background-color: #4a2a2a;
-    color: #f5b3b3;
-    border: 1px solid #6b3a3a;
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: bold;
-    padding: 0px;
-}
-
-QPushButton#walletCardBtnDanger:hover {
-    background-color: #5c3333;
-    border-color: #7a4040;
-}
-
-QPushButton#walletCardBtnDanger:pressed {
-    background-color: #7a4040;
-    color: #ffffff;
-    border-color: #8b4a4a;
-}
-
-/* --- Any button sitting on the active card's blue gradient ----------
-   Identical in both themes - the gradient does not change.            */
-QPushButton#walletCardBtnOnGradient {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: bold;
-    padding: 0px;
-}
-
-QPushButton#walletCardBtnOnGradient:hover {
-    background-color: rgba(255, 255, 255, 0.35);
-    border-color: rgba(255, 255, 255, 0.45);
-}
-
-QPushButton#walletCardBtnOnGradient:pressed {
-    background-color: rgba(255, 255, 255, 0.5);
-    border-color: rgba(255, 255, 255, 0.55);
-}
-
-/* --- Add Wallet ----------------------------------------------------- */
-QPushButton#addWalletBtn {
-    background-color: transparent;
-    color: #6c7086;
-    border: 2px solid #45475a;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: bold;
-    padding: 14px;
-}
-
-QPushButton#addWalletBtn:hover {
-    background-color: #262636;
-    color: #a6adc8;
-    border-color: #585b70;
-}
-
-QPushButton#addWalletBtn:pressed {
-    background-color: #313244;
-    color: #cdd6f4;
-    border-color: #6c7086;
-}
-
-/* --- Disabled ------------------------------------------------------
-   PushButton skips its inline disabled_stylesheet when themed, so the
-   disabled look has to live here or it simply will not appear.        */
-QPushButton#walletCardBtnPrimary:disabled,
-QPushButton#walletCardBtnNeutral:disabled,
-QPushButton#walletCardBtnDanger:disabled,
-QPushButton#addWalletBtn:disabled {
-    background-color: #26263a;
-    color: #585b70;
-    border-color: #313244;
-}
-
-QPushButton#walletCardBtnOnGradient:disabled {
-    background-color: rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.4);
-    border-color: rgba(255, 255, 255, 0.15);
-}
-/* SETTINGS DIALOG */
-
-/* - Dialog shell  */
 QDialog#settingsDialog {
     background-color: #1e1e2e;
 }
 
-/* - Header  */
 QLabel#settingsDialogTitle {
     font-size: 17px;
     font-weight: 600;
@@ -1342,9 +1512,6 @@ QLabel#settingsDialogSubtitle {
     color: #a6adc8;
 }
 
-/*  Section headers (APPEARANCE, STARTUP, DATA, REGIONAL) 
-   margin-top is what separates one group from the next - the HLine
-   underneath sits tight against the label.                            */
 QLabel#settingsSectionLabel {
     font-size: 10px;
     font-weight: 600;
@@ -1353,62 +1520,83 @@ QLabel#settingsSectionLabel {
     margin-top: 10px;
 }
 
-/* - Footer note - */
 QLabel#settingsApplyNote {
     font-size: 11px;
     color: #a6adc8;
 }
 
-/* - Scroll area 
-   Children must be transparent or they paint over the dialog.        */
 QScrollArea#settingsScrollArea {
     background: transparent;
     border: none;
 }
 
-QScrollArea#settingsScrollArea > QWidget > QWidget {
-    background: transparent;
-}
 
-QScrollArea#settingsScrollArea QScrollBar:vertical {
-    background-color: transparent;
-    width: 8px;
-    margin: 0;
-    border: none;
-}
+/* 
+   18. LEGACY - pre-refactor widgets
 
-QScrollArea#settingsScrollArea QScrollBar::handle:vertical {
-    background-color: #45475a;
-    border-radius: 4px;
-    min-height: 24px;
-}
+   Scoped under QTableWidget so the old header rule no longer competes with
+   the QTableView one in section 6. Delete this whole block once nothing
+   references QTableWidget or ResizableTextEdit.
+    */
 
-QScrollArea#settingsScrollArea QScrollBar::handle:vertical:hover {
-    background-color: #585b70;
-}
-
-QScrollArea#settingsScrollArea QScrollBar::add-line:vertical,
-QScrollArea#settingsScrollArea QScrollBar::sub-line:vertical {
-    height: 0;
-    background: none;
-    border: none;
-}
-
-QScrollArea#settingsScrollArea QScrollBar::add-page:vertical,
-QScrollArea#settingsScrollArea QScrollBar::sub-page:vertical {
-    background: none;
-}
-
-/* - Shared input labels -
-   Used by ComboBox, TextInput and SwitchInput. If you already added
-   these for the switch widget, keep ONE copy - they are global, not
-   specific to this dialog.                                            */
-QLabel#inputLabel {
-    font-size: 13px;
+QTableWidget {
+    background-color: #1e1e2e;
     color: #cdd6f4;
+    border: 1px solid #45475a;
+    gridline-color: #313244;
 }
 
-QLabel#inputSubLabel {
-    font-size: 11px;
-    color: #a6adc8;
+QTableWidget::item:selected {
+    background-color: #2a82da;
+    color: #ffffff;
+}
+
+QTableWidget QHeaderView::section {
+    background-color: #181825;
+    color: #cdd6f4;
+    border: 1px solid #45475a;
+    padding: 4px;
+}
+
+ResizableTextEdit {
+    background-color: #313244;
+    color: #cdd6f4;
+    border: 2px solid #45475a;
+    border-radius: 10px;
+    padding: 6px;
+}
+
+/* Segmented control  */
+QFrame#segmentedTrack {
+    background-color: #313244;          /* light: #e9ecf0 */
+    border: none;
+    border-radius: 7px;
+}
+
+QPushButton#segmentButton {
+    background-color: transparent;
+    color: #a6adc8;                     /* light: #4a525c */
+    border: none;
+    border-radius: 5px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+QPushButton#segmentButton:hover {
+    color: #cdd6f4;                     /* light: #1e1e1e */
+}
+
+QPushButton#segmentButton:checked {
+    background-color: #45475a;          /* light: #ffffff */
+    color: #cdd6f4;                     /* light: #1e1e1e */
+    font-weight: 600;
+}
+
+QPushButton#segmentButton:pressed {
+    background-color: #585b70;          /* light: #d9d9d9 */
+}
+
+QPushButton#segmentButton:disabled {
+    color: #6c7086;                     /* light: #b3b3b3 */
 }

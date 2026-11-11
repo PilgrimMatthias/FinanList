@@ -16,6 +16,7 @@ from .widgets.expand_toggle_btn import ExpandToggleButton
 from .widgets.svg_icon import SvgIcon
 from .widgets.checkbox_delegate import CheckboxDelegate
 from .widgets.category_dot_delegate import CategoryDotDelegate
+from .widgets.segmented_control import SegmentedControl
 
 __all__ = [
     "AppState",
@@ -35,6 +36,7 @@ __all__ = [
     "ExpandToggleButton",
     "CheckboxDelegate",
     "CategoryDotDelegate",
+    "SegmentedControl",
     "center_window," "filter_func," "is_number," "is_date",
     "set_next_due_date",
     "cast_datetime_to_str",
