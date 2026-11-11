@@ -14,18 +14,13 @@ class UserProfileRepo(BaseRepo):
             """
             INSERT
                 INTO
-                USER_PROFILE (USER_ID,
-                GROSS_SALARY_MONTHLY,
-                NET_SALARY_MONTHLY,
-                ESTIMATED_EXPENSES_MONTHLY,
+                USER_PROFILE (
+                USER_ID,
                 CURRENCY)
-            VALUES (?,?,?,?)
+            VALUES (?,?)
             """,
             (
                 profile.user_id,
-                profile.gross_salary_monthly,
-                profile.net_salary_monthly,
-                profile.estimated_expenses_monthly,
                 profile.currency,
             ),
         )
@@ -54,28 +49,6 @@ class UserProfileRepo(BaseRepo):
 
         return [UserProfile.from_row(row) for row in rows]
 
-    def update(self, profile: UserProfile) -> UserProfile:
-        with self.db.transaction():
-            self.db.execute(
-                """
-                UPDATE 
-                    USER_PROFILE 
-                SET 
-                    GROSS_SALARY_MONTHLY = ?,
-                    NET_SALARY_MONTHLY = ?,
-                    ESTIMATED_EXPENSES_MONTHLY = ?
-                WHERE 
-                    USER_ID = ?;
-                """,
-                (
-                    profile.gross_salary_monthly,
-                    profile.net_salary_monthly,
-                    profile.estimated_expenses_monthly,
-                    profile.user_id,
-                ),
-            )
-
-        return self.get_by_user_id(user_id=profile.user_id)
 
     def update_no_commit(self, user_profile:UserProfile) -> UserProfile:
         self.db.execute(
@@ -83,17 +56,11 @@ class UserProfileRepo(BaseRepo):
             UPDATE
                 USER_PROFILE
             SET
-                GROSS_SALARY_MONTHLY = ?,
-                NET_SALARY_MONTHLY = ?,
-                ESTIMATED_EXPENSES_MONTHLY = ?,
                 CURRENCY = ?
             WHERE
                 ID = ?
             """,
             (
-                user_profile.gross_salary_monthly,
-                user_profile.net_salary_monthly,
-                user_profile.estimated_expenses_monthly,
                 user_profile.currency,
                 user_profile.id,
             ),

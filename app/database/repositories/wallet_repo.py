@@ -11,8 +11,15 @@ class WalletRepo(BaseRepo):
 
     def create_no_commit(self, wallet: Wallet) -> Wallet:
         cursor = self.db.execute(
-            "INSERT INTO WALLETS (USER_ID, NAME, CURRENCY, INITIAL_BALANCE) VALUES (?, ?, ?, ?)",
-            (wallet.user_id, wallet.name, wallet.currency, wallet.initial_balance),
+            "INSERT INTO WALLETS (USER_ID, NAME, CURRENCY, INITIAL_BALANCE, NET_SALARY_MONTHLY, ESTIMATED_EXPENSES_MONTHLY) VALUES (?, ?, ?, ?, ?, ?)",
+            (
+                wallet.user_id,
+                wallet.name,
+                wallet.currency,
+                wallet.initial_balance,
+                wallet.net_salary_monthly,
+                wallet.estimated_expenses_monthly,
+            ),
         )
         wallet.id = cursor.lastrowid
         return wallet
@@ -52,14 +59,47 @@ class WalletRepo(BaseRepo):
                 SET 
                     NAME = ?,
                     CURRENCY = ?,
-                    INITIAL_BALANCE = ?
+                    INITIAL_BALANCE = ?,
+                    NET_SALARY_MONTHLY = ?,
+                    ESTIMATED_EXPENSES_MONTHLY = ?
                 WHERE 
                     ID = ?
                 """,
-                (wallet.name, wallet.currency, wallet.initial_balance, wallet.id),
+                (
+                    wallet.name,
+                    wallet.currency,
+                    wallet.initial_balance,
+                    wallet.net_salary_monthly,
+                    wallet.estimated_expenses_monthly,
+                    wallet.id,
+                ),
             )
 
         return self.get_by_id(id=wallet.id)
+
+    def update_no_commit(self, wallet:Wallet) -> Wallet:
+        self.db.execute(
+            """
+            UPDATE 
+                WALLETS 
+            SET 
+                NAME = ?,
+                CURRENCY = ?,
+                INITIAL_BALANCE = ?,
+                NET_SALARY_MONTHLY = ?,
+                ESTIMATED_EXPENSES_MONTHLY = ?
+            WHERE 
+                ID = ?
+            """,
+            (
+                wallet.name,
+                wallet.currency,
+                wallet.initial_balance,
+                wallet.net_salary_monthly,
+                wallet.estimated_expenses_monthly,
+                wallet.id,
+            ),
+        )
 
     def get_balance(self, wallet_id: int) -> float:
         """Returns balance of wallet
@@ -79,7 +119,7 @@ class WalletRepo(BaseRepo):
         """
         balance = self.db.execute(query=query, params=(wallet_id,)).fetchone()
 
-        return balance[0] if balance else 0
+        return balance[0] if balance and balance[0] is not None else 0
 
     def delete_by_id(self, wallet_id: int):
         with self.db.transaction():

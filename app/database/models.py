@@ -33,23 +33,17 @@ class UserProfile:
 
     user_id: int
     id: Optional[int] = None
-    gross_salary_monthly: float = field(default=0)
-    net_salary_monthly: float = field(default=0)
-    estimated_expenses_monthly: float = field(default=0)
     currency: Currency = field(default=Currency.PLN)
 
     # Column order must match from_row() index mapping
-    COLUMNS = "id, user_id, gross_salary_monthly, net_salary_monthly, estimated_expenses_monthly, currency"
+    COLUMNS = "id, user_id, currency"
 
     @classmethod
     def from_row(cls, row: tuple) -> "UserProfile":
         return cls(
             id=row[0],
             user_id=row[1],
-            gross_salary_monthly=row[2],
-            net_salary_monthly=row[3],
-            estimated_expenses_monthly=row[4],
-            currency=Currency(row[5]) if row[5] else None
+            currency=Currency(row[2]) if row[2] else None
         )
 
 
@@ -61,11 +55,13 @@ class Wallet:
     name: str = ""
     currency: Currency = field(default=Currency.PLN)
     initial_balance: float = field(default=0)
+    net_salary_monthly: Optional[float] = None
+    estimated_expenses_monthly: Optional[float] = None
     id: Optional[int] = None
     created_at: Optional[str] = None
 
     # Column order must match from_row() index mapping
-    COLUMNS = "id, user_id, name, currency, initial_balance, created_at"
+    COLUMNS = "id, user_id, name, currency, initial_balance, net_salary_monthly, estimated_expenses_monthly, created_at"
 
     @classmethod
     def from_row(cls, row: tuple) -> "Wallet":
@@ -75,7 +71,9 @@ class Wallet:
             name=row[2],
             currency=Currency(row[3]) if row[3] else None,
             initial_balance=row[4],
-            created_at=row[5],
+            net_salary_monthly=row[5],
+            estimated_expenses_monthly=row[6],
+            created_at=row[7],
         )
 
 

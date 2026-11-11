@@ -386,3 +386,37 @@ class TransactionRepo(BaseRepo):
         rows = self.db.execute(query=query, params=params).fetchall()
 
         return rows
+
+    def get_first_transaction_date(self, wallet_id: int) -> str | None:
+        """ISO date of the wallet's oldest transaction, or None."""
+        row = self.db.execute(
+            "SELECT MIN(date) FROM TRANSACTIONS WHERE wallet_id = ?",
+            (wallet_id,),
+        ).fetchone()
+        return row[0] if row and row[0] else None
+ 
+    def sum_by_type(
+        self,
+        wallet_id: int,
+        operation_types: list,
+        date_from: str,
+        date_to: str,
+    ) -> float:
+        """Sum amounts in [date_from, date_to) for the given operation types.
+ 
+        date_to is exclusive, so the caller passes the first day of the month
+        after the window - no need to work out month lengths, and no trouble
+        if a stored date ever carries a time component.
+        """
+        placeholders = ",".join("?" * len(operation_types))
+        sql = f"""
+            SELECT COALESCE(SUM(amount), 0)
+            FROM TRANSACTIONS
+            WHERE wallet_id = ?
+              AND operation_type IN ({placeholders})
+              AND date >= ?
+              AND date < ?
+        """
+        params = [wallet_id, *[t.value for t in operation_types], date_from, date_to]
+        return self.db.execute(sql, params).fetchone()[0]
+ 
