@@ -11,7 +11,7 @@ class WalletRepo(BaseRepo):
 
     def create_no_commit(self, wallet: Wallet) -> Wallet:
         cursor = self.db.execute(
-            "INSERT INTO WALLETS (USER_ID, NAME, CURRENCY, INITIAL_BALANCE, NET_SALARY_MONTHLY, ESTIMATED_EXPENSES_MONTHLY) VALUES (?, ?, ?, ?, ?, ?)",
+            "INSERT INTO WALLETS (USER_ID, NAME, CURRENCY, INITIAL_BALANCE, NET_SALARY_MONTHLY, ESTIMATED_EXPENSES_MONTHLY, PLAN_INCLUDES_TRANSFERS) VALUES (?, ?, ?, ?, ?, ?, ?)",
             (
                 wallet.user_id,
                 wallet.name,
@@ -19,6 +19,7 @@ class WalletRepo(BaseRepo):
                 wallet.initial_balance,
                 wallet.net_salary_monthly,
                 wallet.estimated_expenses_monthly,
+                wallet.plan_includes_transfers,
             ),
         )
         wallet.id = cursor.lastrowid
@@ -61,7 +62,8 @@ class WalletRepo(BaseRepo):
                     CURRENCY = ?,
                     INITIAL_BALANCE = ?,
                     NET_SALARY_MONTHLY = ?,
-                    ESTIMATED_EXPENSES_MONTHLY = ?
+                    ESTIMATED_EXPENSES_MONTHLY = ?,
+                    PLAN_INCLUDES_TRANSFERS = ?
                 WHERE 
                     ID = ?
                 """,
@@ -71,13 +73,14 @@ class WalletRepo(BaseRepo):
                     wallet.initial_balance,
                     wallet.net_salary_monthly,
                     wallet.estimated_expenses_monthly,
+                    wallet.plan_includes_transfers,
                     wallet.id,
                 ),
             )
 
         return self.get_by_id(id=wallet.id)
 
-    def update_no_commit(self, wallet:Wallet) -> Wallet:
+    def update_no_commit(self, wallet: Wallet) -> Wallet:
         self.db.execute(
             """
             UPDATE 
@@ -87,7 +90,8 @@ class WalletRepo(BaseRepo):
                 CURRENCY = ?,
                 INITIAL_BALANCE = ?,
                 NET_SALARY_MONTHLY = ?,
-                ESTIMATED_EXPENSES_MONTHLY = ?
+                ESTIMATED_EXPENSES_MONTHLY = ?,
+                PLAN_INCLUDES_TRANSFERS = ?
             WHERE 
                 ID = ?
             """,
@@ -97,6 +101,7 @@ class WalletRepo(BaseRepo):
                 wallet.initial_balance,
                 wallet.net_salary_monthly,
                 wallet.estimated_expenses_monthly,
+                wallet.plan_includes_transfers,
                 wallet.id,
             ),
         )

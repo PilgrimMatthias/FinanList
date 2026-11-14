@@ -85,7 +85,14 @@ class WalletService:
         temp_sub_category = self.category_repo.create(temp_sub_category)
 
     def create_wallet(
-        self, user_id: int, name: str, currency: Currency, initial_balance: float, net_salary_monthly:float, estimated_expenses_monthly:float
+        self,
+        user_id: int,
+        name: str,
+        currency: Currency,
+        initial_balance: float,
+        net_salary_monthly: float,
+        estimated_expenses_monthly: float,
+        plan_includes_transfers: float,
     ) -> Wallet:
         """Creates wallet in database"""
         # Validation
@@ -103,7 +110,8 @@ class WalletService:
             currency=currency,
             initial_balance=initial_balance,
             net_salary_monthly=net_salary_monthly,
-            estimated_expenses_monthly=estimated_expenses_monthly
+            estimated_expenses_monthly=estimated_expenses_monthly,
+            plan_includes_transfers=plan_includes_transfers,
         )
 
         wallet = self.wallet_repo.create(wallet=wallet)
@@ -146,7 +154,9 @@ class WalletService:
 
         self.app_state.set_active_wallet(wallet_id=wallet_id)
 
-    def calculate_summary(self, net: float | None, expenses: float | None) -> WalletSummary:
+    def calculate_summary(
+        self, net: float | None, expenses: float | None
+    ) -> WalletSummary:
         """
         Returns calculated profile summary
 
@@ -168,7 +178,7 @@ class WalletService:
 
     def get_months_of_history(self, wallet_id: int, today: date = None) -> int:
         """Complete months between the first transaction and this month.
- 
+
         A month with no transactions still counts - the user genuinely spent
         nothing. Months before the first transaction do not, because the
         wallet had no history to average.
@@ -176,31 +186,38 @@ class WalletService:
         first = self.transaction_repo.get_first_transaction_date(wallet_id)
         if first is None:
             return 0
- 
+
         today = today or date.today()
         first_date = date.fromisoformat(first[:10])
         return (today.year - first_date.year) * 12 + (today.month - first_date.month)
- 
+
     def get_plan_suggestion(
         self,
         wallet_id: int,
         months: int,
         today: date = None,
+        include_transfers: bool = False,
     ) -> PlanSuggestion | None:
         available = self.get_months_of_history(wallet_id, today)
         if available == 0:
             return None
- 
+
         counted = min(months, available)
         date_from, date_to = month_window(counted, today)
- 
+
         income = self.transaction_repo.sum_by_type(
             wallet_id, [OperationType.INCOME], date_from, date_to
         )
-        expenses = self.transaction_repo.sum_by_type(
-            wallet_id, [OperationType.EXPENSE], date_from, date_to
+
+        types = (
+            [OperationType.EXPENSE, OperationType.SAVING, OperationType.INVESTMENT]
+            if include_transfers
+            else [OperationType.EXPENSE]
         )
- 
+        expenses = self.transaction_repo.sum_by_type(
+            wallet_id, types, date_from, date_to
+        )
+
         return PlanSuggestion(
             income=income / counted,
             expenses=expenses / counted,

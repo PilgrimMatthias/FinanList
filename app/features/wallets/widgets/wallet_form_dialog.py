@@ -1,6 +1,13 @@
 from dataclasses import replace
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QDialog, QSizePolicy, QLabel, QVBoxLayout, QHBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QDialog,
+    QSizePolicy,
+    QLabel,
+    QVBoxLayout,
+    QHBoxLayout,
+    QWidget,
+)
 from ..service import WalletService
 from app.database.models import Wallet
 from enum import StrEnum
@@ -93,7 +100,7 @@ class WalletFormDialog(QDialog):
                 for currency in Currency
             ],
             default_value=self._set_currency(),
-            on_change=self._update_summary
+            on_change=self._update_summary,
         )
         if self.dialog_type == DialogType.EDIT:
             self.currency_input.setEnabled(False)
@@ -131,10 +138,22 @@ class WalletFormDialog(QDialog):
             self._create_hint_row(on_use=self._use_income_suggestion)
         )
 
+        self.basis_control = SegmentedControl(
+            text="Planned expenses cover",
+            # sub_text="Everything = expenses + savings + investments",
+            values=[
+                (0, "Expenses\nonly"),
+                (1, "Expenses with savings\nand investmens"),
+            ],
+            default_value=1 if self._wallet_includes_transfers() else 0,
+            label_position="left",
+            on_change=self._basis_changed,
+        )
+
         self.expenses_edit = TextInput(
             self,
             text="Estimated expenses",
-            sub_text="monthly, used for forecasting. Excludes transfers to savings and investments.",
+            sub_text="monthly, used for forecasting. Excludes savings and investments.",
             default_text=self._set_planned_expenses(),
             validate_number=True,
         )
@@ -190,6 +209,7 @@ class WalletFormDialog(QDialog):
         input_layout.addWidget(self.month_control)
         input_layout.addWidget(self.net_salary_edit)
         input_layout.addWidget(self.income_hint)
+        input_layout.addWidget(self.basis_control)
         input_layout.addWidget(self.expenses_edit)
         input_layout.addWidget(self.expenses_hint)
         input_layout.addWidget(summary_widget)
@@ -269,6 +289,11 @@ class WalletFormDialog(QDialog):
             return self._format_amount(self.wallet.estimated_expenses_monthly)
         return None
 
+    def _wallet_includes_transfers(self):
+        if self.dialog_type == DialogType.EDIT and self.wallet is not None:
+            return self.wallet.plan_includes_transfers
+        return None
+
     @staticmethod
     def _format_amount(value):
         """Format a nullable amount for a text input. None stays empty."""
@@ -282,6 +307,24 @@ class WalletFormDialog(QDialog):
             return self.wallet.currency.name
         data = self.currency_input.get_data()
         return Currency(data).name if data else ""
+
+    def _basis_changed(self):
+        if self.dialog_type == DialogType.CREATE or self.wallet is None:
+            return
+
+        # Refresh hint and hint label
+        if self.wallet is not None:
+            self._refresh_suggestions()
+
+        # Refresh sub_text
+        if bool(self.basis_control.get_data()):
+            self.expenses_edit.set_sub_text(
+                "monthly, used for forecasting. Includes savings and investments."
+            )
+        else:
+            self.expenses_edit.set_sub_text(
+                "monthly, used for forecasting. Excludes savings and investments."
+            )
 
     # Suggestions
     def _create_hint_row(self, on_use):
@@ -321,7 +364,9 @@ class WalletFormDialog(QDialog):
             wallet_id=self.wallet.id,
         )
 
-        usable = [window for window, _ in SUGGESTION_WINDOWS if window <= months_available]
+        usable = [
+            window for window, _ in SUGGESTION_WINDOWS if window <= months_available
+        ]
         self.month_control.set_enabled_values(usable)
 
         if not usable:
@@ -346,6 +391,7 @@ class WalletFormDialog(QDialog):
         self.suggestion = self.service.get_plan_suggestion(
             wallet_id=self.wallet.id,
             months=months,
+            include_transfers=bool(self.basis_control.get_data()),
         )
 
         if self.suggestion is None:
@@ -358,10 +404,16 @@ class WalletFormDialog(QDialog):
         self.income_hint_label.setText(
             f"Last {counted} months: {format_balance(self.suggestion.income)}"
         )
-        self.expenses_hint_label.setText(
-            f"Last {counted} months, expenses only: "
-            f"{format_balance(self.suggestion.expenses)}"
-        )
+        if bool(self.basis_control.get_data()):
+            self.expenses_hint_label.setText(
+                f"Last {counted} months, incl. transfers: "
+                f"{format_balance(self.suggestion.expenses)}"
+            )
+        else:
+            self.expenses_hint_label.setText(
+                f"Last {counted} months, expenses only: "
+                f"{format_balance(self.suggestion.expenses)}"
+            )
 
         self.income_hint.show()
         self.expenses_hint.show()
@@ -413,6 +465,7 @@ class WalletFormDialog(QDialog):
                 initial_balance=self.in_balance_input.get_value(),
                 net_salary_monthly=self._plan_value(self.net_salary_edit),
                 estimated_expenses_monthly=self._plan_value(self.expenses_edit),
+                plan_includes_transfers=self.basis_control.get_data(),
             )
             self.close()
         except ValidationError as e:
@@ -428,6 +481,7 @@ class WalletFormDialog(QDialog):
         updated_wallet.initial_balance = self.in_balance_input.get_value()
         updated_wallet.net_salary_monthly = self._plan_value(self.net_salary_edit)
         updated_wallet.estimated_expenses_monthly = self._plan_value(self.expenses_edit)
+        updated_wallet.plan_includes_transfers = self.basis_control.get_data()
 
         try:
             self.service.update_wallet(wallet=updated_wallet)
@@ -450,7 +504,7 @@ class WalletFormDialog(QDialog):
 
     def _update_summary(self):
         """Updates summary widget - live recompute"""
-        
+
         net = self._plan_value(self.net_salary_edit)
         expenses = self._plan_value(self.expenses_edit)
 
@@ -467,7 +521,8 @@ class WalletFormDialog(QDialog):
 
         self.savings_rate_amount.setText(
             f"{format_balance(self.wallet_summary.savings_rate * 100)}%"
-            if self.wallet_summary.savings_rate is not None else "-"
+            if self.wallet_summary.savings_rate is not None
+            else "-"
         )
 
         positive = "true" if self.wallet_summary.left_each_month >= 0 else "false"

@@ -6,7 +6,7 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QVBoxLayout,
     QTextEdit,
-    QHBoxLayout
+    QHBoxLayout,
 )
 
 
@@ -16,7 +16,7 @@ class TextInput(QWidget):
         parent=None,
         text: str = None,
         sub_text: str = None,
-        error_text:str = None,
+        error_text: str = None,
         placeholder: str = None,
         default_text: str = None,
         validate_number=False,
@@ -34,7 +34,6 @@ class TextInput(QWidget):
         self.validate_number = validate_number
         self._locale = QLocale(QLocale.Language.English, QLocale.Country.Poland)
 
-
         if self.validate_number and is_multiline:
             raise ValueError("Number validation is not supported for multiline input")
 
@@ -50,7 +49,9 @@ class TextInput(QWidget):
         self.label = QLabel(self)
         self.sub_label = QLabel(self)
         self.sub_label.setObjectName("inputSubLabel")
-        self.sub_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignBottom)
+        self.sub_label.setAlignment(
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignBottom
+        )
 
         if text is not None:
             self.label.setText(text)
@@ -95,7 +96,7 @@ class TextInput(QWidget):
 
         return self.text_input.text().strip()
 
-    def set_value(self, value:str):
+    def set_value(self, value: str):
         "Sets value"
         self.text_input.setText(value)
 
@@ -108,6 +109,9 @@ class TextInput(QWidget):
         if self.text_input.text() == "":
             return False
         return True
+
+    def set_sub_text(self, text: str):
+        self.sub_label.setText(text)
 
     def toggle_error(self, enabled):
         self.error_label.setVisible(enabled)
