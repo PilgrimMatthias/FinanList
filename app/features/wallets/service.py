@@ -13,6 +13,13 @@ from .models import WalletSummary, PlanSuggestion
 from datetime import date
 from app.core.utils import month_window
 
+# Everything that leaves the wallet, used when averaging scheduled outflow.
+OUTFLOW_TYPES = [
+    OperationType.EXPENSE,
+    OperationType.SAVING,
+    OperationType.INVESTMENT,
+]
+
 
 class WalletService:
     """Wallet service"""
@@ -91,8 +98,7 @@ class WalletService:
         currency: Currency,
         initial_balance: float,
         net_salary_monthly: float,
-        estimated_expenses_monthly: float,
-        plan_includes_transfers: float,
+        everyday_spending_monthly: float,
     ) -> Wallet:
         """Creates wallet in database"""
         # Validation
@@ -110,8 +116,7 @@ class WalletService:
             currency=currency,
             initial_balance=initial_balance,
             net_salary_monthly=net_salary_monthly,
-            estimated_expenses_monthly=estimated_expenses_monthly,
-            plan_includes_transfers=plan_includes_transfers,
+            everyday_spending_monthly=everyday_spending_monthly,
         )
 
         wallet = self.wallet_repo.create(wallet=wallet)
@@ -155,22 +160,32 @@ class WalletService:
         self.app_state.set_active_wallet(wallet_id=wallet_id)
 
     def calculate_summary(
-        self, net: float | None, expenses: float | None
+        self,
+        net: float | None,
+        everyday: float | None,
+        recurring_outflow: float | None,
     ) -> WalletSummary:
         """
-        Returns calculated profile summary
+        Returns calculated wallet summary
+
+        everyday is only the non-scheduled part of spending, so the scheduled
+        side has to come back in or "Left each month" would ignore every bill.
 
         Args:
-            net (float): net income
-            expenses (float): expenses monthly
+            net (float): net income monthly
+            everyday (float): everyday spending monthly, excluding scheduled items
+            recurring_outflow (float): average monthly total of scheduled bills
+                and transfers, from get_recurring_outflow()
 
         Returns:
-            WalletSummary: Profile summary for dipslay
+            WalletSummary: wallet summary for display
         """
 
         net = net or 0.0
-        expenses = expenses or 0.0
-        left = net - expenses
+        everyday = everyday or 0.0
+        recurring_outflow = recurring_outflow or 0.0
+
+        left = net - everyday - recurring_outflow
         return WalletSummary(
             left_each_month=left,
             savings_rate=left / net if net else None,
@@ -191,13 +206,42 @@ class WalletService:
         first_date = date.fromisoformat(first[:10])
         return (today.year - first_date.year) * 12 + (today.month - first_date.month)
 
+    def get_recurring_outflow(
+        self, wallet_id: int, months: int, today: date = None
+    ) -> float:
+        """Average monthly outflow from scheduled items.
+
+        Bills, savings and investments that came from a recurring transaction.
+        Used by calculate_summary, which otherwise only sees everyday spending.
+        """
+        available = self.get_months_of_history(wallet_id, today)
+        if available == 0:
+            return 0.0
+
+        counted = min(months, available)
+        date_from, date_to = month_window(counted, today)
+
+        total = self.transaction_repo.sum_by_type(
+            wallet_id,
+            OUTFLOW_TYPES,
+            date_from,
+            date_to,
+            recurring=True,
+        )
+        return total / counted
+
     def get_plan_suggestion(
         self,
         wallet_id: int,
         months: int,
         today: date = None,
-        include_transfers: bool = False,
     ) -> PlanSuggestion | None:
+        """Derived averages for the calibration hints.
+
+        PlanSuggestion.expenses is EVERYDAY spending - expenses with no
+        recurring link. Scheduled bills are excluded because the forecast adds
+        them separately; including them here would double-count.
+        """
         available = self.get_months_of_history(wallet_id, today)
         if available == 0:
             return None
@@ -209,17 +253,16 @@ class WalletService:
             wallet_id, [OperationType.INCOME], date_from, date_to
         )
 
-        types = (
-            [OperationType.EXPENSE, OperationType.SAVING, OperationType.INVESTMENT]
-            if include_transfers
-            else [OperationType.EXPENSE]
-        )
-        expenses = self.transaction_repo.sum_by_type(
-            wallet_id, types, date_from, date_to
+        everyday = self.transaction_repo.sum_by_type(
+            wallet_id,
+            [OperationType.EXPENSE],
+            date_from,
+            date_to,
+            recurring=False,
         )
 
         return PlanSuggestion(
             income=income / counted,
-            expenses=expenses / counted,
+            expenses=everyday / counted,
             months_counted=counted,
         )

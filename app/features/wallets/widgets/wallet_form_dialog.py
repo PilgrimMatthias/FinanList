@@ -49,7 +49,11 @@ class WalletFormDialog(QDialog):
     - Name
     - Currency
     - Initial balance
-    - Monthly plan (net salary, estimated expenses) used by the forecast
+    - Monthly plan (net salary, everyday spending) used by the forecast
+
+    Everyday spending is only the part that is NOT scheduled. The forecast
+    adds scheduled bills and transfers separately, so including them here
+    would count them twice.
     """
 
     def __init__(self, service: WalletService, wallet: Wallet = None, parent=None):
@@ -59,6 +63,9 @@ class WalletFormDialog(QDialog):
         self.wallet = wallet
         self.dialog_type = DialogType.CREATE
         self.suggestion = None
+        # Average monthly scheduled outflow, refreshed with the window.
+        # Needed by the summary, which otherwise only sees everyday spending.
+        self.recurring_outflow = 0.0
 
         if self.wallet:
             self.dialog_type = DialogType.EDIT
@@ -138,23 +145,11 @@ class WalletFormDialog(QDialog):
             self._create_hint_row(on_use=self._use_income_suggestion)
         )
 
-        self.basis_control = SegmentedControl(
-            text="Planned expenses cover",
-            # sub_text="Everything = expenses + savings + investments",
-            values=[
-                (0, "Expenses\nonly"),
-                (1, "Expenses with savings\nand investmens"),
-            ],
-            default_value=1 if self._wallet_includes_transfers() else 0,
-            label_position="left",
-            on_change=self._basis_changed,
-        )
-
         self.expenses_edit = TextInput(
             self,
-            text="Estimated expenses",
-            sub_text="monthly, used for forecasting. Excludes savings and investments.",
-            default_text=self._set_planned_expenses(),
+            text="Everyday spending",
+            sub_text="monthly, excluding scheduled bills and transfers",
+            default_text=self._set_everyday_spending(),
             validate_number=True,
         )
         self.expenses_edit.toggle_error(False)
@@ -209,7 +204,6 @@ class WalletFormDialog(QDialog):
         input_layout.addWidget(self.month_control)
         input_layout.addWidget(self.net_salary_edit)
         input_layout.addWidget(self.income_hint)
-        input_layout.addWidget(self.basis_control)
         input_layout.addWidget(self.expenses_edit)
         input_layout.addWidget(self.expenses_hint)
         input_layout.addWidget(summary_widget)
@@ -283,15 +277,10 @@ class WalletFormDialog(QDialog):
             return self._format_amount(self.wallet.net_salary_monthly)
         return None
 
-    def _set_planned_expenses(self):
-        """Set estimated expenses for wallet - if wallet provided"""
+    def _set_everyday_spending(self):
+        """Set everyday spending for wallet - if wallet provided"""
         if self.dialog_type == DialogType.EDIT and self.wallet is not None:
-            return self._format_amount(self.wallet.estimated_expenses_monthly)
-        return None
-
-    def _wallet_includes_transfers(self):
-        if self.dialog_type == DialogType.EDIT and self.wallet is not None:
-            return self.wallet.plan_includes_transfers
+            return self._format_amount(self.wallet.everyday_spending_monthly)
         return None
 
     @staticmethod
@@ -307,24 +296,6 @@ class WalletFormDialog(QDialog):
             return self.wallet.currency.name
         data = self.currency_input.get_data()
         return Currency(data).name if data else ""
-
-    def _basis_changed(self):
-        if self.dialog_type == DialogType.CREATE or self.wallet is None:
-            return
-
-        # Refresh hint and hint label
-        if self.wallet is not None:
-            self._refresh_suggestions()
-
-        # Refresh sub_text
-        if bool(self.basis_control.get_data()):
-            self.expenses_edit.set_sub_text(
-                "monthly, used for forecasting. Includes savings and investments."
-            )
-        else:
-            self.expenses_edit.set_sub_text(
-                "monthly, used for forecasting. Excludes savings and investments."
-            )
 
     # Suggestions
     def _create_hint_row(self, on_use):
@@ -381,17 +352,22 @@ class WalletFormDialog(QDialog):
         self._refresh_suggestions()
 
     def _refresh_suggestions(self, months: int = None):
-        """Recalculate both hints for the selected window."""
+        """Recalculate both hints, and the scheduled outflow the summary needs."""
         if self.dialog_type == DialogType.CREATE or self.wallet is None:
             return
 
         if months is None:
             months = self.month_control.get_data()
 
+        # Queried once per window change rather than per keystroke.
+        self.recurring_outflow = self.service.get_recurring_outflow(
+            wallet_id=self.wallet.id,
+            months=months,
+        )
+
         self.suggestion = self.service.get_plan_suggestion(
             wallet_id=self.wallet.id,
             months=months,
-            include_transfers=bool(self.basis_control.get_data()),
         )
 
         if self.suggestion is None:
@@ -404,19 +380,15 @@ class WalletFormDialog(QDialog):
         self.income_hint_label.setText(
             f"Last {counted} months: {format_balance(self.suggestion.income)}"
         )
-        if bool(self.basis_control.get_data()):
-            self.expenses_hint_label.setText(
-                f"Last {counted} months, incl. transfers: "
-                f"{format_balance(self.suggestion.expenses)}"
-            )
-        else:
-            self.expenses_hint_label.setText(
-                f"Last {counted} months, expenses only: "
-                f"{format_balance(self.suggestion.expenses)}"
-            )
+        self.expenses_hint_label.setText(
+            f"Last {counted} months, everyday spending: "
+            f"{format_balance(self.suggestion.expenses)}"
+        )
 
         self.income_hint.show()
         self.expenses_hint.show()
+
+        self._update_summary()
 
     def _use_income_suggestion(self):
         """Copy the suggested income into the input"""
@@ -426,7 +398,7 @@ class WalletFormDialog(QDialog):
         self._update_summary()
 
     def _use_expense_suggestion(self):
-        """Copy the suggested expenses into the input"""
+        """Copy the suggested everyday spending into the input"""
         if self.suggestion is None:
             return
         self.expenses_edit.set_value(self._format_amount(self.suggestion.expenses))
@@ -464,8 +436,7 @@ class WalletFormDialog(QDialog):
                 currency=self.currency_input.get_data(),
                 initial_balance=self.in_balance_input.get_value(),
                 net_salary_monthly=self._plan_value(self.net_salary_edit),
-                estimated_expenses_monthly=self._plan_value(self.expenses_edit),
-                plan_includes_transfers=self.basis_control.get_data(),
+                everyday_spending_monthly=self._plan_value(self.expenses_edit),
             )
             self.close()
         except ValidationError as e:
@@ -480,8 +451,7 @@ class WalletFormDialog(QDialog):
         updated_wallet.name = self.name_input.get_value()
         updated_wallet.initial_balance = self.in_balance_input.get_value()
         updated_wallet.net_salary_monthly = self._plan_value(self.net_salary_edit)
-        updated_wallet.estimated_expenses_monthly = self._plan_value(self.expenses_edit)
-        updated_wallet.plan_includes_transfers = self.basis_control.get_data()
+        updated_wallet.everyday_spending_monthly = self._plan_value(self.expenses_edit)
 
         try:
             self.service.update_wallet(wallet=updated_wallet)
@@ -506,11 +476,12 @@ class WalletFormDialog(QDialog):
         """Updates summary widget - live recompute"""
 
         net = self._plan_value(self.net_salary_edit)
-        expenses = self._plan_value(self.expenses_edit)
+        everyday = self._plan_value(self.expenses_edit)
 
         self.wallet_summary = self.service.calculate_summary(
             net=net,
-            expenses=expenses,
+            everyday=everyday,
+            recurring_outflow=self.recurring_outflow,
         )
 
         sign = "+" if self.wallet_summary.left_each_month >= 0 else "-"

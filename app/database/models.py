@@ -54,13 +54,12 @@ class Wallet:
     currency: Currency = field(default=Currency.PLN)
     initial_balance: float = field(default=0)
     net_salary_monthly: Optional[float] = None
-    estimated_expenses_monthly: Optional[float] = None
-    plan_includes_transfers: bool = False
+    everyday_spending_monthly: Optional[float] = None
     id: Optional[int] = None
     created_at: Optional[str] = None
 
     # Column order must match from_row() index mapping
-    COLUMNS = "id, user_id, name, currency, initial_balance, net_salary_monthly, estimated_expenses_monthly, plan_includes_transfers, created_at"
+    COLUMNS = "id, user_id, name, currency, initial_balance, net_salary_monthly, everyday_spending_monthly, created_at"
 
     @classmethod
     def from_row(cls, row: tuple) -> "Wallet":
@@ -71,9 +70,8 @@ class Wallet:
             currency=Currency(row[3]) if row[3] else None,
             initial_balance=row[4],
             net_salary_monthly=row[5],
-            estimated_expenses_monthly=row[6],
-            plan_includes_transfers=row[7],
-            created_at=row[8],
+            everyday_spending_monthly=row[6],
+            created_at=row[7],
         )
 
 

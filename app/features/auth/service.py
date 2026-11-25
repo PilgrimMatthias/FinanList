@@ -19,7 +19,7 @@ class AuthService:
         profile_repo: UserProfileRepo,
         wallet_repo: WalletRepo,
         category_repo: CategoryRepo,
-        settings_service:SettingsService,
+        settings_service: SettingsService,
         app_state: AppState,
     ):
         super().__init__()
@@ -40,7 +40,7 @@ class AuthService:
         name: str,
         gross_salary_monthly: float = 0,
         net_salary_monthly: float = 0,
-        estimated_expenses_monthly: float = 0,
+        everyday_spending_monthly: float = 0,
         initial_balance: float = 0,
         currency: Currency = Currency.PLN,
     ):
@@ -51,7 +51,7 @@ class AuthService:
             raise ValidationError("Gross salary (monthly) must equel or higher than 0")
         if net_salary_monthly < 0:
             raise ValidationError("Net salary (monthly) must equel or higher than 0")
-        if estimated_expenses_monthly < 0:
+        if everyday_spending_monthly < 0:
             raise ValidationError(
                 "Estimated expenses (monthly) must equel or higher than 0"
             )
@@ -64,10 +64,7 @@ class AuthService:
             new_user = self.user_repo.create_no_commit(user=new_user)
 
             # Create new user profile
-            new_user_profile = UserProfile(
-                user_id=new_user.id,
-                currency=currency
-            )
+            new_user_profile = UserProfile(user_id=new_user.id, currency=currency)
             self.profile_repo.create_no_commit(profile=new_user_profile)
 
             # Create first wallet
@@ -77,7 +74,7 @@ class AuthService:
                 currency=currency,
                 initial_balance=initial_balance,
                 net_salary_monthly=net_salary_monthly,
-                estimated_expenses_monthly=estimated_expenses_monthly,
+                everyday_spending_monthly=everyday_spending_monthly,
             )
             new_wallet = self.wallet_repo.create_no_commit(wallet=new_wallet)
 
@@ -87,7 +84,9 @@ class AuthService:
                     name=main_category,
                     operation_type=OperationType.EXPENSE,
                 )
-                temp_main_category = self.category_repo.create_no_commit(temp_main_category)
+                temp_main_category = self.category_repo.create_no_commit(
+                    temp_main_category
+                )
 
                 for sub_category in DEFAULT_SUB_CATEGORIES:
                     temp_sub_category = Category(
@@ -96,7 +95,9 @@ class AuthService:
                         operation_type=OperationType.EXPENSE,
                         parent_id=temp_main_category.id,
                     )
-                    temp_sub_category = self.category_repo.create_no_commit(temp_sub_category)
+                    temp_sub_category = self.category_repo.create_no_commit(
+                        temp_sub_category
+                    )
 
                 if main_category == "Private":
                     temp_sub_category = Category(
@@ -105,7 +106,9 @@ class AuthService:
                         operation_type=OperationType.INCOME,
                         parent_id=temp_main_category.id,
                     )
-                    temp_sub_category = self.category_repo.create_no_commit(temp_sub_category)
+                    temp_sub_category = self.category_repo.create_no_commit(
+                        temp_sub_category
+                    )
 
             # Uncathegorized category
             temp_sub_category = Category(

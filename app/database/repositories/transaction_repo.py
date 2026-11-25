@@ -292,7 +292,7 @@ class TransactionRepo(BaseRepo):
                 TRANSACTIONS T
             WHERE T.RECURRING_ID = ?
         """
-        params = (recurring_id, )
+        params = (recurring_id,)
         rows = self.db.execute(query=query, params=params).fetchall()
 
         return [row[0] for row in rows]
@@ -305,7 +305,6 @@ class TransactionRepo(BaseRepo):
                 f"DELETE FROM TRANSACTIONS WHERE ID IN ({placeholders})",
                 tuple(ids),
             )
-
 
     def create_no_commit(self, transaction: Transaction) -> Transaction:
         """Insert without opening a transaction. Caller must wrap in db.transaction()."""
@@ -338,7 +337,9 @@ class TransactionRepo(BaseRepo):
         transaction.id = cursor.lastrowid
         return transaction
 
-    def get_month_totals(self, wallet_id:int, date_from:str, date_to:str) -> list[tuple]:
+    def get_month_totals(
+        self, wallet_id: int, date_from: str, date_to: str
+    ) -> list[tuple]:
         """Returns month total amount per operation type"""
         query = """
             SELECT
@@ -353,12 +354,18 @@ class TransactionRepo(BaseRepo):
             GROUP BY
                 OPERATION_TYPE;
         """
-        params = (wallet_id, date_from, date_to, )
+        params = (
+            wallet_id,
+            date_from,
+            date_to,
+        )
         rows = self.db.execute(query=query, params=params).fetchall()
 
         return rows
 
-    def get_category_totals(self, wallet_id:int, date_from:str, date_to:str) -> list[tuple]:
+    def get_category_totals(
+        self, wallet_id: int, date_from: str, date_to: str
+    ) -> list[tuple]:
         """Returns category totals from given month"""
         query = """
             SELECT
@@ -382,7 +389,11 @@ class TransactionRepo(BaseRepo):
             ORDER BY
                 TOTAL DESC;
         """
-        params = (wallet_id, date_from, date_to, )
+        params = (
+            wallet_id,
+            date_from,
+            date_to,
+        )
         rows = self.db.execute(query=query, params=params).fetchall()
 
         return rows
@@ -394,16 +405,17 @@ class TransactionRepo(BaseRepo):
             (wallet_id,),
         ).fetchone()
         return row[0] if row and row[0] else None
- 
+
     def sum_by_type(
         self,
         wallet_id: int,
         operation_types: list,
         date_from: str,
         date_to: str,
+        recurring: bool | None = None,
     ) -> float:
         """Sum amounts in [date_from, date_to) for the given operation types.
- 
+
         date_to is exclusive, so the caller passes the first day of the month
         after the window - no need to work out month lengths, and no trouble
         if a stored date ever carries a time component.
@@ -417,6 +429,10 @@ class TransactionRepo(BaseRepo):
               AND date >= ?
               AND date < ?
         """
+        if recurring is True:
+            sql += " AND recurring_id IS NOT NULL"
+        elif recurring is False:
+            sql += " AND recurring_id IS NULL"
+
         params = [wallet_id, *[t.value for t in operation_types], date_from, date_to]
         return self.db.execute(sql, params).fetchone()[0]
- 

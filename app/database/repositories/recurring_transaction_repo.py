@@ -434,3 +434,33 @@ class RecurringTransactionRepo(BaseRepo):
         rows = self.db.execute(query=query, params=params).fetchall()
 
         return rows
+
+
+    def get_active_by_wallet_id(self, wallet_id: int) -> list[tuple]:
+        """Returns active recurring transactions where next_due_date has passed."""
+        rows = self.db.execute(
+            f"""
+            SELECT
+                T.ID,
+                T.WALLET_ID,
+                T.CATEGORY_ID,
+                T.TITLE,
+                T.DESCRIPTION,
+                T.OPERATION_TYPE,
+                T.AMOUNT,
+                T.MERCHANT,
+                T.RECURRENCE_INTERVAL,
+                T.START_DATE,
+                T.END_DATE,
+                T.NEXT_DUE_DATE,
+                T.IS_ACTIVE,
+                T.CREATED_AT,
+            FROM 
+                RECURRING_TRANSACTIONS T
+            WHERE T.WALLET_ID = ?
+                AND T.IS_ACTIVE = 1
+                AND (T.END_DATE IS NULL OR T.NEXT_DUE_DATE <= T.END_DATE)
+            """,
+            (wallet_id,),
+        ).fetchall()
+        return rows

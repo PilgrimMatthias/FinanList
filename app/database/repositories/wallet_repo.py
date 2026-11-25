@@ -11,14 +11,14 @@ class WalletRepo(BaseRepo):
 
     def create_no_commit(self, wallet: Wallet) -> Wallet:
         cursor = self.db.execute(
-            "INSERT INTO WALLETS (USER_ID, NAME, CURRENCY, INITIAL_BALANCE, NET_SALARY_MONTHLY, ESTIMATED_EXPENSES_MONTHLY, PLAN_INCLUDES_TRANSFERS) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO WALLETS (USER_ID, NAME, CURRENCY, INITIAL_BALANCE, NET_SALARY_MONTHLY, everyday_spending_monthly, PLAN_INCLUDES_TRANSFERS) VALUES (?, ?, ?, ?, ?, ?, ?)",
             (
                 wallet.user_id,
                 wallet.name,
                 wallet.currency,
                 wallet.initial_balance,
                 wallet.net_salary_monthly,
-                wallet.estimated_expenses_monthly,
+                wallet.everyday_spending_monthly,
                 wallet.plan_includes_transfers,
             ),
         )
@@ -62,8 +62,7 @@ class WalletRepo(BaseRepo):
                     CURRENCY = ?,
                     INITIAL_BALANCE = ?,
                     NET_SALARY_MONTHLY = ?,
-                    ESTIMATED_EXPENSES_MONTHLY = ?,
-                    PLAN_INCLUDES_TRANSFERS = ?
+                    EVERYDAY_SPENDING_MONTHLY = ?
                 WHERE 
                     ID = ?
                 """,
@@ -72,8 +71,7 @@ class WalletRepo(BaseRepo):
                     wallet.currency,
                     wallet.initial_balance,
                     wallet.net_salary_monthly,
-                    wallet.estimated_expenses_monthly,
-                    wallet.plan_includes_transfers,
+                    wallet.everyday_spending_monthly,
                     wallet.id,
                 ),
             )
@@ -90,8 +88,7 @@ class WalletRepo(BaseRepo):
                 CURRENCY = ?,
                 INITIAL_BALANCE = ?,
                 NET_SALARY_MONTHLY = ?,
-                ESTIMATED_EXPENSES_MONTHLY = ?,
-                PLAN_INCLUDES_TRANSFERS = ?
+                EVERYDAY_SPENDING_MONTHLY = ?,
             WHERE 
                 ID = ?
             """,
@@ -100,8 +97,7 @@ class WalletRepo(BaseRepo):
                 wallet.currency,
                 wallet.initial_balance,
                 wallet.net_salary_monthly,
-                wallet.estimated_expenses_monthly,
-                wallet.plan_includes_transfers,
+                wallet.everyday_spending_monthly,
                 wallet.id,
             ),
         )

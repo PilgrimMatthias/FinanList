@@ -236,7 +236,7 @@ class AuthView(QWidget):
                 name=self.name_input.get_value(),
                 gross_salary_monthly=self.gross_salary_input.get_value(),
                 net_salary_monthly=self.net_salary_input.get_value(),
-                estimated_expenses_monthly=self.avg_expenses_input.get_value(),
+                everyday_spending_monthly=self.avg_expenses_input.get_value(),
                 initial_balance=self.initial_balance_input.get_value(),
                 currency=Currency(self.currency_input.get_data()),
             )
