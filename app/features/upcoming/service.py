@@ -1,8 +1,5 @@
 from app.core import AppState
-from app.database.repositories import (
-    RecurringTransactionRepo,
-    TransactionRepo
-)
+from app.database.repositories import RecurringTransactionRepo, TransactionRepo
 from .models import RecurringTransactionDisplay
 from app.database.models import RecurringTransaction, Transaction
 from app.core.utils import cast_str_to_datetime, cast_datetime_to_str
@@ -10,6 +7,7 @@ from datetime import datetime
 from app.core.enums import Currency, RecurrenceInterval
 from dateutil.relativedelta import relativedelta
 from app.core.exceptions import ValidationError
+
 
 class UpcomingService:
     def __init__(
@@ -39,37 +37,46 @@ class UpcomingService:
             page_size=page_size,
             sort_by=sort_by,
             sort_order=sort_order,
-            search=search
+            search=search,
         )
         return [self._row_to_display(row) for row in rows]
-    
-    def get_count(self, wallet_id:int, search: str = "") -> int:
+
+    def get_count(self, wallet_id: int, search: str = "") -> int:
         """Get count of recurring transactions"""
-        return self.recurring_transaction_repo.get_count(wallet_id=wallet_id, search=search)
+        return self.recurring_transaction_repo.get_count(
+            wallet_id=wallet_id, search=search
+        )
 
-
-    def get_due_transactions(self, wallet_id: int, today: datetime | None = None) -> list[RecurringTransactionDisplay]: 
+    def get_due_transactions(
+        self, wallet_id: int, today: datetime | None = None
+    ) -> list[RecurringTransactionDisplay]:
         """Get due transactions for display"""
         # Get due recurrings
         today = today or datetime.today()
-        rows = self.recurring_transaction_repo.get_due(
-            wallet_id=wallet_id,
-            today=today
-        )
+        rows = self.recurring_transaction_repo.get_due(wallet_id=wallet_id, today=today)
 
         due_transactions = []
-    
+
         for row in rows:
             pending_transactions = []
             # Prepare recurring for display
-            temp_recurring_display = self._row_to_display(row) 
+            temp_recurring_display = self._row_to_display(row)
             temp_recurring = temp_recurring_display.recurring
 
             # Get existing dates in transaction repo for recurring
-            existing_dates = {cast_str_to_datetime(d) for d in self.transaction_repo.get_dates_for_recurring(temp_recurring.id)}
+            existing_dates = {
+                cast_str_to_datetime(d)
+                for d in self.transaction_repo.get_dates_for_recurring(
+                    temp_recurring.id
+                )
+            }
 
             # Get limit date for recurring - today of recurring end date
-            limit_date = min(today, cast_str_to_datetime(temp_recurring.end_date)) if temp_recurring.end_date else today
+            limit_date = (
+                min(today, cast_str_to_datetime(temp_recurring.end_date))
+                if temp_recurring.end_date
+                else today
+            )
 
             # Set occurence date as next due date
             occurrence_date = cast_str_to_datetime(temp_recurring.next_due_date)
@@ -77,32 +84,33 @@ class UpcomingService:
             # Create new transactions between due date and limit date if it was not already created
             while occurrence_date <= limit_date:
                 if occurrence_date not in existing_dates:
-                        transaction = Transaction(
-                            wallet_id=temp_recurring.wallet_id,
-                            category_id=temp_recurring.category_id,
-                            title=temp_recurring.title,
-                            description=temp_recurring.description,
-                            date=occurrence_date,
-                            operation_type=temp_recurring.operation_type,
-                            amount=temp_recurring.amount,
-                            merchant=temp_recurring.merchant,
-                            recurring_id=temp_recurring.id,
-                        )
-                        pending_transactions.append(transaction)
-                occurrence_date = self._calculate_next_date(occurrence_date, temp_recurring.recurrence_interval)
+                    transaction = Transaction(
+                        wallet_id=temp_recurring.wallet_id,
+                        category_id=temp_recurring.category_id,
+                        title=temp_recurring.title,
+                        description=temp_recurring.description,
+                        date=occurrence_date,
+                        operation_type=temp_recurring.operation_type,
+                        amount=temp_recurring.amount,
+                        merchant=temp_recurring.merchant,
+                        recurring_id=temp_recurring.id,
+                    )
+                    pending_transactions.append(transaction)
+                occurrence_date = self._calculate_next_date(
+                    occurrence_date, temp_recurring.recurrence_interval
+                )
 
             if pending_transactions:
                 temp_recurring_display.occurrences = pending_transactions
                 due_transactions.append(temp_recurring_display)
 
         return due_transactions
-    
-    def get_due_count(self, wallet_id: int, today: datetime | None = None) -> int: 
+
+    def get_due_count(self, wallet_id: int, today: datetime | None = None) -> int:
         """Get due transaction count for display"""
         today = today or datetime.today()
         count = self.recurring_transaction_repo.get_due_count(
-            wallet_id=wallet_id,
-            today=today
+            wallet_id=wallet_id, today=today
         )
         return count
 
@@ -113,16 +121,16 @@ class UpcomingService:
 
         self.app_state.emit_recurring_transaction_change()
 
-
     def confirm_transactions(self, transactions: list[Transaction]):
         """Confirm transactions"""
         with self.transaction_repo.db.transaction():
             for transaction in transactions:
-                transaction.date = cast_datetime_to_str(transaction.date, format="%Y-%m-%d")
+                transaction.date = cast_datetime_to_str(
+                    transaction.date, format="%Y-%m-%d"
+                )
                 self.transaction_repo.create_no_commit(transaction)
-        
-        self.app_state.emit_transaction_change()
 
+        self.app_state.emit_transaction_change()
 
     def delete_transactions(self, ids: list[int]):
         """Method for deleting selected recurring transaction from database"""
@@ -131,14 +139,13 @@ class UpcomingService:
 
         self.app_state.emit_recurring_transaction_change()
 
-
-    def is_over_due(self, next_due_date:str) -> bool:
+    def is_over_due(self, next_due_date: str) -> bool:
         """Check if specified date is due"""
         next_due_date = cast_str_to_datetime(next_due_date)
         if next_due_date <= datetime.today():
             return True
         return False
-    
+
     # Helpers
     def _row_to_display(self, row: tuple) -> RecurringTransactionDisplay:
         """Returns TransactionDisplay from specified row"""
@@ -153,7 +160,7 @@ class UpcomingService:
             sub_category_name=row[16],
             sub_category_color=row[17],
             days_until_due=(next_due_date - datetime.today()).days,
-            currency=Currency(row[18])
+            currency=Currency(row[18]),
         )
 
         return transaction_display
@@ -171,9 +178,12 @@ class UpcomingService:
                 return current_date + relativedelta(years=1)
             case _:
                 raise ValidationError(f"Unsupported recurrence interval: {interval}")
-                
 
-    def advance_recurrings(self, recurrings: list[RecurringTransactionDisplay], confirmed: list[Transaction]):
+    def advance_recurrings(
+        self,
+        recurrings: list[RecurringTransactionDisplay],
+        confirmed: list[Transaction],
+    ):
         """Advance recurring transaction"""
 
         # Advance each recurring based on what was confirmed
@@ -187,24 +197,30 @@ class UpcomingService:
 
             # Earliest occurrence NOT confirmed
             unconfirmed = [
-                occ.date for occ in group.occurrences
-                if occ.date not in confirmed_dates
+                occ.date for occ in group.occurrences if occ.date not in confirmed_dates
             ]
 
             if unconfirmed:
                 # Floor stays at earliest unconfirmed → it reappears next launch
-                recurring.next_due_date = cast_datetime_to_str(min(unconfirmed), format="%Y-%m-%d")
+                recurring.next_due_date = cast_datetime_to_str(
+                    min(unconfirmed), format="%Y-%m-%d"
+                )
             else:
                 # All confirmed → advance to first future date
                 next_date = cast_str_to_datetime(recurring.next_due_date)
                 today_iso = datetime.today()
-                
-                while next_date <= today_iso:
-                    next_date = self._calculate_next_date(next_date, recurring.recurrence_interval)
-                if recurring.end_date and next_date > cast_str_to_datetime(recurring.end_date):
-                    recurring.is_active = False
-                recurring.next_due_date = cast_datetime_to_str(next_date, format="%Y-%m-%d")
 
+                while next_date <= today_iso:
+                    next_date = self._calculate_next_date(
+                        next_date, recurring.recurrence_interval
+                    )
+                if recurring.end_date and next_date > cast_str_to_datetime(
+                    recurring.end_date
+                ):
+                    recurring.is_active = False
+                recurring.next_due_date = cast_datetime_to_str(
+                    next_date, format="%Y-%m-%d"
+                )
 
             self.recurring_transaction_repo.update(recurring)
 

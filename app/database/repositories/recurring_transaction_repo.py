@@ -200,7 +200,7 @@ class RecurringTransactionRepo(BaseRepo):
             (category_id,),
         ).fetchone()
         return count[0] if count else 0
-    
+
     def delete_many(self, ids: list[int]) -> None:
         placeholders = ",".join(["?" for _ in ids])
         with self.db.transaction():
@@ -378,9 +378,7 @@ class RecurringTransactionRepo(BaseRepo):
 
         return cursor[0] if cursor else 0
 
-    def toggle_active(
-        self, recurring_id: int
-    ) -> RecurringTransaction:
+    def toggle_active(self, recurring_id: int) -> RecurringTransaction:
         "Flips is_active flag"
         with self.db.transaction():
             self.db.execute(
@@ -389,7 +387,9 @@ class RecurringTransactionRepo(BaseRepo):
             )
         return self.get_by_id(id=recurring_id)
 
-    def get_upcomings(self, wallet_id:int, date_from:str, limit: int = 5) -> list[tuple]:
+    def get_upcomings(
+        self, wallet_id: int, date_from: str, limit: int = 5
+    ) -> list[tuple]:
         """Returns upcoming transactions"""
         query = """
             SELECT
@@ -430,11 +430,14 @@ class RecurringTransactionRepo(BaseRepo):
                 T.NEXT_DUE_DATE ASC
             LIMIT ?;
         """
-        params = (wallet_id, date_from, limit, )
+        params = (
+            wallet_id,
+            date_from,
+            limit,
+        )
         rows = self.db.execute(query=query, params=params).fetchall()
 
         return rows
-
 
     def get_active_by_wallet_id(self, wallet_id: int) -> list[tuple]:
         """Returns active recurring transactions where next_due_date has passed."""
@@ -454,7 +457,7 @@ class RecurringTransactionRepo(BaseRepo):
                 T.END_DATE,
                 T.NEXT_DUE_DATE,
                 T.IS_ACTIVE,
-                T.CREATED_AT,
+                T.CREATED_AT
             FROM 
                 RECURRING_TRANSACTIONS T
             WHERE T.WALLET_ID = ?
@@ -463,4 +466,5 @@ class RecurringTransactionRepo(BaseRepo):
             """,
             (wallet_id,),
         ).fetchall()
-        return rows
+
+        return [RecurringTransaction.from_row(row) for row in rows]

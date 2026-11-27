@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QLabel, QComboBox, QVBoxLayout
+from PySide6.QtWidgets import QWidget, QLabel, QComboBox, QVBoxLayout, QHBoxLayout
 from PySide6.QtCore import Qt
 
 
@@ -11,6 +11,7 @@ class ComboBox(QWidget):
         placeholder: str = None,
         values: list[tuple[str, any]] = [],
         default_value: str = None,
+        label_position: str = "top",
         on_change=None,
     ):
         """
@@ -21,12 +22,19 @@ class ComboBox(QWidget):
             placeholder (str, optional): placeholder for combobox. Defaults to None.
             values (list, optional): list of values for the combobox. Defaults to [].
             default_value (str, optional): default value to combobox. Defaults to None.
+            label_position (str, optional): "top" stacks the label above the box,
+                "left" puts it on the same line, before the box. Defaults to "top".
         """
         super().__init__()
 
-        self.widget_layout = QVBoxLayout(self)
-        self.widget_layout.setContentsMargins(0, 5, 0, 5)
-        self.widget_layout.setSpacing(5)
+        if label_position == "left":
+            self.widget_layout = QHBoxLayout(self)
+            self.widget_layout.setContentsMargins(0, 0, 0, 0)
+            self.widget_layout.setSpacing(8)
+        else:
+            self.widget_layout = QVBoxLayout(self)
+            self.widget_layout.setContentsMargins(0, 5, 0, 5)
+            self.widget_layout.setSpacing(5)
 
         self.label = QLabel(self)
 

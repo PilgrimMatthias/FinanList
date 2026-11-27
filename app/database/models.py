@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from ..core.enums import OperationType, RecurrenceInterval, Currency
+from ..core.utils import as_float
 
 
 @dataclass
@@ -55,11 +56,12 @@ class Wallet:
     initial_balance: float = field(default=0)
     net_salary_monthly: Optional[float] = None
     everyday_spending_monthly: Optional[float] = None
+    forecast_floor: Optional[float] = None
     id: Optional[int] = None
     created_at: Optional[str] = None
 
     # Column order must match from_row() index mapping
-    COLUMNS = "id, user_id, name, currency, initial_balance, net_salary_monthly, everyday_spending_monthly, created_at"
+    COLUMNS = "id, user_id, name, currency, initial_balance, net_salary_monthly, everyday_spending_monthly, forecast_floor, created_at"
 
     @classmethod
     def from_row(cls, row: tuple) -> "Wallet":
@@ -68,10 +70,11 @@ class Wallet:
             user_id=row[1],
             name=row[2],
             currency=Currency(row[3]) if row[3] else None,
-            initial_balance=row[4],
-            net_salary_monthly=row[5],
-            everyday_spending_monthly=row[6],
-            created_at=row[7],
+            initial_balance=as_float(row[4]),
+            net_salary_monthly=as_float(row[5]),
+            everyday_spending_monthly=as_float(row[6]),
+            forecast_floor=as_float(row[7]),
+            created_at=row[8],
         )
 
 

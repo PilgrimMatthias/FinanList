@@ -414,12 +414,7 @@ class TransactionRepo(BaseRepo):
         date_to: str,
         recurring: bool | None = None,
     ) -> float:
-        """Sum amounts in [date_from, date_to) for the given operation types.
-
-        date_to is exclusive, so the caller passes the first day of the month
-        after the window - no need to work out month lengths, and no trouble
-        if a stored date ever carries a time component.
-        """
+        """Sum amounts in [date_from, date_to) for the given operation types."""
         placeholders = ",".join("?" * len(operation_types))
         sql = f"""
             SELECT COALESCE(SUM(amount), 0)
@@ -436,3 +431,121 @@ class TransactionRepo(BaseRepo):
 
         params = [wallet_id, *[t.value for t in operation_types], date_from, date_to]
         return self.db.execute(sql, params).fetchone()[0]
+
+    def get_monthly_totals(
+        self, wallet_id: int, date_from: str, date_to: str
+    ) -> list[tuple]:
+        """Totals per month per operation type."""
+        query = """
+            SELECT
+                strftime('%Y-%m', DATE) AS YEAR_MONTH,
+                OPERATION_TYPE,
+                SUM(AMOUNT) AS TOTAL
+            FROM
+                TRANSACTIONS
+            WHERE
+                WALLET_ID = ?
+                AND DATE >= ?
+                AND DATE < ?
+            GROUP BY
+                YEAR_MONTH,
+                OPERATION_TYPE
+            ORDER BY
+                YEAR_MONTH
+        """
+        params = (wallet_id, date_from, date_to)
+        return self.db.execute(query=query, params=params).fetchall()
+
+    def get_month_actuals(
+        self, wallet_id: int, date_from: str, date_to: str
+    ) -> list[tuple]:
+        """What the current month has already recorded."""
+        query = """
+            SELECT
+                OPERATION_TYPE,
+                CASE WHEN RECURRING_ID IS NULL THEN 0 ELSE 1 END AS IS_RECURRING,
+                SUM(AMOUNT) AS TOTAL
+            FROM
+                TRANSACTIONS
+            WHERE
+                WALLET_ID = ?
+                AND DATE >= ?
+                AND DATE < ?
+            GROUP BY
+                OPERATION_TYPE,
+                IS_RECURRING
+        """
+        params = (wallet_id, date_from, date_to)
+        return self.db.execute(query=query, params=params).fetchall()
+
+    def get_category_monthly_totals(
+        self,
+        wallet_id: int,
+        date_from: str,
+        date_to: str,
+        operation_types: list[str],
+    ) -> list[tuple]:
+        """Per month per main category, for the Trends by-category view."""
+        placeholders = ", ".join("?" * len(operation_types))
+        query = f"""
+            SELECT
+                strftime('%Y-%m', T.DATE)       AS YEAR_MONTH,
+                COALESCE(MAIN.ID, SUB.ID)       AS CAT_ID,
+                COALESCE(MAIN.NAME, SUB.NAME)   AS CAT_NAME,
+                COALESCE(MAIN.COLOR, SUB.COLOR) AS CAT_COLOR,
+                SUM(T.AMOUNT)                   AS TOTAL
+            FROM
+                TRANSACTIONS T
+            LEFT JOIN CATEGORIES SUB ON
+                T.CATEGORY_ID = SUB.ID
+            LEFT JOIN CATEGORIES MAIN ON
+                SUB.PARENT_ID = MAIN.ID
+            WHERE
+                T.WALLET_ID = ?
+                AND T.DATE >= ?
+                AND T.DATE < ?
+                AND T.OPERATION_TYPE IN ({placeholders})
+            GROUP BY
+                YEAR_MONTH,
+                COALESCE(MAIN.ID, SUB.ID)
+            ORDER BY
+                YEAR_MONTH
+        """
+        params = (wallet_id, date_from, date_to, *operation_types)
+        return self.db.execute(query=query, params=params).fetchall()
+
+    def get_subcategory_monthly_totals(
+        self,
+        wallet_id: int,
+        date_from: str,
+        date_to: str,
+        operation_types: list[str],
+        parent_id: int,
+    ) -> list[tuple]:
+        """Per month per subcategory inside one main category."""
+        placeholders = ", ".join("?" * len(operation_types))
+        query = f"""
+            SELECT
+                strftime('%Y-%m', T.DATE) AS YEAR_MONTH,
+                SUB.ID                    AS CAT_ID,
+                SUB.NAME                  AS CAT_NAME,
+                SUB.COLOR                 AS CAT_COLOR,
+                SUM(T.AMOUNT)             AS TOTAL
+            FROM
+                TRANSACTIONS T
+            INNER JOIN CATEGORIES SUB ON
+                T.CATEGORY_ID = SUB.ID
+            WHERE
+                T.WALLET_ID = ?
+                AND T.DATE >= ?
+                AND T.DATE < ?
+                AND T.OPERATION_TYPE IN ({placeholders})
+                AND SUB.PARENT_ID = ?
+            GROUP BY
+                YEAR_MONTH,
+                SUB.ID
+            ORDER BY
+                YEAR_MONTH
+        """
+        params = (wallet_id, date_from, date_to, *operation_types, parent_id)
+        return self.db.execute(query=query, params=params).fetchall()

@@ -26,6 +26,7 @@ from app.features import (
     DashboardView,
     DashboardService,
     AnalysisView,
+    AnalysisService,
     HistoryView,
     HistoryService,
     InvestmentView,
@@ -49,7 +50,9 @@ from app.features import (
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, database: Database, app_state:AppState, settings_service:SettingsService):
+    def __init__(
+        self, database: Database, app_state: AppState, settings_service: SettingsService
+    ):
         super().__init__()
 
         self.database = database
@@ -99,11 +102,19 @@ class MainWindow(QMainWindow):
             transaction_repo=self.transaction_repo, app_state=self.app_state
         )
         self.upcoming_service = UpcomingService(
-            recurring_transaction_repo=self.recurring_repo, transaction_repo=self.transaction_repo, app_state=self.app_state
+            recurring_transaction_repo=self.recurring_repo,
+            transaction_repo=self.transaction_repo,
+            app_state=self.app_state,
         )
         self.wallet_service = WalletService(
             wallet_repo=self.wallet_repo,
             category_repo=self.category_repo,
+            transaction_repo=self.transaction_repo,
+            recurring_transaction_repo=self.recurring_repo,
+            app_state=self.app_state,
+        )
+        self.analysis_service = AnalysisService(
+            wallet_repo=self.wallet_repo,
             transaction_repo=self.transaction_repo,
             recurring_transaction_repo=self.recurring_repo,
             app_state=self.app_state,
@@ -119,7 +130,7 @@ class MainWindow(QMainWindow):
         self.profile_service = ProfileService(
             user_repo=self.user_repo,
             user_profile_repo=self.profile_repo,
-            app_state=self.app_state
+            app_state=self.app_state,
         )
 
         # Connect app state
@@ -242,12 +253,14 @@ class MainWindow(QMainWindow):
 
         # Creating app sections
         self.dashboard_section = DashboardView(
-            service = self.dashboard_service,
-            app_state = self.app_state
+            service=self.dashboard_service, app_state=self.app_state
         )
-        self.dashboard_section.review_recent_signal.connect(lambda: self.set_current_section(2))
-        self.dashboard_section.review_upcoming_signal.connect(lambda: self.set_current_section(3))
-        self.analysis_section = AnalysisView()
+        self.dashboard_section.review_recent_signal.connect(
+            lambda: self.set_current_section(2)
+        )
+        self.dashboard_section.review_upcoming_signal.connect(
+            lambda: self.set_current_section(3)
+        )
         self.history_section = HistoryView(
             service=self.history_service,
             transaction_service=self.transaction_service,
@@ -258,7 +271,8 @@ class MainWindow(QMainWindow):
             service=self.upcoming_service,
             transaction_service=self.transaction_service,
             settings_service=self.settings_service,
-            app_state=self.app_state,)
+            app_state=self.app_state,
+        )
         self.savings_section = SavingsView()
         self.investment_section = InvestmentView()
         self.categories_section = CategoriesView(
@@ -268,12 +282,16 @@ class MainWindow(QMainWindow):
             service=self.wallet_service, app_state=self.app_state, parent=self
         )
         self.settings_window = SettingsView(
-            service = self.settings_service,
-            app_state = self.app_state,
-            parent = self
+            service=self.settings_service, app_state=self.app_state, parent=self
         )
         self.profile_window = ProfileView(
             profile_service=self.profile_service, app_state=self.app_state, parent=self
+        )
+        self.analysis_section = AnalysisView(
+            service=self.analysis_service,
+            wallet_service=self.wallet_service,
+            app_state=self.app_state,
+            parent=self,
         )
 
         # Stacked widgest for sections
@@ -380,11 +398,11 @@ class MainWindow(QMainWindow):
         if self.app_state.active_user_id is None:
             return
         if self.root_widget.currentIndex() == 1:
-            return 
-        
+            return
+
         self.root_widget.setCurrentIndex(1)
         self.stacked_pages.setCurrentIndex(self.settings_service.get_default_page())
-        
+
     def log_out(self):
         """
         Method used for showing window with user wallets.
@@ -397,14 +415,13 @@ class MainWindow(QMainWindow):
         self.app_state.set_active_wallet(None)
         self.root_widget.setCurrentIndex(0)
 
-
-    def _check_due_transactions(self, wallet_id:int):
+    def _check_due_transactions(self, wallet_id: int):
         """Check due transaction and show dialog"""
         if self._due_check_done:
             return
 
         if wallet_id is None:
-            return 
+            return
 
         self._due_check_done = True
         if self.upcoming_service.get_due_count(wallet_id) > 0:

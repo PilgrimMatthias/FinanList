@@ -1599,3 +1599,305 @@ QPushButton#segmentButton:pressed {
 QPushButton#segmentButton:disabled {
     color: #b3b3b3;   
 }
+
+/* ANALYSIS - FORECAST*/
+
+/* Cards */
+QFrame#analysisCard {
+    background-color: #ffffff;
+    border: 1px solid #e3e6ea;
+    border-radius: 10px;
+}
+
+QLabel#cardTitle {
+    font-size: 10pt;
+    font-weight: 600;
+    color: #1d232b;
+}
+
+/* Summary strip */
+QFrame#summaryTile {
+    background-color: #ffffff;
+    border: 1px solid #e3e6ea;
+    border-radius: 10px;
+}
+
+QFrame#summaryTile[highlight="true"] {
+    background-color: #f7faff;
+    border: 1px solid #9cc3f3;
+}
+
+QLabel#summaryLabel {
+    font-size: 9pt;
+    color: #66707c;
+}
+
+QLabel#summaryValue {
+    font-size: 18pt;
+    font-weight: 600;
+    color: #1d232b;
+}
+
+QLabel#summaryValue[tone="danger"] {
+    color: #c62f2f;
+}
+
+QLabel#summaryHint {
+    font-size: 9pt;
+    font-weight: 500;
+    color: #66707c;
+}
+
+QLabel#summaryHint[tone="warning"] {
+    color: #a86a00;
+}
+
+QLabel#summaryHint[tone="danger"] {
+    color: #c62f2f;
+}
+
+QPushButton#summaryLink {
+    background-color: transparent;
+    border: none;
+    padding: 0px;
+    text-align: left;
+    font-size: 9pt;
+    font-weight: 500;
+    color: #0a6fe0;
+}
+
+QPushButton#summaryLink:hover {
+    color: #0857b0;
+}
+
+/* Stale banner */
+QFrame#staleBanner {
+    background-color: #fff7e0;
+    border: 1px solid #efd58c;
+    border-radius: 8px;
+}
+
+QLabel#staleBannerText {
+    font-size: 9pt;
+    color: #6e5200;
+}
+
+QFrame#staleBanner QPushButton#linkButton {
+    color: #7a5a00;
+}
+
+QFrame#staleBanner QPushButton#linkButton:hover {
+    color: #4d3800;
+}
+
+/* Assumptions strip */
+QFrame#assumptionsStrip {
+    background-color: #ffffff;
+    border: 1px solid #e3e6ea;
+    border-radius: 10px;
+}
+
+QLabel#assumptionsHeading {
+    font-size: 9pt;
+    font-weight: 600;
+    color: #1d232b;
+}
+
+QLabel#assumptionItem {
+    font-size: 9pt;
+    color: #66707c;
+}
+
+/* Controls row */
+QLabel#forecastTimestamp {
+    font-size: 9pt;
+    color: #66707c;
+}
+
+/* Flat link-style button - banner "Recalculate", strip "Edit assumptions" */
+QPushButton#linkButton {
+    background-color: transparent;
+    border: none;
+    padding: 0px;
+    font-size: 9pt;
+    font-weight: 600;
+    color: #0a6fe0;
+}
+
+QPushButton#linkButton:hover {
+    color: #0857b0;
+}
+
+QPushButton#linkButton:disabled {
+    color: #a3aab3;
+}
+
+/* Yet-to-pay popover */
+QFrame#schedulePopover {
+    background-color: #ffffff;
+    border: 1px solid #cfd5dc;
+    border-radius: 6px;
+}
+
+QLabel#popoverRow {
+    font-size: 9pt;
+    color: #1d232b;
+}
+
+QLabel#popoverTotal {
+    font-size: 9pt;
+    font-weight: 600;
+    color: #1d232b;
+}
+
+QLabel#popoverMore,
+QLabel#popoverEmpty {
+    font-size: 9pt;
+    color: #7a838e;
+}
+
+QFrame#popoverSeparator {
+    border: none;
+    border-top: 1px solid #eceff3;
+    max-height: 1px;
+}
+
+/* ============================================================
+   ANALYSIS - TRENDS
+   ============================================================ */
+
+QTableView#tableFooter {
+    background-color: #f3f5f7;
+    border: 1px solid #e3e6ea;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #1d232b;
+}
+
+QLabel#breadcrumbLabel {
+    font-size: 10pt;
+    font-weight: 600;
+    color: #1d232b;
+}
+
+QLabel#rangeError {
+    font-size: 9pt;
+    color: #c62f2f;
+}
+
+/* Analysis tab bar */
+QPushButton#viewTab {
+    background-color: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 9px 16px;
+    font-size: 10pt;
+    font-weight: 500;
+    color: #66707c;
+}
+
+QPushButton#viewTab:hover {
+    color: #1d232b;
+}
+
+QPushButton#viewTab:checked {
+    font-weight: 600;
+    color: #0a6fe0;
+    border-bottom: 2px solid #0a6fe0;
+}
+
+QLabel#analysisWalletLabel {
+    font-size: 9pt;
+    color: #66707c;
+}
+
+/* ============================================================
+   ANALYSIS - MOCKUP 2a/2b LAYOUT
+   ============================================================ */
+
+/* Page header: title, wallet, tabs on the bottom border */
+QFrame#analysisHeader {
+    background-color: #ffffff;
+    border: none;
+    border-bottom: 1px solid #e3e6ea;
+}
+
+QLabel#analysisTitle {
+    font-size: 16pt;
+    font-weight: 600;
+    color: #1d232b;
+}
+
+/* Summary strip: one card, tiles split by a hairline */
+QFrame#summaryStrip {
+    background-color: #ffffff;
+    border: 1px solid #e3e6ea;
+    border-radius: 10px;
+}
+
+QFrame#summaryStrip QFrame#summaryTile {
+    background-color: transparent;
+    border: none;
+    border-right: 1px solid #e3e6ea;
+    border-radius: 0px;
+}
+
+QFrame#summaryStrip QFrame#summaryTile[last="true"] {
+    border-right: none;
+}
+
+QFrame#summaryStrip QFrame#summaryTile[highlight="true"] {
+    background-color: #f7faff;
+    border: 1px solid #9cc3f3;
+}
+
+/* Stale banner bullet */
+QLabel#staleBannerDot {
+    font-size: 8pt;
+    color: #e0a100;
+}
+
+/* Chart legend row */
+QLabel#chartLegendItem {
+    font-size: 9pt;
+    color: #4a525c;
+}
+
+QLabel#chartNote {
+    font-size: 9pt;
+    color: #7a838e;
+}
+
+/* Tables inside analysis cards: the card draws the border */
+QFrame#analysisCard QTableView {
+    background-color: transparent;
+    border: none;
+    border-radius: 10px;
+}
+
+/* 8px, the same as the header and the painting delegates, so a value
+   and its column title share a right edge. */
+QFrame#analysisCard QTableView::item {
+    padding: 0px 8px;
+    border-bottom: 1px solid #eceff3;
+}
+
+QTableView#tableFooter::item {
+    padding: 0px 8px;
+    border: none;
+}
+
+QFrame#analysisCard QHeaderView::section {
+    background-color: #f3f5f7;
+    color: #4a525c;
+    padding: 9px 8px;
+    border: none;
+    border-bottom: 1px solid #e3e6ea;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+QFrame#analysisCard QHeaderView::section:hover {
+    background-color: #f3f5f7;
+    color: #4a525c;
+}

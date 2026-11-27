@@ -121,13 +121,16 @@ def set_next_due_date(start_date: datetime, interval: RecurrenceInterval) -> dat
             case RecurrenceInterval.WEEKLY:
                 next_due_date += relativedelta(weeks=1)
             case RecurrenceInterval.MONTHLY:
-                next_due_date += relativedelta(months=1, day = start_date.day)
+                next_due_date += relativedelta(months=1, day=start_date.day)
             case RecurrenceInterval.YEARLY:
-                next_due_date += relativedelta(years=1, day = start_date.day, month = start_date.month)
+                next_due_date += relativedelta(
+                    years=1, day=start_date.day, month=start_date.month
+                )
 
         return next_due_date.strftime(format="%Y-%m-%d")
 
     return start_date
+
 
 def cast_datetime_to_str(date: datetime, format: str = "%d.%m.%Y"):
     """Casts datetime date to string with proper format"""
@@ -155,21 +158,32 @@ def cast_str_to_datetime(date: str, format="%Y-%m-%d"):
     except Exception as e:
         return date
 
-def format_balance(balance:float):
+
+def as_float(value):
+    """SQLite stores per value, not per column: a hand-edited row can
+    hold text in a REAL column. Coerce at the boundary so nothing
+    downstream has to ask."""
+    if value is None or isinstance(value, float):
+        return value
+    if isinstance(value, (int,)):
+        return float(value)
+    return float(str(value).replace(" ", "").replace(",", "."))
+
+
+def format_balance(balance: float):
     """Format balance"""
     return f"{balance:,.2f}".replace(",", " ").replace(".", ",")
-
 
 
 def shift_month(year: int, month: int, delta: int) -> tuple[int, int]:
     """Move (year, month) by delta months."""
     index = year * 12 + (month - 1) + delta
     return index // 12, index % 12 + 1
- 
- 
+
+
 def month_window(months: int, today: date = None) -> tuple[str, str]:
     """Return (date_from, date_to) for the last N complete months.
- 
+
     date_to is exclusive and is always the first of the current month.
     """
     today = today or date.today()

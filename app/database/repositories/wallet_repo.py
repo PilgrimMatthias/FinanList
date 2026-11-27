@@ -11,7 +11,18 @@ class WalletRepo(BaseRepo):
 
     def create_no_commit(self, wallet: Wallet) -> Wallet:
         cursor = self.db.execute(
-            "INSERT INTO WALLETS (USER_ID, NAME, CURRENCY, INITIAL_BALANCE, NET_SALARY_MONTHLY, everyday_spending_monthly, PLAN_INCLUDES_TRANSFERS) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            """
+            INSERT INTO WALLETS (
+                USER_ID,
+                NAME,
+                CURRENCY,
+                INITIAL_BALANCE,
+                NET_SALARY_MONTHLY,
+                EVERYDAY_SPENDING_MONTHLY,
+                FORECAST_FLOOR
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
             (
                 wallet.user_id,
                 wallet.name,
@@ -19,7 +30,7 @@ class WalletRepo(BaseRepo):
                 wallet.initial_balance,
                 wallet.net_salary_monthly,
                 wallet.everyday_spending_monthly,
-                wallet.plan_includes_transfers,
+                wallet.forecast_floor,
             ),
         )
         wallet.id = cursor.lastrowid
@@ -53,43 +64,23 @@ class WalletRepo(BaseRepo):
 
     def update(self, wallet: Wallet) -> Wallet:
         with self.db.transaction():
-            self.db.execute(
-                """
-                UPDATE 
-                    WALLETS 
-                SET 
-                    NAME = ?,
-                    CURRENCY = ?,
-                    INITIAL_BALANCE = ?,
-                    NET_SALARY_MONTHLY = ?,
-                    EVERYDAY_SPENDING_MONTHLY = ?
-                WHERE 
-                    ID = ?
-                """,
-                (
-                    wallet.name,
-                    wallet.currency,
-                    wallet.initial_balance,
-                    wallet.net_salary_monthly,
-                    wallet.everyday_spending_monthly,
-                    wallet.id,
-                ),
-            )
+            self.update_no_commit(wallet=wallet)
 
         return self.get_by_id(id=wallet.id)
 
-    def update_no_commit(self, wallet: Wallet) -> Wallet:
+    def update_no_commit(self, wallet: Wallet) -> None:
         self.db.execute(
             """
-            UPDATE 
-                WALLETS 
-            SET 
+            UPDATE
+                WALLETS
+            SET
                 NAME = ?,
                 CURRENCY = ?,
                 INITIAL_BALANCE = ?,
                 NET_SALARY_MONTHLY = ?,
                 EVERYDAY_SPENDING_MONTHLY = ?,
-            WHERE 
+                FORECAST_FLOOR = ?
+            WHERE
                 ID = ?
             """,
             (
@@ -98,29 +89,37 @@ class WalletRepo(BaseRepo):
                 wallet.initial_balance,
                 wallet.net_salary_monthly,
                 wallet.everyday_spending_monthly,
+                wallet.forecast_floor,
                 wallet.id,
             ),
         )
 
     def get_balance(self, wallet_id: int) -> float:
-        """Returns balance of wallet
+        """Current balance - initial balance plus every transaction to date."""
+        return self.get_balance_at(wallet_id=wallet_id)
 
-        Counted as Initial Balance + sum of Incomes - sum of other operation types
-        """
+    def get_balance_at(self, wallet_id: int, as_of: str = None) -> float:
+        """Balance counting only transactions strictly BEFORE as_of."""
         query = """
-            SELECT 
-                w.INITIAL_BALANCE + COALESCE(SUM(CASE 
-                    WHEN T.OPERATION_TYPE <> "Income" then -T.AMOUNT 
-                    ELSE T.AMOUNT
-                END),0) AS BALANCE
-            FROM WALLETS w
-            LEFT JOIN TRANSACTIONS t
-            on t.WALLET_ID = w.ID 
-            where w.id = ?;
+            SELECT
+                w.INITIAL_BALANCE + COALESCE(SUM(CASE
+                    WHEN t.OPERATION_TYPE <> 'Income' THEN -t.AMOUNT
+                    ELSE t.AMOUNT
+                END), 0) AS BALANCE
+            FROM
+                WALLETS w
+            LEFT JOIN TRANSACTIONS t ON
+                t.WALLET_ID = w.ID
+                AND (? IS NULL OR t.DATE < ?)
+            WHERE
+                w.ID = ?
+            GROUP BY
+                w.ID
         """
-        balance = self.db.execute(query=query, params=(wallet_id,)).fetchone()
+        params = (as_of, as_of, wallet_id)
+        balance = self.db.execute(query=query, params=params).fetchone()
 
-        return balance[0] if balance and balance[0] is not None else 0
+        return balance[0] if balance and balance[0] is not None else 0.0
 
     def delete_by_id(self, wallet_id: int):
         with self.db.transaction():

@@ -54,6 +54,10 @@ class WalletService:
             "recurring": self.recurring_transaction_repo.count_by_wallet_id(wallet_id),
         }
 
+    def get_wallet(self, wallet_id: int) -> Wallet:
+        """Returns one wallet"""
+        return self.wallet_repo.get_by_id(id=wallet_id)
+
     def _seed_default_categories(self, wallet_id: int):
         """Create default categories for wallet"""
         for main_category in DEFAULT_MAIN_CATEGORIES:
